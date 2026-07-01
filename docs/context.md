@@ -335,6 +335,11 @@ All checkpoints follow `hermes-work-package-v1` JSON schema with fields:
 | 2 | Git Init + Push + Resolve Open Questions | completed |
 | 3 | Pre-Level 3 HCP | in_progress |
 | 4 | Level 3 HCP — replay + recover + error recovery | completed |
+| 5 | Android App Analysis - Pre-Refactor | in_progress |
+| 6 | Full HCP Level 3 — onError + docs + manual | completed |
+| 7 | Full Code Review — Bug Report + Project Review | in_progress |
+| 8 | Fix 10 easy bugs + write tests (batch 1) | completed |
+| 9 | Fix 10 easy bugs + write tests (batch 2) | completed |
 
 ---
 
@@ -356,6 +361,10 @@ All checkpoints follow `hermes-work-package-v1` JSON schema with fields:
 - **HCP:** Using `hermes-work-package-v1` JSON schema for all checkpoints
 - **Recovery:** Checkpoint sequence numbers used to find last good state for recovery
 - **Git:** `checkpoints/` committed to git (public), `.checkpoints/` ignored (private)
+- **Service Instance:** `WeakReference` for `FloatingWidgetService.instance` to prevent context leak
+- **Audio Channel:** `Channel(BUFFERED, DROP_OLDEST)` for streaming audio to prevent OOM
+- **AI Timeout:** All `CompletableDeferred.await()` calls wrapped in `withTimeout(30_000)`
+- **Privacy:** Notification message body stripped before sending to Gemini
 - Using `Gemini 3.1 Flash Live Preview` for real-time, `Gemini 3.5 Flash` for text-only
 - Using Deepgram Nova-2 model with Thai language
 - Using Open-Meteo (free, no API key) for weather

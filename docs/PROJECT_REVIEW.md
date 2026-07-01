@@ -200,33 +200,27 @@ Thai-language voice assistant app using **Gemini Live API (WebSocket real-time)*
 
 | Feature | Works Now? | Risk Level | Blockers |
 |---------|-----------|------------|----------|
-| Voice Chat | ⚠️ Partial | HIGH | Tool schemas broken |
-| Camera Vision | ⚠️ Partial | HIGH | Thread safety, camera race |
+| Voice Chat | ✅ Fixed | LOW | Tool schemas fixed |
+| Camera Vision | ✅ Fixed | MED | Thread safety, camera race fixed |
 | Deepgram ASR | ✅ Likely | MED | No reconnect |
 | Wake Word | ✅ Likely | MED | Battery drain |
-| Floating Widget | ✅ Likely | MED | Click race |
-| Vehicle Info | ⚠️ Partial | HIGH | Tool schemas |
+| Floating Widget | ✅ Fixed | LOW | startForeground + WeakRef fixed |
+| Vehicle Info | ✅ Fixed | LOW | Tool schemas fixed |
 | Memory System | ✅ Basic | LOW | Minor perf issues |
 | Google Calendar | ⚠️ Partial | HIGH | No OAuth refresh |
-| Google Drive | ⚠️ Partial | HIGH | SQL injection, no refresh |
-| Meeting Recorder | ✅ Basic | HIGH | ANR, OOM |
-| Dating Assistant | ⚠️ Partial | HIGH | Hang risk |
+| Google Drive | ✅ Fixed | LOW | SQL injection fixed |
+| Meeting Recorder | ✅ Fixed | MED | ANR, OOM fixed |
+| Dating Assistant | ✅ Fixed | LOW | Timeout added |
 | Situational Awareness | ✅ Basic | MED | Sensor leaks |
 | Dynamic Rules | ✅ Basic | MED | Perf with many rules |
-| Notification Perception | ⚠️ Partial | CRITICAL | Privacy breach |
+| Notification Perception | ✅ Fixed | LOW | Privacy fixed |
 | Weather & Places | ✅ Basic | MED | No timeout |
 
 ---
 
 ## Next Steps (Recommended Order)
 
-1. Fix **ToolDefinitions** JSON Schema types (uppercase → lowercase) — unlocks all tools
-2. Fix **ProGuard** config — enables release builds
-3. Add **`POST_NOTIFICATIONS`** permission — Android 13+ compliance
-4. Fix **main thread blocking** in MeetingActivity — prevents ANR
-5. Fix **privacy breach** in SmartNotificationListenerService
-6. Add **timeout** to all `deferred.await()` calls — prevents hangs
-7. Fix **`Channel(UNLIMITED)`** → bounded — prevents OOM
-8. Fix **AudioRecorder native crash** — prevents SIGSEGV
+> ✅ Items 1-8 completed as of 2026-07-01 (commits 216fd41, 153a899)
+
 9. Fix **state preservation** (onSaveInstanceState) in all 3 activities
 10. Begin **DI + Room migration** for long-term maintainability

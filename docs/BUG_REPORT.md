@@ -193,16 +193,18 @@
 ## Top 10 Priority Fix Order
 
 ```
-Rank  Issue                                           Impact
-──────────────────────────────────────────────────────────────────────
- 1    ToolDefinitions: uppercase JSON types            ALL tools broken
- 2    ProGuard: -repackageclasses                      Release build crash
- 3    POST_NOTIFICATIONS missing                       Notifications silent (API 33+)
- 4    Thread.sleep + MediaPlayer.prepare               ANR on MeetingActivity
- 5    FloatingWidgetService: no startForeground()      Service crash on start
- 6    NotificationListener: message content leak       Privacy breach
- 7    deferred.await() no timeout (3 locations)        Coroutine hang forever
- 8    Channel(UNLIMITED)                               OOM under network lag
- 9    AudioRecorder: release while reading             SIGSEGV native crash
-10    CameraCaptureHelper: stop/opened race            Camera device leak
+Rank  Issue                                           Impact                  Status
+────────────────────────────────────────────────────────────────────────────────────────
+ 1    ToolDefinitions: uppercase JSON types            ALL tools broken        ✅ FIXED (commit 216fd41)
+ 2    ProGuard: -repackageclasses                      Release build crash     ✅ FIXED (commit 153a899)
+ 3    POST_NOTIFICATIONS missing                       Notifications silent    ✅ FIXED (commit 216fd41)
+ 4    Thread.sleep + MediaPlayer.prepare               ANR                     ✅ FIXED (commit 153a899)
+ 5    FloatingWidgetService: no startForeground()      Service crash           ✅ FIXED (commit 153a899)
+ 6    NotificationListener: message content leak       Privacy breach          ✅ FIXED (commit 153a899)
+ 7    deferred.await() no timeout (3 locations)        Coroutine hang          ✅ FIXED (commit 153a899)
+ 8    Channel(UNLIMITED)                               OOM                     ✅ FIXED (commit 153a899)
+ 9    AudioRecorder: release while reading             SIGSEGV                 ✅ FIXED (commit 153a899)
+10    CameraCaptureHelper: stop/opened race            Camera device leak      ✅ FIXED (commit 153a899)
 ```
+
+> All 10 critical bugs fixed as of 2026-07-01. See checkpoints `wp-20260701-221357-fix-10-easy-bugs-write-tests-001` and `wp-20260701-222601-fix-10-easy-bugs-write-tests-session-resume-002`.
