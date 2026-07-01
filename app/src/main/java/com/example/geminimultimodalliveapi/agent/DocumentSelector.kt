@@ -26,11 +26,11 @@ class DocumentSelector(private val context: Context) {
         val docsDir = File(context.filesDir, "documents")
         if (!docsDir.exists() || !docsDir.isDirectory) return emptyList()
 
-        val jsonFiles = docsDir.listFiles { f -> f.isFile && f.name.endsWith(".json") }
+        val docFiles = docsDir.listFiles { f -> f.isFile && (f.name.endsWith(".json") || f.name.endsWith(".txt")) }
             ?: return emptyList()
 
         val docs = mutableListOf<ScoredDoc>()
-        for (file in jsonFiles) {
+        for (file in docFiles) {
             try {
                 val raw = file.readText()
                 val json = JSONObject(raw)
@@ -67,7 +67,7 @@ class DocumentSelector(private val context: Context) {
 
         docs.sortByDescending { it.score }
         val selected = docs.take(MAX_MATCH)
-        Log.i(TAG, "Selected ${selected.size} docs from ${jsonFiles.size} files (top score: ${selected.firstOrNull()?.score})")
+        Log.i(TAG, "Selected ${selected.size} docs from ${docFiles.size} files (top score: ${selected.firstOrNull()?.score})")
         return selected
     }
 

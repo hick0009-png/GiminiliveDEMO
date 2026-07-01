@@ -71,7 +71,7 @@ class MemoryDbHelper(private val context: Context) : SQLiteOpenHelper(context, D
     fun getMemoryList(): List<MemoryEntry> {
         val list = mutableListOf<MemoryEntry>()
         val db = getReadableDatabase(dbPassword)
-        val cursor = db.query(TABLE_NAME, null, null, null, null, null, null)
+        val cursor = db.query(TABLE_NAME, null, null, null, null, null, "last_accessed_time DESC")
         cursor?.use { c ->
             val idIndex = c.getColumnIndex(COL_ID)
             val contentIndex = c.getColumnIndex(COL_CONTENT)
@@ -196,8 +196,9 @@ class MemoryDbHelper(private val context: Context) : SQLiteOpenHelper(context, D
     fun searchMemories(searchQuery: String): List<MemoryEntry> {
         val list = mutableListOf<MemoryEntry>()
         val db = getReadableDatabase(dbPassword)
-        val query = "SELECT * FROM $TABLE_NAME WHERE $COL_CONTENT LIKE ?"
-        val cursor = db.rawQuery(query, arrayOf("%$searchQuery%"))
+        val safeQuery = searchQuery.replace("%", "\\%").replace("_", "\\_")
+        val query = "SELECT * FROM $TABLE_NAME WHERE $COL_CONTENT LIKE ? ESCAPE '\\'"
+        val cursor = db.rawQuery(query, arrayOf("%$safeQuery%"))
         cursor?.use { c ->
             val idIdx = c.getColumnIndex(COL_ID)
             val contentIdx = c.getColumnIndex(COL_CONTENT)

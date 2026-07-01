@@ -54,6 +54,7 @@ class GeminiLiveClient(
     private var client: OkHttpClient? = null
     private var webSocket: WebSocket? = null
     private val mainHandler = Handler(Looper.getMainLooper())
+    @Volatile
     var isConnected = false
         private set
 

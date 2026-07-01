@@ -351,28 +351,28 @@ object GeminiMeetingService {
 
         // Define JSON Schema
         val schema = JSONObject()
-        schema.put("type", "OBJECT")
+        schema.put("type", "object")
 
         val properties = JSONObject()
 
         val summaryProp = JSONObject()
-        summaryProp.put("type", "STRING")
+        summaryProp.put("type", "string")
         summaryProp.put("description", "สรุปประเด็นหลักและข้อตกลงของการประชุมเป็นภาษาไทยเท่านั้น ห้ามเขียนเป็นภาษาอังกฤษเด็ดขาด")
         properties.put("summary", summaryProp)
 
         val segmentsProp = JSONObject()
-        segmentsProp.put("type", "ARRAY")
+        segmentsProp.put("type", "array")
 
         val segmentItem = JSONObject()
-        segmentItem.put("type", "OBJECT")
+        segmentItem.put("type", "object")
         val segItemProperties = JSONObject()
 
         val speakerProp = JSONObject()
-        speakerProp.put("type", "STRING")
+        speakerProp.put("type", "string")
         segItemProperties.put("speaker", speakerProp)
 
         val textProp = JSONObject()
-        textProp.put("type", "STRING")
+        textProp.put("type", "string")
         textProp.put("description", "ข้อความถอดเสียงพูดภาษาไทยของผู้พูด")
         segItemProperties.put("text", textProp)
 
@@ -425,28 +425,28 @@ object GeminiMeetingService {
 
         // Define JSON Schema
         val schema = JSONObject()
-        schema.put("type", "OBJECT")
+        schema.put("type", "object")
 
         val properties = JSONObject()
 
         val summaryProp = JSONObject()
-        summaryProp.put("type", "STRING")
+        summaryProp.put("type", "string")
         summaryProp.put("description", "สรุปประเด็นหลักและข้อตกลงของการประชุมเป็นภาษาไทยเท่านั้น ห้ามเขียนเป็นภาษาอังกฤษเด็ดขาด")
         properties.put("summary", summaryProp)
 
         val segmentsProp = JSONObject()
-        segmentsProp.put("type", "ARRAY")
+        segmentsProp.put("type", "array")
 
         val segmentItem = JSONObject()
-        segmentItem.put("type", "OBJECT")
+        segmentItem.put("type", "object")
         val segItemProperties = JSONObject()
 
         val speakerProp = JSONObject()
-        speakerProp.put("type", "STRING")
+        speakerProp.put("type", "string")
         segItemProperties.put("speaker", speakerProp)
 
         val textProp = JSONObject()
-        textProp.put("type", "STRING")
+        textProp.put("type", "string")
         textProp.put("description", "ข้อความถอดเสียงพูดภาษาไทยของผู้พูด")
         segItemProperties.put("text", textProp)
 

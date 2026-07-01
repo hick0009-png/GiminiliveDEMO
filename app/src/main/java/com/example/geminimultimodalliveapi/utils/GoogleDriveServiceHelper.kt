@@ -20,7 +20,8 @@ class GoogleDriveServiceHelper(private val driveService: Drive) {
     suspend fun createOrGetFolder(folderName: String): String? = withContext(Dispatchers.IO) {
         try {
             // Search for existing folder with the folderName
-            val query = "mimeType = 'application/vnd.google-apps.folder' and name = '$folderName' and trashed = false"
+            val safeFolderName = folderName.replace("'", "''")
+            val query = "mimeType = 'application/vnd.google-apps.folder' and name = '$safeFolderName' and trashed = false"
             val resultList = driveService.files().list()
                 .setQ(query)
                 .setSpaces("drive")
@@ -64,9 +65,10 @@ class GoogleDriveServiceHelper(private val driveService: Drive) {
     ): String? = withContext(Dispatchers.IO) {
         try {
             val fileName = localFile.name
+            val safeFileName = fileName.replace("'", "''")
             
             // Search if file already exists in the target folder
-            var query = "name = '$fileName' and trashed = false"
+            var query = "name = '$safeFileName' and trashed = false"
             if (folderId != null) {
                 query += " and '$folderId' in parents"
             }
@@ -122,7 +124,8 @@ class GoogleDriveServiceHelper(private val driveService: Drive) {
      */
     suspend fun deleteFileByName(fileName: String, folderId: String?): Boolean = withContext(Dispatchers.IO) {
         try {
-            var query = "name = '$fileName' and trashed = false"
+            val safeFileName2 = fileName.replace("'", "''")
+            var query = "name = '$safeFileName2' and trashed = false"
             if (folderId != null) {
                 query += " and '$folderId' in parents"
             }

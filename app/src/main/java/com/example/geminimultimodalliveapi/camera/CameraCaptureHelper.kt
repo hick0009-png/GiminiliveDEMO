@@ -33,6 +33,7 @@ class CameraCaptureHelper(
     private lateinit var previewSize: Size
 
     private var captureJob: Job? = null
+    @Volatile
     var isCameraActive = false
         private set
 

@@ -1,0 +1,45 @@
+﻿{
+    "schema": "hermes-work-package-v1",
+    "id": "wp-20260701-221357-fix-10-easy-bugs-write-tests-001",
+    "sequence": 1,
+    "createdAt": "2026-07-01T22:13:57+07:00",
+    "updatedAt": "2026-07-01T22:30:00+07:00",
+    "title": "Fix 10 easy bugs + write tests",
+    "status": "completed",
+    "progress": 100,
+    "objective": "Fix critical JSON schema types, add missing permissions, fix concurrency bugs, SQL injection, and write verification tests",
+    "scope": "ToolDefinitions, GeminiMeetingService, GeminiLiveClient, AudioRecorder, CameraCaptureHelper, MemoryDbHelper, GoogleDriveServiceHelper, DocumentSelector, AndroidManifest, XML resources",
+    "completed": [
+        "ToolDefinitions: lowercase all JSON schema types (OBJECT→object, STRING→string, INTEGER→integer, ARRAY→array)",
+        "GeminiMeetingService: lowercase all JSON schema types",
+        "AndroidManifest: add POST_NOTIFICATIONS permission for API 33+",
+        "GeminiLiveClient: add @Volatile to isConnected flag",
+        "AudioRecorder: add @Volatile to isRecording flag",
+        "CameraCaptureHelper: add @Volatile to isCameraActive flag",
+        "MemoryDbHelper: add ORDER BY last_accessed_time DESC to getMemoryList",
+        "MemoryDbHelper: escape % and _ wildcards in searchMemories LIKE query",
+        "GoogleDriveServiceHelper: escape single quotes to prevent SQL injection in Drive API queries",
+        "DocumentSelector: also search *.txt files alongside *.json",
+        "backup_rules.xml: remove Sample template comments",
+        "data_extraction_rules.xml: remove Sample template comments",
+        "Write ToolDefinitionsUnitTest.kt: 5 unit tests for type casing, uniqueness, required params",
+        "Write BugFixVerificationTest.kt: 9 AndroidJUnit4 tests verifying all fixes"
+    ],
+    "pending": [],
+    "artifacts": [
+        {"path": "app/src/test/java/com/example/geminimultimodalliveapi/ToolDefinitionsUnitTest.kt", "type": "code", "description": "Unit tests for ToolDefinitions JSON schema"},
+        {"path": "app/src/androidTest/java/com/example/geminimultimodalliveapi/BugFixVerificationTest.kt", "type": "code", "description": "Integration tests verifying all bug fixes"}
+    ],
+    "decisions": [],
+    "knowledge": [
+        "Gemini API requires lowercase JSON Schema types (object, string, integer) — uppercase types silently ignored",
+        "Google Drive API query strings need single quotes escaped by doubling ('' → )",
+        "SQLite LIKE wildcards % and _ must be escaped when searching user-provided strings",
+        "@Volatile annotation ensures visibility of flags across threads in Kotlin"
+    ],
+    "next_steps": [
+        "Fix remaining top-priority bugs: ProGuard -repackageclasses, MeetingActivity ANR, FloatingWidgetService startForeground, NotificationListener privacy, deferred.await() timeout, Channel(UNLIMITED) OOM, AudioRecorder SIGSEGV, CameraCaptureHelper race"
+    ],
+    "context_summary": "Fixed 11 bugs + added 2 test files. Working tree has all changes staged for commit. Remaining 8 high-priority bugs from the code review still need fixes.",
+    "tags": ["bugfix", "tests", "critical", "json-schema", "volatile", "security"]
+}

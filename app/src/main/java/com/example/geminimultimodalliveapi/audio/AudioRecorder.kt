@@ -28,6 +28,7 @@ class AudioRecorder(
     private var recordingJob: Job? = null
     private var aec: AcousticEchoCanceler? = null
     private var ns: NoiseSuppressor? = null
+    @Volatile
     var isRecording = false
         private set
 

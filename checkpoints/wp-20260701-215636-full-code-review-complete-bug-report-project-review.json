@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  {
+
+                   },
+    "id":  "wp-20260701-215636-full-code-review-complete-bug-report-project-review",
+    "scope":  "",
+    "createdAt":  "2026-07-01T21:56:36+07:00",
+    "decisions":  {
+
+                  },
+    "progress":  0,
+    "knowledge":  {
+
+                  },
+    "pending":  {
+
+                },
+    "assumptions":  [
+
+                    ],
+    "objective":  "Identified 89 issues (30 Critical, 35+ Major, 24 Minor)",
+    "title":  "Full Code Review Complete — Bug Report + Project Review",
+    "risks":  {
+
+              },
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-01T21:56:36+07:00",
+    "status":  "in_progress",
+    "completed":  {
+
+                  },
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
