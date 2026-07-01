@@ -14,3 +14,7 @@
 .cxx
 local.properties
 .checkpoints/
+*.db
+*.m4a
+*.mp4
+*.mkv
