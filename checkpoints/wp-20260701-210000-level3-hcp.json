@@ -1,0 +1,77 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260701-210000-level3-hcp-004",
+  "sequence": 4,
+  "createdAt": "2026-07-01T21:00:00+07:00",
+  "updatedAt": "2026-07-01T21:00:00+07:00",
+  "title": "Level 3 HCP — /replay + /recover + error recovery",
+  "status": "completed",
+  "progress": 100,
+  "objective": "อัปเกรด Work Package System จาก Level 2.5 เป็น Level 3: เพิ่ม /replay และ /recover สำหรับ error recovery",
+  "scope": ".agents/skills/work-package/ (replay.ps1, recover.ps1, SKILL.md, hcp-config.json)",
+  "completed": [
+    "สร้าง replay.ps1 — replay decisions/timeline จาก checkpoints เรียงตาม sequence (รองรับ --id, --project, --full, --json)",
+    "สร้าง recover.ps1 — restore จาก error/failed checkpoint กลับไปยัง last good state (รองรับ --id, --dryrun, --json)",
+    "อัปเดต SKILL.md — เพิ่ม Level 3 commands (/replay, /recover), error_info schema, HCP levels summary table",
+    "อัปเดต checkpoint schema — เพิ่ม error_info object (error_type, error_message, actions_before_error, tool_used, recovery_instruction)",
+    "อัปเดต hcp-config.json — version 1.0 → 1.0, เพิ่ม replay/recover sections",
+    "ทดสอบ /replay (3 checkpoints) — ทำงานถูกต้อง แสดง timeline, decisions, knowledge, state transition log",
+    "ทดสอบ /recover — แสดง restore point, decisions, knowledge, memory_snapshot สำหรับ recovery"
+  ],
+  "pending": [],
+  "artifacts": [
+    {"path": ".agents/skills/work-package/replay.ps1", "type": "code", "description": "Replay script — replay timeline + decisions + state transitions"},
+    {"path": ".agents/skills/work-package/recover.ps1", "type": "code", "description": "Recover script — restore from error to last good state"},
+    {"path": ".agents/skills/work-package/SKILL.md", "type": "doc", "description": "Updated Level 3 SKILL.md"},
+    {"path": ".agents/skills/work-package/hcp-config.json", "type": "data", "description": "Updated config with replay/recover sections"}
+  ],
+  "agents": [
+    {"role": "current", "name": "AI Agent (opencode)", "responsibility": "Build Level 3 HCP (replay + recover)"}
+  ],
+  "decisions": [
+    {
+      "id": "DEC-007",
+      "timestamp": "2026-07-01T20:50:00+07:00",
+      "decision": "/replay ออกแบบให้ show timeline + decisions + knowledge + state transition log",
+      "rationale": "ต้องการ replay ที่สมบูรณ์สำหรับ context reconstruction ไม่ใช่แค่ list checkpoint",
+      "alternatives": ["แค่ list checkpoint names", "แสดงเฉพาะ decisions"],
+      "decidedBy": "AI"
+    },
+    {
+      "id": "DEC-008",
+      "timestamp": "2026-07-01T20:55:00+07:00",
+      "decision": "/recover ใช้ sequence number เพื่อหา last good checkpoint (seq - 1)",
+      "rationale": "ง่ายสุด และ error checkpoint ส่วนใหญ่เกิดต่อจาก good checkpoint ทันที",
+      "alternatives": ["ค้นหาจาก timestamp", "ค้นหาจาก status = completed ล่าสุด"],
+      "decidedBy": "AI"
+    }
+  ],
+  "knowledge": [
+    "Level 3 HCP = replay (context reconstruction) + recover (error recovery) + audit trail (จาก Level 2.5)",
+    "replay.ps1 ใช้ sequence number เพื่อเรียง checkpoints และสร้าง state transition log",
+    "recover.ps1 หา last good checkpoint โดยการลด sequence ลง 1 และเช็ค status = completed",
+    "error_info schema field ช่วยให้ recover แสดง recovery instruction เฉพาะเจาะจงได้"
+  ],
+  "assumptions": [
+    {"assumption": "Good checkpoint มักเป็น seq - 1 ของ error checkpoint", "confidence": "high", "needsValidation": false},
+    {"assumption": "checkpoint ที่มี status = completed เท่านั้นที่ถือว่าเป็น safe restore point", "confidence": "high", "needsValidation": false}
+  ],
+  "risks": [
+    {"risk": "ถ้าไม่มี completed checkpoint ก่อน error จะ restore ไม่ได้", "impact": "medium", "mitigation": "recover แจ้งเตือนและแนะนำให้ start fresh"},
+    {"risk": "memory_snapshot อาจล้าสมัยถ้า checkpoint ห่างกันนาน", "impact": "low", "mitigation": "replay --full ช่วยตรวจสอบ history"}
+  ],
+  "next_steps": [
+    "เริ่ม implement หรือ refactor GeminiLiveDemo Android app",
+    "พิจารณาเพิ่ม auto-checkpoint onError trigger (ถ้าพบ error ให้สร้าง checkpoint อัตโนมัติ)"
+  ],
+  "dependencies": [],
+  "open_questions": [],
+  "memory_snapshot": [
+    {"key": "hcp_level", "value": "3"},
+    {"key": "scripts", "value": "checkpoint.ps1, resume.ps1, audit.ps1, replay.ps1, recover.ps1"},
+    {"key": "hcp_config_path", "value": ".agents/skills/work-package/hcp-config.json"},
+    {"key": "active_checkpoint", "value": "wp-20260701-210000-level3-hcp-004"}
+  ],
+  "context_summary": "Level 3 HCP เสร็จสมบูรณ์ ระบบ Hermes Continuity Protocol ครบทุกฟีเจอร์: checkpoint, resume, audit, replay, recover พร้อม error_info schema สำหรับ error recovery โดยเฉพาะ",
+  "tags": ["hermes", "hcp", "work-package", "level3", "replay", "recover", "opencode", "completed"]
+}

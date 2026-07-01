@@ -10,7 +10,14 @@ param(
     [string]$ContextSummary = "",
     [string]$Status = "in_progress",
     [int]$Progress = 0,
-    [switch]$Auto
+    [switch]$Auto,
+    [switch]$OnError,
+    [string]$ErrorType = "",
+    [string]$ErrorMessage = "",
+    [string]$ToolUsed = "",
+    [string]$ActionsBeforeError = "[]",
+    [string]$RecoveryInstruction = "",
+    [string]$ErrorException = ""
 )
 
 $projectRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
@@ -19,6 +26,14 @@ if (-not (Test-Path $checkpointsDir)) { New-Item -ItemType Directory -Path $chec
 
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $isoNow = Get-Date -Format "yyyy-MM-ddTHH:mm:ssK"
+
+# Auto-title for error checkpoints
+if ($OnError -and -not $Title) {
+    $Title = "Error Recovery"
+}
+if ($OnError) {
+    $Status = "error"
+}
 
 $slug = if ($Title) { $Title.ToLower() -replace '[^a-z0-9]+', '-' -replace '^-|-$', '' } else { "checkpoint" }
 
@@ -36,7 +51,7 @@ if ((Get-ChildItem -Path $checkpointsDir -Filter "wp-*$slug*.json" -ErrorAction 
 
 $id = "wp-$timestamp-$slug"
 $filename = "$id.json"
-if ($Auto) {
+if ($Auto -or $OnError) {
     $filename = "wp-$timestamp-$slug-$( '{0:D3}' -f $seq ).json"
     $id = "wp-$timestamp-$slug-$seq"
 }
@@ -70,10 +85,34 @@ $wp = @{
     tags = @()
 }
 
+# Populate error_info for OnError checkpoints
+if ($OnError) {
+    $errorInfo = @{}
+    $errorInfo.error_type = if ($ErrorType) { $ErrorType } else { "unknown" }
+    $errorInfo.error_message = if ($ErrorMessage) { $ErrorMessage } else { "No error message captured" }
+    $errorInfo.error_timestamp = $isoNow
+    $errorInfo.tool_used = if ($ToolUsed) { $ToolUsed } else { "" }
+    $errorInfo.actions_before_error = if ($ActionsBeforeError -ne "[]") { $ActionsBeforeError | ConvertFrom-Json } else { @() }
+    $errorInfo.recovery_instruction = if ($RecoveryInstruction) { $RecoveryInstruction } else { "Review error and retry with caution" }
+
+    # Capture last PowerShell error if available
+    if (-not $ErrorMessage -and $global:Error.Count -gt 0) {
+        $lastErr = $global:Error[0]
+        if (-not $ErrorException) { $errorInfo.stack_trace = $lastErr.ToString() }
+    }
+    if ($ErrorException) {
+        $errorInfo.stack_trace = $ErrorException.ToString()
+    }
+
+    $wp.error_info = $errorInfo
+}
+
 $wpJson = $wp | ConvertTo-Json -Depth 10
 Set-Content -Path $filePath -Value $wpJson -Encoding UTF8
 
-if ($Auto) {
+if ($OnError) {
+    Write-Output "[error-checkpoint] $id"
+} elseif ($Auto) {
     Write-Output "[auto-checkpoint] $id"
 } else {
     Write-Output "Checkpoint saved:"

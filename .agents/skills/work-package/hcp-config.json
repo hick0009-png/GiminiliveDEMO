@@ -4,7 +4,13 @@
   "autoCheckpoint": {
     "enabled": true,
     "frequency": 3,
-    "onError": true,
+    "onError": {
+      "enabled": true,
+      "captureStackTrace": true,
+      "createCheckpointOnExitCode": true,
+      "createCheckpointOnException": true,
+      "guardScript": "hcp-guard.ps1"
+    },
     "onDecision": true,
     "onTopicSwitch": false,
     "onHighImpactTool": true

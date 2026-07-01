@@ -338,6 +338,42 @@ Summary:
 4. ใช้ sequence number ต่อจาก checkpoint ล่าสุด
 5. แจ้งสั้นๆ: `[auto-checkpoint] wp-xxx-{seq}`
 
+### OnError auto-checkpoint (Level 3):
+
+เมื่อพบ error ให้สร้าง error checkpoint โดยอัตโนมัติทันที
+
+**วิธีที่ 1: Manual error checkpoint**
+```
+.\checkpoint.ps1 -OnError -ErrorType "api_failure" -ErrorMessage "Connection timeout" -ToolUsed "git push" -RecoveryInstruction "Check network and retry"
+```
+
+**วิธีที่ 2: hcp-guard wrapper (recommended)**
+```
+.\hcp-guard.ps1 -ScriptBlock { git push } -Context "Pushing to GitHub"
+```
+
+hcp-guard จะ:
+1. Execute คำสั่งใน ScriptBlock
+2. ตรวจสอบ `$LASTEXITCODE` และ `$Error` อัตโนมัติ
+3. ถ้า error → สร้าง error checkpoint โดย populate error_info ให้ครบ
+4. ถ้าสำเร็จ → สามารถ auto-checkpoint ได้ด้วย `-CreateAutoCheckpointOnSuccess`
+
+**Error type ที่รองรับ:**
+- `tool_error` — tool/command ล้มเหลว
+- `api_failure` — API call ล้มเหลว
+- `timeout` — command timeout
+- `exception` — unhandled exception
+- `user_abort` — ผู้ใช้ยกเลิก
+- `script_execution_error` — script exit code != 0
+- `unknown` — ไม่ระบุ
+
+**Workflow เมื่อเจอ error:**
+1. หยุด action ปัจจุบันทันที
+2. เรียก `checkpoint.ps1 -OnError` หรือ `hcp-guard.ps1`
+3. set status = "error", progress = current, populate error_info
+4. แจ้งผู้ใช้: `[error-checkpoint] wp-xxx-005`
+5. ผู้ใช้สามารถ `/recover` เพื่อกู้คืน
+
 ---
 
 ## Level 3 Features
