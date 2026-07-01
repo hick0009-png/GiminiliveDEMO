@@ -1,0 +1,59 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260701-204500-pre-level3-003",
+  "sequence": 3,
+  "createdAt": "2026-07-01T20:45:00+07:00",
+  "updatedAt": "2026-07-01T20:45:00+07:00",
+  "title": "Pre-Level 3 HCP — ก่อนสร้าง /replay และ /recover",
+  "status": "in_progress",
+  "progress": 0,
+  "objective": "อัปเกรด Work Package System จาก Level 2.5 เป็น Level 3: เพิ่ม /replay และ /recover สำหรับ error recovery",
+  "scope": ".agents/skills/work-package/, checkpoints/",
+  "completed": [
+    "ทดสอบ /audit — ทำงานถูกต้อง แก้ encoding issue และ open question logic"
+  ],
+  "pending": [
+    "สร้าง replay.ps1 — replay decisions/timeline จาก checkpoints เรียงตาม sequence",
+    "สร้าง recover.ps1 — restore จาก error checkpoint กลับไปยัง last good state",
+    "อัปเดต SKILL.md — เพิ่ม Level 3 commands, schema fields (error_info)",
+    "อัปเดต checkpoint schema — เพิ่ม error_info object สำหรับ error state",
+    "อัปเดต hcp-config.json — เพิ่ม Level 3 config",
+    "ทดสอบ /replay และ /recover"
+  ],
+  "artifacts": [
+    {"path": ".agents/skills/work-package/SKILL.md", "type": "doc", "description": "Work Package Skill definition (จะถูกอัปเดต)"},
+    {"path": ".agents/skills/work-package/replay.ps1", "type": "code", "description": "Replay script (จะถูกสร้าง)"},
+    {"path": ".agents/skills/work-package/recover.ps1", "type": "code", "description": "Recover script (จะถูกสร้าง)"},
+    {"path": ".agents/skills/work-package/hcp-config.json", "type": "data", "description": "HCP configuration (จะถูกอัปเดต)"}
+  ],
+  "agents": [
+    {"role": "current", "name": "AI Agent (opencode)", "responsibility": "Build Level 3 HCP (replay + recover)"}
+  ],
+  "decisions": [],
+  "knowledge": [
+    "Level 3 HCP requires error_info schema field for tracking error states",
+    "/replay = replay decisions/timeline for context reconstruction",
+    "/recover = restore from error state to last good checkpoint"
+  ],
+  "assumptions": [],
+  "risks": [
+    {"risk": "/recover อาจซับซ้อนเพราะต้อง track state changes ระหว่าง checkpoints", "impact": "medium", "mitigation": "ใช้ sequence number + memory_snapshot เพื่อระบุ state ที่กลับไป"},
+    {"risk": "ไม่มี git-like diff ระหว่าง checkpoints ทำให้ recover อาจพลาดบาง context", "impact": "medium", "mitigation": "memory_snapshot เก็บ key-value context ไว้แล้ว ใช้เป็น restore point"}
+  ],
+  "next_steps": [
+    "1. สร้าง replay.ps1",
+    "2. สร้าง recover.ps1",
+    "3. อัปเดต schema + SKILL.md + hcp-config.json",
+    "4. ทดสอบ /replay และ /recover"
+  ],
+  "dependencies": [],
+  "open_questions": [],
+  "memory_snapshot": [
+    {"key": "current_level", "value": "2.5"},
+    {"key": "target_level", "value": "3"},
+    {"key": "scripts_exist", "value": "checkpoint.ps1, resume.ps1, audit.ps1"},
+    {"key": "scripts_to_create", "value": "replay.ps1, recover.ps1"}
+  ],
+  "context_summary": "กำลังจะเริ่มสร้าง Level 3 HCP — replay และ recover commands เพื่อให้ระบบ error recovery ที่สมบูรณ์ หลังจาก Level 2.5 ทำงานได้ปกติแล้ว",
+  "tags": ["hermes", "hcp", "work-package", "level3", "replay", "recover", "opencode"]
+}

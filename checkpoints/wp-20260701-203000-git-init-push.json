@@ -1,0 +1,68 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260701-203000-git-init-push-002",
+  "sequence": 2,
+  "createdAt": "2026-07-01T20:30:00+07:00",
+  "updatedAt": "2026-07-01T20:30:00+07:00",
+  "title": "Git Init + Push + Resolve Open Questions",
+  "status": "completed",
+  "progress": 100,
+  "objective": "Initialize Git repo, commit project, push to GitHub, resolve open questions about .gitignore and checkpoint strategy",
+  "scope": ".gitignore, checkpoints/, GitHub remote",
+  "completed": [
+    "Git init (branch: main)",
+    "Initial commit ของทั้งโปรเจค GeminiLiveDemo + Work Package System Level 2.5",
+    "Set remote origin และ push ไปยัง github.com/hick0009-png/GiminiliveDEMO.git",
+    "เพิ่ม *.db, *.m4a, *.mp4, *.mkv ใน .gitignore",
+    "Remove db/m4a files ออกจาก git tracking (keep local)",
+    "Close open question: checkpoints ใช้ commit กับ git ได้ (ไม่ต้อง ignore)"
+  ],
+  "pending": [],
+  "artifacts": [
+    {"path": ".gitignore", "type": "config", "description": "Updated gitignore with *.db *.m4a *.mp4 *.mkv"},
+    {"path": "checkpoints/wp-20260701-203000-git-init-push.json", "type": "data", "description": "This checkpoint"}
+  ],
+  "agents": [
+    {"role": "current", "name": "AI Agent (opencode)", "responsibility": "Git setup + cleanup db/m4a files"}
+  ],
+  "decisions": [
+    {
+      "id": "DEC-005",
+      "timestamp": "2026-07-01T20:15:00+07:00",
+      "decision": "Commit checkpoints/ และ checkpoint JSON ไปกับ git (ไม่ ignore)",
+      "rationale": "checkpoint/ (public) ควร version controlled เพื่อ audit trail ส่วน .checkpoints/ (private) ถูก ignore อยู่แล้ว",
+      "alternatives": ["Ignore checkpoints/ ทั้งหมด"],
+      "decidedBy": "User"
+    },
+    {
+      "id": "DEC-006",
+      "timestamp": "2026-07-01T20:15:00+07:00",
+      "decision": "เพิ่ม *.db *.m4a *.mp4 *.mkv ใน .gitignore และ remove จาก tracking",
+      "rationale": "local database files (SQLite) และ audio recordings ไม่ควรอยู่ใน repo — เป็นข้อมูลเฉพาะเครื่อง",
+      "alternatives": ["เก็บไว้ แต่เสี่ยงต่อ data leak", "ignore เฉพาะบางไฟล์"],
+      "decidedBy": "AI + User"
+    }
+  ],
+  "knowledge": [
+    "Windows Git + GCM (Git Credential Manager) 2.7.3 ทำงานกับ GitHub HTTPS ได้โดยไม่ต้องใช้ token ด้วยตนเอง",
+    "PowerShell `git add -A` อาจ timeout ถ้ามีไฟล์จำนวนมาก (ใช้ --timeout เพิ่ม หรือใช้ git add ทีละส่วน)"
+  ],
+  "assumptions": [
+    {"assumption": "GitHub remote URL `https://github.com/hick0009-png/GiminiliveDEMO.git` ถูกต้อง", "confidence": "high", "needsValidation": false}
+  ],
+  "risks": [],
+  "next_steps": [
+    "พิจารณาเพิ่ม Level 3 HCP: /replay, /recover ถ้าต้องการ error recovery จริงจัง",
+    "เริ่ม implement หรือ refactor GeminiLiveDemo Android app"
+  ],
+  "dependencies": [],
+  "open_questions": [],
+  "memory_snapshot": [
+    {"key": "git_remote", "value": "https://github.com/hick0009-png/GiminiliveDEMO.git"},
+    {"key": "git_branch", "value": "main"},
+    {"key": "last_commit", "value": "a6cafba"},
+    {"key": "gitignore_additions", "value": "*.db, *.m4a, *.mp4, *.mkv"}
+  ],
+  "context_summary": "Git init + push เสร็จสมบูรณ์ ไฟล์ที่ไม่ควร track (db, m4a) ถูกลบออกจาก git และเพิ่มใน .gitignore แล้ว Open questions เกี่ยวกับ checkpoint strategy และ gitignore ถูกปิดทั้งหมด",
+  "tags": ["hermes", "hcp", "work-package", "git", "gitignore", "checkpoint"]
+}

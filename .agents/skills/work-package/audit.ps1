@@ -4,6 +4,10 @@ param(
     [switch]$Json
 )
 
+# Ensure UTF-8 output encoding for Unicode/Thai support
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+
 $checkpointsDir = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) "checkpoints"
 
 if (-not (Test-Path $checkpointsDir)) {
@@ -25,6 +29,7 @@ $timeline = @()
 $statusMap = @{}
 $totalProgress = 0
 $errorCount = 0
+$currentOpenQuestions = @()
 
 foreach ($file in $files) {
     try {
@@ -63,14 +68,18 @@ foreach ($file in $files) {
             }
         }
         
-        if ($wp.open_questions) {
+        # Open questions: later checkpoint replaces previous state
+        if ($wp.open_questions -and $wp.open_questions.Count -gt 0) {
+            $currentOpenQuestions = @()
             foreach ($q in $wp.open_questions) {
-                $allQuestions += [PSCustomObject]@{
+                $currentOpenQuestions += [PSCustomObject]@{
                     question = $q.question
                     assignedTo = $q.assignedTo
                     fromCheckpoint = $wp.id
                 }
             }
+        } else {
+            $currentOpenQuestions = @()
         }
 
         if ($wp.status -eq "error" -or $wp.status -eq "failed") {
@@ -90,7 +99,7 @@ if ($Json) {
         decisions = $allDecisions
         timeline = $timeline
         knowledge = $allKnowledge
-        openQuestions = $allQuestions
+        openQuestions = $currentOpenQuestions
         errorCount = $errorCount
         statusBreakdown = $statusMap
         avgProgress = if ($timeline.Count -gt 0) { [math]::Round($totalProgress / $timeline.Count, 1) } else { 0 }
@@ -149,11 +158,11 @@ if ($allKnowledge.Count -gt 0) {
     Write-Output ""
 }
 
-# Open Questions
-if ($allQuestions.Count -gt 0) {
-    Write-Output "--- Open Questions ($($allQuestions.Count)) ---"
+# Open Questions (latest state from newest checkpoint)
+if ($currentOpenQuestions.Count -gt 0) {
+    Write-Output "--- Open Questions ($($currentOpenQuestions.Count)) ---"
     $seenQ = @{}
-    foreach ($q in $allQuestions) {
+    foreach ($q in $currentOpenQuestions) {
         $key = $q.question
         if (-not $seenQ.ContainsKey($key)) {
             $seenQ[$key] = $true

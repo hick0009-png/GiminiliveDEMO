@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "description": "Hermes Continuity Protocol Configuration - Level 2.5",
+  "description": "Hermes Continuity Protocol Configuration - Level 3",
   "autoCheckpoint": {
     "enabled": true,
     "frequency": 3,
@@ -18,6 +18,15 @@
   "audit": {
     "maxDecisionsPerCheckpoint": 20,
     "groupByProject": true
+  },
+  "replay": {
+    "showMemorySnapshot": false,
+    "maxEntries": 100
+  },
+  "recover": {
+    "autoRestoreMemory": true,
+    "requireConfirmation": true,
+    "defaultRecoverFromStatus": ["error", "failed", "cancelled"]
   },
   "project": {
     "name": "GeminiLiveDemo",
