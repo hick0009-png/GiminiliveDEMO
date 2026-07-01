@@ -1,0 +1,95 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260701-213000-full-hcp-level3-005",
+  "sequence": 5,
+  "createdAt": "2026-07-01T21:30:00+07:00",
+  "updatedAt": "2026-07-01T21:30:00+07:00",
+  "title": "HCP Level 3 Complete — onError trigger + docs + manual",
+  "status": "completed",
+  "progress": 100,
+  "objective": "Build Level 3 HCP with onError auto-checkpoint trigger, comprehensive docs, and tool manual",
+  "scope": ".agents/skills/work-package/, docs/, checkpoints/",
+  "completed": [
+    "สร้าง replay.ps1 — replay timeline + decisions + knowledge + state transition log",
+    "สร้าง recover.ps1 — restore from error/failed to last good state",
+    "สร้าง hcp-guard.ps1 — execute command + auto-detect error ($LASTEXITCODE + $Error) + auto error checkpoint",
+    "อัปเดต checkpoint.ps1 — เพิ่ม -OnError switch + 7 error params (-ErrorType, -ErrorMessage, -ToolUsed, -ActionsBeforeError, -RecoveryInstruction, -ErrorException)",
+    "อัปเดต hcp-config.json — onError object (enabled, captureStackTrace, createCheckpointOnExitCode, createCheckpointOnException)",
+    "อัปเดต SKILL.md — onError automation section + error types + workflows",
+    "อัปเดต checkpoint schema — เพิ่ม error_info field",
+    "ทดสอบ /replay — 4 checkpoints แสดง timeline + decisions + knowledge + state transition",
+    "ทดสอบ /recover — error checkpoint → last good checkpoint (completed items, decisions, memory_snapshot)",
+    "ทดสอบ hcp-guard — both success (+ auto-checkpoint) and failure (+ error checkpoint)",
+    "ทดสอบ /recover — ทำงานถูกต้อง แก้ encoding issue และ open question logic",
+    "สร้าง docs/MANUAL.md — comprehensive tool manual (13 sections, cheatsheet, schema, workflows)",
+    "อัปเดต docs/context.md — HCP commands, Git workflow, full parameter lists, session handoff",
+    "Git: 4 commits บน main, push ไป GitHub"
+  ],
+  "pending": [
+    "เริ่ม implement หรือ refactor GeminiLiveDemo Android app (70+ Kotlin files)"
+  ],
+  "artifacts": [
+    {"path": ".agents/skills/work-package/replay.ps1", "type": "code", "description": "Replay script"},
+    {"path": ".agents/skills/work-package/recover.ps1", "type": "code", "description": "Recover script"},
+    {"path": ".agents/skills/work-package/hcp-guard.ps1", "type": "code", "description": "Error guard wrapper"},
+    {"path": ".agents/skills/work-package/checkpoint.ps1", "type": "code", "description": "Updated with -OnError switch"},
+    {"path": ".agents/skills/work-package/hcp-config.json", "type": "config", "description": "Updated onError config"},
+    {"path": ".agents/skills/work-package/SKILL.md", "type": "doc", "description": "Updated with onError section"},
+    {"path": "docs/MANUAL.md", "type": "doc", "description": "HCP tool manual"},
+    {"path": "docs/context.md", "type": "doc", "description": "Updated project context"}
+  ],
+  "agents": [
+    {"role": "current", "name": "AI Agent (opencode)", "responsibility": "Build Level 3 HCP + docs"}
+  ],
+  "decisions": [
+    {
+      "id": "DEC-007",
+      "timestamp": "2026-07-01T20:50:00+07:00",
+      "decision": "/replay ออกแบบให้ show timeline + decisions + knowledge + state transition log",
+      "rationale": "ต้องการ replay ที่สมบูรณ์สำหรับ context reconstruction",
+      "alternatives": ["แค่ list checkpoint names", "แสดงเฉพาะ decisions"],
+      "decidedBy": "AI"
+    },
+    {
+      "id": "DEC-008",
+      "timestamp": "2026-07-01T20:55:00+07:00",
+      "decision": "/recover ใช้ sequence number เพื่อหา last good checkpoint (seq - 1)",
+      "rationale": "ง่ายสุด และ error checkpoint ส่วนใหญ่เกิดต่อจาก good checkpoint ทันที",
+      "alternatives": ["ค้นหาจาก timestamp", "ค้นหาจาก status = completed ล่าสุด"],
+      "decidedBy": "AI"
+    },
+    {
+      "id": "DEC-009",
+      "timestamp": "2026-07-01T21:10:00+07:00",
+      "decision": "onError auto-checkpoint ใช้ hcp-guard.ps1 wrapper approach แทนการ patch ลงในทุก tool",
+      "rationale": "wrapper ใช้งานง่าย ไม่ต้องแก้ tool ทุกตัว แค่ครอบคำสั่งที่ต้องการ monitor",
+      "alternatives": ["try/catch ในทุก tool", "global error handler ใน PowerShell profile"],
+      "decidedBy": "AI"
+    }
+  ],
+  "knowledge": [
+    "PowerShell 5.1 ไม่รองรับ ternary operator (? :) และ null-coalescing (??) ต้องใช้ if/else แทน",
+    "PowerShell -File mode แปลงพารามิเตอร์ทุกตัวเป็น string ทำให้ scriptblock parameter ใช้กับ -File ไม่ได้ ต้องใช้ -Command + & แทน",
+    "hcp-guard ใช้ Invoke-Expression + $LASTEXITCHECK + $Error.Count detection เพื่อ detect error อัตโนมัติ",
+    "checkpoint sequence ใช้ regex match '-(\d+)$' เพื่อ increment อัตโนมัติ"
+  ],
+  "assumptions": [],
+  "risks": [],
+  "next_steps": [
+    "เริ่ม implement หรือ refactor GeminiLiveDemo Android app (70+ Kotlin files)"
+  ],
+  "dependencies": [],
+  "open_questions": [],
+  "memory_snapshot": [
+    {"key": "hcp_level", "value": "3"},
+    {"key": "git_remote", "value": "https://github.com/hick0009-png/GiminiliveDEMO.git"},
+    {"key": "git_branch", "value": "main"},
+    {"key": "last_commit", "value": "37aaad4"},
+    {"key": "scripts", "value": "checkpoint.ps1, resume.ps1, audit.ps1, replay.ps1, recover.ps1, hcp-guard.ps1"},
+    {"key": "checkpoints_count", "value": "5"},
+    {"key": "docs_updated", "value": "context.md, MANUAL.md, SKILL.md"},
+    {"key": "project_root", "value": "D:\\New folder (2)\\GeminiLiveDemo"}
+  ],
+  "context_summary": "HCP Level 3 เสร็จสมบูรณ์พร้อม onError auto-checkpoint trigger มี scripts ครบ 6 ตัว (checkpoint, resume, audit, replay, recover, hcp-guard) + comprehensive docs + git backup งานค้างเดียวคือ GeminiLiveDemo Android app",
+  "tags": ["hermes", "hcp", "work-package", "level3", "replay", "recover", "onerror", "hcp-guard", "completed"]
+}

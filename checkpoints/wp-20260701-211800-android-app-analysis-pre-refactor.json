@@ -1,0 +1,95 @@
+﻿{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260701-211800-android-app-analysis-pre-refactor-001",
+  "sequence": 1,
+  "createdAt": "2026-07-01T21:18:00+07:00",
+  "updatedAt": "2026-07-01T21:18:00+07:00",
+  "title": "Android App Analysis - Pre-Refactor",
+  "status": "in_progress",
+  "progress": 10,
+  "objective": "Analyze GeminiLiveDemo Android app (70+ Kotlin files) for refactor/implementation priorities",
+  "scope": "app/src/main/java/com/example/geminilivedemo/, build.gradle.kts, AndroidManifest.xml, local.properties",
+  "completed": [
+    "Loaded Level 2.5 checkpoint (seq 1) via /resume",
+    "Discovered Level 3 HCP already complete (seq 4-5): replay.ps1, recover.ps1, hcp-guard.ps1 all exist",
+    "Full build configuration audit: compileSdk=35, minSdk=26, AGP=8.8.0, Kotlin=2.0.0, Gradle=9.4.1",
+    "Project compiles successfully (compileDebugSources succeeds)",
+    "39 unit tests all pass (Phase5UnitTest, SessionStateHolderTest, SituationalArchitectureTest, SpeakerLockManagerTest)",
+    "Dependency tree resolved with no conflicts",
+    "Identified 6 categories of lint errors (30 total errors, 339 warnings)",
+    "Identified missing Gemini API key in local.properties (runtime failure for Gemini features)",
+    "Identified JAVA_HOME not set in environment",
+    "Catalogued all 55+ Kotlin source files across 14 packages",
+    "Architecture mapped: 6 layers (Network, Audio, Service, Situational, Memory, Multi-Agent Dating)"
+  ],
+  "pending": [
+    "Fix 30 lint errors: VIBRATE permission (2), getITelephony reflection (1), TileService deprecated API (2), RECEIVER_EXPORTED flag (1), android:tint → app:tint in XML (23), uses-feature telephony (1)",
+    "Set up API keys: add gemini.api.key and deepgram.api.key to local.properties with BuildConfig injection",
+    "Consider refactoring FloatingWidgetService (3000+ lines) into smaller components",
+    "Address Gradle 10 deprecation warnings",
+    "Set JAVA_HOME permanently via environment variable",
+    "Add proguard rules for kotlinx.serialization, SQLCipher, and Google API client"
+  ],
+  "artifacts": [
+    {"path": "app/src/main/java/com/example/geminilivedemo/", "type": "code", "description": "Main Kotlin source directory (55+ files)"},
+    {"path": "app/build.gradle.kts", "type": "config", "description": "App-level build configuration"},
+    {"path": "build.gradle.kts", "type": "config", "description": "Root-level build configuration"},
+    {"path": "gradle/libs.versions.toml", "type": "config", "description": "Version catalog"},
+    {"path": "AndroidManifest.xml", "type": "config", "description": "Android manifest"}
+  ],
+  "agents": [
+    {"role": "current", "name": "AI Agent (opencode)", "responsibility": "Analyze and refactor GeminiLiveDemo Android app"}
+  ],
+  "decisions": [
+    {
+      "id": "DEC-010",
+      "timestamp": "2026-07-01T21:00:00+07:00",
+      "decision": "Prioritize fixing 30 lint errors + API key setup before feature work",
+      "rationale": "Lint failures block CI/CD; missing API key makes Gemini features unusable at runtime",
+      "alternatives": ["Start with FloatingWidgetService refactor first", "Add new features immediately"],
+      "decidedBy": "AI"
+    }
+  ],
+  "knowledge": [
+    "HCP Level 3 fully implemented: 6 scripts (checkpoint, resume, audit, replay, recover, hcp-guard) + docs",
+    "Project uses Gemini 3.1 Flash Live Preview (not 3.5 Flash for real-time)",
+    "App uses Java-WebSocket library (not OkHttp WebSocket) for Gemini Live API connection",
+    "Deepgram API key is hardcoded in GeminiMeetingService.kt — should be moved to BuildConfig",
+    "SQLCipher 4.5.4 for encrypted databases; 3 separate DBs (AssistantMemory, Meetings, DateProfiles)",
+    "FloatingWidgetService.kt is the largest file at ~3000 lines handling session lifecycle, audio, sensor coordination"
+  ],
+  "assumptions": [
+    {"assumption": "lint errors are the primary blocker for production readiness", "confidence": "high", "needsValidation": false},
+    {"assumption": "JAVA_HOME pointing to Android Studio JBR is sufficient for all builds", "confidence": "high", "needsValidation": false}
+  ],
+  "risks": [
+    {"risk": "getITelephony reflection will break on API 35+ (already targeting SDK 35)", "impact": "high", "mitigation": "Replace with TelecomManager API"},
+    {"risk": "Missing Gemini API key makes all Gemini features fail silently", "impact": "high", "mitigation": "Add key validation at app startup with user-facing error"},
+    {"risk": "Deepgram key hardcoded in source code — security leak if pushed to public repo", "impact": "medium", "mitigation": "Move to BuildConfig injected from local.properties"}
+  ],
+  "next_steps": [
+    "Fix 30 lint errors (starting with highest impact: getITelephony reflection, VIBRATE permission, RECEIVER_EXPORTED flag)",
+    "Instruct user to add gemini.api.key + deepgram.api.key to local.properties",
+    "Move hardcoded Deepgram key from GeminiMeetingService.kt to BuildConfig",
+    "Run gradlew check again to verify lint fixes"
+  ],
+  "dependencies": [],
+  "open_questions": [
+    {"question": "Should FloatingWidgetService be split into multiple smaller services or remains as-is?", "assignedTo": ""},
+    {"question": "Should we add CI/CD (GitHub Actions) for auto lint + test?", "assignedTo": ""}
+  ],
+  "memory_snapshot": [
+    {"key": "hcp_level", "value": "3"},
+    {"key": "project_root", "value": "D:\\New folder (2)\\GeminiLiveDemo"},
+    {"key": "last_checkpoint_loaded", "value": "wp-20260701-200000-level2p5-work-package-001"},
+    {"key": "current_checkpoint", "value": "wp-20260701-211800-android-app-analysis-pre-refactor-001"},
+    {"key": "compile_status", "value": "PASS (compileDebugSources)"},
+    {"key": "unit_tests", "value": "39/39 PASS"},
+    {"key": "lint_errors", "value": "30"},
+    {"key": "lint_warnings", "value": "339"},
+    {"key": "gemini_api_key_set", "value": "false"},
+    {"key": "java_home_set", "value": "false"}
+  ],
+  "context_summary": "HCP Level 3 complete with all 6 scripts. Android app compiles and tests pass, but has 30 lint errors + missing API keys. Starting with lint fixes and API key setup before deeper refactoring.",
+  "tags": ["hermes", "hcp", "android", "geminilivedemo", "lint", "refactor", "checkpoint"]
+}
