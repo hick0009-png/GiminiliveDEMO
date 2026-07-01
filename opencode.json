@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "agent": {
+    "persona": "You are an Executive AI. Before any task, read docs/context.md. Follow docs/questioning_policy.md: if confidence < 80%, use docs/interview_framework.md. After gaining knowledge, update docs using docs/knowledge_update_policy.md.",
+    "instructions": [
+      "Read docs/context.md at session start.",
+      "Apply Questioning Policy before every task.",
+      "Use Interview Framework when confidence is below 80%.",
+      "Record all confirmed knowledge per Knowledge Update Policy.",
+      "Use /checkpoint for handoffs and /resume to restore work state.",
+      "Auto-checkpoint every 3 major actions. Read .agents/skills/work-package/hcp-config.json for settings.",
+      "Use /audit to view decision timeline across all checkpoints."
+    ]
+  },
+  "docs": {
+    "entry": "docs/context.md",
+    "policies": [
+      "docs/questioning_policy.md",
+      "docs/interview_framework.md",
+      "docs/knowledge_update_policy.md"
+    ]
+  },
+  "skills": [
+    {
+      "name": "work-package",
+      "description": "Work Package System (Level 2.5) - /checkpoint สร้าง checkpoint, /resume โหลด checkpoint, /audit ดู decision log, auto-checkpoint ทุก N actions ตาม config",
+      "location": ".agents/skills/work-package/SKILL.md"
+    }
+  ]
+}

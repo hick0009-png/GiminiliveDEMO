@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#4D707070" /> <!-- 30% alpha Standby Gray for inactive glass status -->
+    <stroke
+        android:width="2dp"
+        android:color="#80FFFFFF" /> <!-- Frosted white border -->
+    <size
+        android:width="60dp"
+        android:height="60dp" />
+</shape>

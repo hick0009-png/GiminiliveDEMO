@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://tools.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- MAIN VIEW (Recording & History List) -->
+    <LinearLayout
+        android:id="@+id/mainMeetingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Header Bar -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingHorizontal="16dp">
+
+            <ImageButton
+                android:id="@+id/btnBackMeeting"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_back_24"
+                android:contentDescription="กลับ"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="โหมดบันทึกการประชุม"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <!-- Recording Panel Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:strokeWidth="1dp"
+            app:strokeColor="#1AFFFFFF"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Title Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColorHint="#9E9E9E"
+                    app:boxStrokeColor="#1A73E8"
+                    app:hintTextColor="#1A73E8"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editMeetingTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="ชื่อหัวข้อประชุม"
+                        android:text="หัวข้อการประชุม"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Silent Mode Switch -->
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchAutoSilence"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="ปิดเสียงเรียกเข้า/แจ้งเตือนอัตโนมัติ"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:checked="true"
+                    app:thumbTint="#1A73E8"
+                    app:trackTint="#4D1A73E8" />
+
+                <!-- Live Transcript Switch -->
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchLiveTranscript"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="ถอดความสดแยกคนพูด (Live Transcript)"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:checked="false"
+                    app:thumbTint="#1A73E8"
+                    app:trackTint="#4D1A73E8" />
+
+                <!-- Timer & Status -->
+                <TextView
+                    android:id="@+id/txtRecordTimer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:text="00:00:00"
+                    android:textColor="#FF453A"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/txtRecordStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:text="พร้อมบันทึกการประชุม"
+                    android:textColor="#9E9E9E"
+                    android:textSize="13sp" />
+
+                <!-- Deepgram Live Status Indicator -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardDeepgramStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="#1A2196F3"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#332196F3"
+                    app:cardElevation="0dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/dotDeepgram"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="6dp"
+                            app:cardCornerRadius="3dp"
+                            app:cardBackgroundColor="#2196F3"
+                            app:strokeWidth="0dp"
+                            app:cardElevation="0dp" />
+
+                        <TextView
+                            android:id="@+id/txtDeepgramStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Deepgram กำลังทำงาน..."
+                            android:textColor="#2196F3"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Record Button Container -->
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp">
+
+                    <!-- Outer Wave Ring -->
+                    <View
+                        android:id="@+id/meetingWaveRing"
+                        android:layout_width="96dp"
+                        android:layout_height="96dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/wave_bg"
+                        android:alpha="0" />
+
+                    <!-- Record Button -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/btnRecordMeeting"
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:layout_gravity="center"
+                        app:cardCornerRadius="36dp"
+                        app:cardBackgroundColor="#E53935"
+                        app:strokeWidth="0dp"
+                        app:cardElevation="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
+
+                        <ImageView
+                            android:id="@+id/imgRecordIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/baseline_mic_24"
+                            app:tint="#FFFFFF"
+                            android:contentDescription="เริ่มบันทึก" />
+                    </com.google.android.material.card.MaterialCardView>
+                </FrameLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- History List Header -->
+        <TextView
+            android:id="@+id/txtHistoryHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="ประวัติการประชุม"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <!-- Search Bar -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSearchMeetings"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:strokeWidth="1dp"
+            app:strokeColor="#33FFFFFF"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@android:drawable/ic_menu_search"
+                    app:tint="#9E9E9E"
+                    android:contentDescription="ค้นหา" />
+
+                <EditText
+                    android:id="@+id/editSearchMeetings"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:background="@null"
+                    android:hint="ค้นหาหัวข้อ หรือสรุป..."
+                    android:textColorHint="#66FFFFFF"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:singleLine="true"
+                    android:imeOptions="actionSearch" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- History RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerMeetings"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="24dp"
+            tools:listitem="@layout/item_meeting" />
+
+        <!-- Live Transcript Panel (visible only when recording with live transcript) -->
+        <LinearLayout
+            android:id="@+id/layoutLiveTranscriptPanel"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:visibility="gone">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ถอดความสดแยกเสียงผู้พูด (Live)"
+                    android:textColor="#4A90E2"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardLiveDot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    app:cardCornerRadius="4dp"
+                    app:cardBackgroundColor="#E53935"
+                    app:strokeWidth="0dp"
+                    app:cardElevation="0dp" />
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerLiveTranscript"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="16dp"
+                tools:listitem="@layout/item_transcript_segment" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <!-- DETAIL OVERLAY VIEW (Initially hidden) -->
+    <LinearLayout
+        android:id="@+id/detailMeetingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- Detail Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingHorizontal="16dp">
+
+            <ImageButton
+                android:id="@+id/btnCloseDetail"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_back_24"
+                android:contentDescription="ปิด"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/txtDetailHeaderTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_toEndOf="@id/btnCloseDetail"
+                android:layout_toStartOf="@id/btnShareMeeting"
+                android:text="รายละเอียดประชุม"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <!-- Share Button -->
+            <ImageButton
+                android:id="@+id/btnShareMeeting"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_menu_24"
+                android:contentDescription="แชร์"
+                app:tint="#FFFFFF" />
+        </RelativeLayout>
+
+        <!-- Scrollable Details -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="24dp">
+
+                <!-- Title and Meta -->
+                <TextView
+                    android:id="@+id/txtDetailTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtDetailMeta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#9E9E9E"
+                    android:textSize="12sp"
+                    android:text="18 มิ.ย. 2026 | ความยาว 12:45" />
+
+                <!-- Audio Playback Control Panel -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#1A1A1A"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#33FFFFFF"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <!-- Play/Pause Button -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/btnPlayPauseAudio"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                app:cardCornerRadius="24dp"
+                                app:cardBackgroundColor="#FFFFFF"
+                                app:strokeWidth="0dp"
+                                app:cardElevation="2dp"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <ImageView
+                                    android:id="@+id/imgPlayPauseIcon"
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/baseline_camera_24"
+                                    app:tint="#000000"
+                                    android:contentDescription="เล่น" />
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Audio Progress Slider / SeekBar -->
+                            <SeekBar
+                                android:id="@+id/seekBarAudio"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:progressTint="#4A90E2"
+                                android:thumbTint="#4A90E2" />
+                        </LinearLayout>
+
+                        <!-- Playback Time -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:paddingHorizontal="8dp">
+
+                            <TextView
+                                android:id="@+id/txtCurrentPlayTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="00:00"
+                                android:textColor="#9E9E9E"
+                                android:textSize="11sp" />
+
+                            <TextView
+                                android:id="@+id/txtTotalPlayTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:text="00:00"
+                                android:textColor="#9E9E9E"
+                                android:textSize="11sp" />
+                        </RelativeLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Processing / Loading state -->
+                <LinearLayout
+                    android:id="@+id/layoutProcessing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:indeterminateTint="#4A90E2" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="กำลังประมวลผลวิเคราะห์ด้วย Gemini 2.5 Flash..."
+                        android:textColor="#4A90E2"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="กำลังทำการถอดความและแยกแยะคนพูด โปรดรอสักครู่"
+                        android:textColor="#9E9E9E"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- Process Button (if not processed yet) -->
+                <Button
+                    android:id="@+id/btnAnalyzeMeeting"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="20dp"
+                    android:backgroundTint="#4A90E2"
+                    android:textColor="#FFFFFF"
+                    android:text="วิเคราะห์การประชุมด้วย Gemini"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp"
+                    android:visibility="gone" />
+
+                <!-- Results Layout -->
+                <LinearLayout
+                    android:id="@+id/layoutAnalysisResults"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:visibility="visible">
+
+                    <!-- Summary Title -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="สรุปมติที่ประชุม (Gemini Summary)"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <!-- Summary Card -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardBackgroundColor="#1A1A1A"
+                        app:strokeWidth="0dp"
+                        app:cardElevation="0dp">
+
+                        <TextView
+                            android:id="@+id/txtMeetingSummary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="16dp"
+                            android:text="บทสรุปผลลัพธ์จาก AI จะแสดงที่นี่..."
+                            android:textColor="#E0E0E0"
+                            android:textSize="13sp"
+                            android:lineSpacingMultiplier="1.2" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Transcript Title & Rename Option -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="บทสนทนาที่ถอดความได้ (Transcript)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/btnRenameSpeaker"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:textColor="#4A90E2"
+                            android:text="แก้ไขชื่อผู้พูด"
+                            android:textSize="12sp" />
+                    </RelativeLayout>
+
+                    <!-- Transcript RecyclerView -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerTranscript"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="false"
+                        tools:listitem="@layout/item_transcript_segment" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+
+</FrameLayout>

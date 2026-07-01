@@ -1,0 +1,109 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260701-200000-level2p5-work-package-001",
+  "sequence": 1,
+  "createdAt": "2026-07-01T20:00:00+07:00",
+  "updatedAt": "2026-07-01T20:00:00+07:00",
+  "title": "Build Work Package System Level 2.5",
+  "status": "completed",
+  "progress": 100,
+  "objective": "สร้าง Work Package System (Checkpoint + Resume + Audit + Auto-Checkpoint) สำหรับ Hermes Continuity Protocol",
+  "scope": ".agents/skills/work-package/, opencode.json, .gitignore, docs/",
+  "completed": [
+    "Read และวิเคราะห์โค้ดโปรเจค GeminiLiveDemo ทั้งหมด (70+ Kotlin files)",
+    "อัปเดต docs/context.md — Project Vision, Architecture 6 Layers, 18 Tools, Business Rules, APIs, Key Files",
+    "อัปเดต docs/questioning_policy.md — เพิ่ม project-specific vocab และ edge cases",
+    "อัปเดต docs/interview_framework.md — เพิ่มตัวอย่าง project-specific แต่ละ Stage",
+    "อัปเดต docs/knowledge_update_policy.md — ปรับ classification mapping",
+    "ออกแบบ Work Package JSON schema (hermes-work-package-v1)",
+    "สร้าง SKILL.md — commands, schema, automation rules",
+    "สร้าง checkpoint.ps1 — manual + auto checkpoint with sequence numbers",
+    "สร้าง resume.ps1 — restore checkpoint state",
+    "สร้าง audit.ps1 — timeline, decisions, knowledge, questions, status breakdown",
+    "สร้าง hcp-config.json — auto-checkpoint every 3 actions, onError, onDecision, onHighImpactTool",
+    "สร้าง sample.json — ตัวอย่าง checkpoint จริง",
+    "สร้าง checkpoints/ directory",
+    "อัปเดต opencode.json — register skill + add auto-checkpoint instruction",
+    "อัปเดต .gitignore — เพิ่ม .checkpoints/"
+  ],
+  "pending": [],
+  "artifacts": [
+    {"path": ".agents/skills/work-package/SKILL.md", "type": "doc", "description": "Work Package Skill definition"},
+    {"path": ".agents/skills/work-package/checkpoint.ps1", "type": "code", "description": "Checkpoint creator script"},
+    {"path": ".agents/skills/work-package/resume.ps1", "type": "code", "description": "Checkpoint resume script"},
+    {"path": ".agents/skills/work-package/audit.ps1", "type": "code", "description": "Audit timeline viewer"},
+    {"path": ".agents/skills/work-package/hcp-config.json", "type": "data", "description": "HCP configuration"},
+    {"path": ".agents/skills/work-package/sample.json", "type": "data", "description": "Example checkpoint"},
+    {"path": "docs/context.md", "type": "doc", "description": "Project context with full architecture"},
+    {"path": "opencode.json", "type": "config", "description": "OpenCode configuration"},
+    {"path": "checkpoints/", "type": "data", "description": "Checkpoint storage directory"}
+  ],
+  "agents": [
+    {"role": "current", "name": "AI Agent (opencode)", "responsibility": "Build Work Package System + document project"}
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "timestamp": "2026-07-01T19:00:00+07:00",
+      "decision": "ใช้ JSON schema (hermes-work-package-v1) แทน Markdown สำหรับ checkpoint",
+      "rationale": "AI, โปรแกรม, Database, Dashboard อ่าน JSON ได้ทั้งหมด",
+      "alternatives": ["Markdown เท่านั้น", "YAML"],
+      "decidedBy": "User + AI"
+    },
+    {
+      "id": "DEC-002",
+      "timestamp": "2026-07-01T19:15:00+07:00",
+      "decision": "PowerShell scripts สำหรับ checkpoint/resume/audit แทนการให้ AI เขียน JSON โดยตรง",
+      "rationale": "ทำงานข้าม session ได้ ไม่ต้องพึ่ง AI runtime",
+      "alternatives": ["Bash scripts", "Python scripts"],
+      "decidedBy": "AI"
+    },
+    {
+      "id": "DEC-003",
+      "timestamp": "2026-07-01T19:30:00+07:00",
+      "decision": "Level 2.5 = Level 2 + auto-checkpoint + /audit โดยตัด /replay และ /recover ออกก่อน",
+      "rationale": "เพียงพอสำหรับการใช้งานจริง รอความต้องการก่อนค่อยเพิ่ม Level 3",
+      "alternatives": ["Level 2 เฉยๆ", "Level 3 เต็มรูปแบบ"],
+      "decidedBy": "User"
+    },
+    {
+      "id": "DEC-004",
+      "timestamp": "2026-07-01T19:45:00+07:00",
+      "decision": "Auto-checkpoint frequency = 3 major actions, เปิด onError, onDecision, onHighImpactTool",
+      "rationale": "บ่อยเกินไปรบกวน นานเกินไปเสี่ยงเสีย context",
+      "alternatives": ["ทุก 1 action", "ทุก 5 actions", "เฉพาะ manual เท่านั้น"],
+      "decidedBy": "AI + User"
+    }
+  ],
+  "knowledge": [
+    "Work Package มี 3 Levels: 1=summary, 2=checkpoint+resume, 2.5=auto+audit, 3=HCP เต็ม (replay, recover, audit trail)",
+    "PowerShell 5.1 ไม่ support ?? (null-coalescing) และ Unicode emoji ใน script",
+    "OpenCode ใช้ .agents/skills/ สำหรับ skill registry และ opencode.json สำหรับ config",
+    "GeminiLiveDemo มี 70+ Kotlin files, 6 packages หลัก, 18 tool functions"
+  ],
+  "assumptions": [
+    {"assumption": "PowerShell ExecutionPolicy อาจถูกปิด ต้องเรียกด้วย -ExecutionPolicy Bypass", "confidence": "high", "needsValidation": false},
+    {"assumption": "checkpoints/ directory ใช้เก็บ public checkpoint ส่วน .checkpoints/ ใช้ private", "confidence": "high", "needsValidation": false}
+  ],
+  "risks": [
+    {"risk": "PowerShell script ไม่ได้ register เป็น command — ต้องเรียกด้วย full path", "impact": "low", "mitigation": "SKILL.md มีคำแนะนำการใช้งาน"},
+    {"risk": "Auto-checkpoint ต้องอาศัย AI จำนับ actions เอง — อาจพลาด", "impact": "medium", "mitigation": "มี manual /checkpoint เป็น backup"}
+  ],
+  "next_steps": [
+    "ทดสอบ /resume เช็คว่าโหลด checkpoint นี้แล้วทำงานต่อได้",
+    "พิจารณาเพิ่ม Level 3: /replay, /recover ถ้าต้องการ error recovery จริงจัง"
+  ],
+  "dependencies": [],
+  "open_questions": [
+    {"question": "ควรเพิ่ม private .checkpoints/ gitignore path ใน remote build หรือไม่?", "assignedTo": ""},
+    {"question": "ควรทำ Git commit checkpoint หรือควร ignore ทั้งหมด?", "assignedTo": ""}
+  ],
+  "memory_snapshot": [
+    {"key": "project_root", "value": "D:\\New folder (2)\\GeminiLiveDemo"},
+    {"key": "work_package_skill_path", "value": ".agents/skills/work-package/SKILL.md"},
+    {"key": "opencode_config_path", "value": "opencode.json"},
+    {"key": "docs_completed", "value": "context.md, questioning_policy.md, interview_framework.md, knowledge_update_policy.md"}
+  ],
+  "context_summary": "สร้าง Work Package System Level 2.5 เสร็จสมบูรณ์ ประกอบด้วย checkpoint/resume/audit/auto-checkpoint พร้อม JSON schema และ PowerShell scripts ครอบคลุมทั้งการ save state, restore, audit trail และ auto-save ตาม config",
+  "tags": ["hermes", "hcp", "work-package", "checkpoint", "opencode", "level2.5"]
+}

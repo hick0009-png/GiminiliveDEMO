@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardMeeting"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardBackgroundColor="#1A1A1A"
+    app:strokeWidth="1dp"
+    app:strokeColor="#1AFFFFFF"
+    app:cardElevation="0dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Meeting Title -->
+        <TextView
+            android:id="@+id/txtMeetingTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/btnDeleteMeeting"
+            android:text="หัวข้อการประชุม"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="1" />
+
+        <!-- Date / Time Info -->
+        <TextView
+            android:id="@+id/txtMeetingDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtMeetingTitle"
+            android:layout_marginTop="6dp"
+            android:text="18 มิ.ย. 2026, 20:00"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp" />
+
+        <!-- Duration Info -->
+        <TextView
+            android:id="@+id/txtMeetingDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtMeetingTitle"
+            android:layout_toEndOf="@id/txtMeetingDate"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:text="05:12 นาที"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp" />
+
+        <!-- Transcription Status -->
+        <TextView
+            android:id="@+id/txtMeetingStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtMeetingDate"
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="3dp"
+            android:background="@drawable/floating_widget_bg"
+            android:text="ยังไม่ได้ประมวลผล"
+            android:textColor="#E53935"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <!-- Delete Button -->
+        <ImageButton
+            android:id="@+id/btnDeleteMeeting"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_delete_24"
+            app:tint="#D32F2F"
+            android:contentDescription="ลบการประชุม" />
+
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

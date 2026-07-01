@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="8dp">
+
+    <!-- Speaker Name Tag -->
+    <TextView
+        android:id="@+id/txtSpeaker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Speaker A"
+        android:textColor="#4A90E2"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <!-- Dialogue Bubble Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:cardCornerRadius="12dp"
+        app:cardBackgroundColor="#262626"
+        app:strokeWidth="0dp"
+        app:cardElevation="0dp">
+
+        <TextView
+            android:id="@+id/txtSpeechText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="ข้อความการประชุม..."
+            android:textColor="#E0E0E0"
+            android:textSize="14sp" />
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">GeminiLiveDemo</string>
+
+    <!-- Diagnostics panel labels (format strings) -->
+    <string name="label_attention">ATTENTION: %s</string>
+    <string name="label_topic">TOPIC: %s</string>
+    <string name="label_event">EVENT: %s</string>
+</resources>

@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "description": "Hermes Continuity Protocol Configuration - Level 2.5",
+  "autoCheckpoint": {
+    "enabled": true,
+    "frequency": 3,
+    "onError": true,
+    "onDecision": true,
+    "onTopicSwitch": false,
+    "onHighImpactTool": true
+  },
+  "storage": {
+    "checkpointsDir": "checkpoints",
+    "privateDir": ".checkpoints",
+    "maxCheckpoints": 50,
+    "retentionDays": 90
+  },
+  "audit": {
+    "maxDecisionsPerCheckpoint": 20,
+    "groupByProject": true
+  },
+  "project": {
+    "name": "GeminiLiveDemo",
+    "defaultTags": ["android", "gemini-live", "kotlin"]
+  }
+}

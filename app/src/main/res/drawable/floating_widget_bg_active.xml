@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#4D00BCD4" /> <!-- 30% alpha Cyan for active glass status -->
+    <stroke
+        android:width="2dp"
+        android:color="#CC00BCD4" /> <!-- Cyan stroke border -->
+    <size
+        android:width="60dp"
+        android:height="60dp" />
+</shape>

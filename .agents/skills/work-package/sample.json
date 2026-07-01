@@ -1,0 +1,68 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260701-130000-supplier-analysis",
+  "createdAt": "2026-07-01T13:00:00+07:00",
+  "updatedAt": "2026-07-01T13:00:00+07:00",
+  "title": "วิเคราะห์ Supplier จีน",
+  "status": "in_progress",
+  "progress": 70,
+  "objective": "หาและประเมิน Supplier วัตถุดิบจากประเทศจีน 3-5 ราย",
+  "scope": "เฉพาะวัตถุดิบประเภท A, B เท่านั้น ไม่รวมประเภท C",
+  "completed": [
+    "วิเคราะห์ตลาดวัตถุดิบจีน",
+    "วิเคราะห์คู่แข่ง 5 ราย",
+    "คัดกรอง Supplier เบื้องต้น 20 ราย"
+  ],
+  "pending": [
+    "หา Supplier เพิ่มเติมจาก Alibaba",
+    "วิเคราะห์ต้นทุนโลจิสติกส์",
+    "ส่ง RFQ ให้ Supplier 10 ราย"
+  ],
+  "artifacts": [
+    { "path": "docs/market-analysis.md", "type": "doc", "description": "ผลวิเคราะห์ตลาด" },
+    { "path": "data/supplier-shortlist.xlsx", "type": "data", "description": "รายชื่อ Supplier ที่คัดกรองแล้ว" }
+  ],
+  "agents": [
+    { "role": "current", "name": "Procurement Agent", "responsibility": "หาและประเมิน Supplier" }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "timestamp": "2026-07-01T10:00:00+07:00",
+      "decision": "เลือกใช้เกณฑ์ราคา 60% + คุณภาพ 40% ในการจัดอันดับ",
+      "rationale": "ต้นทุนเป็นปัจจัยหลัก แต่ต้องรักษาคุณภาพไม่ให้ต่ำกว่ามาตรฐาน",
+      "alternatives": ["ราคา 70% + คุณภาพ 30%", "ราคา 50% + คุณภาพ 50%"],
+      "decidedBy": "Procurement Lead"
+    }
+  ],
+  "knowledge": [
+    "ตลาดจีนปีนี้ราคาวัตถุดิบลดลง 15% จาก oversupply",
+    "Supplier ใน Guangdong มีต้นทุนต่ำกว่า Shanghai 10-20%"
+  ],
+  "assumptions": [
+    { "assumption": "อัตราแลกเปลี่ยนคงที่ 5.0 THB/CNY", "confidence": "medium", "needsValidation": true },
+    { "assumption": "Lead time 45-60 วัน", "confidence": "high", "needsValidation": false }
+  ],
+  "risks": [
+    { "risk": "การเมืองจีนอาจกระทบการส่งออก", "impact": "medium", "mitigation": "กระจายความเสี่ยงหลาย Supplier" },
+    { "risk": "คุณภาพไม่ตรงตาม spec", "impact": "high", "mitigation": "ขอ sample ก่อนสั่ง production lot" }
+  ],
+  "next_steps": [
+    "ติดต่อ Supplier 10 รายเพื่อขอ quotation",
+    "คำนวณ landed cost เปรียบเทียบ",
+    "นัดประชุมทีม procurement เพื่อพิจารณารายชื่อ finalist"
+  ],
+  "dependencies": [
+    "รอ approve งบประมาณจากผู้บริหาร (คาดว่า 5 ก.ค.)"
+  ],
+  "open_questions": [
+    { "question": "ต้องการ MOQ เท่าไหร่?", "assignedTo": "ผู้บริหาร" },
+    { "question": "ใช้ Incoterm อะไร? FOB หรือ CIF?", "assignedTo": "Logistics Team" }
+  ],
+  "memory_snapshot": [
+    { "key": "budget_approved", "value": "ยังไม่ approved" },
+    { "key": "preferred_region", "value": "Guangdong" }
+  ],
+  "context_summary": "กำลังหา Supplier จีนสำหรับวัตถุดิบ A/B คัดกรองเบื้องต้นเสร็จ 70% รอ quotation และตัดสินใจเรื่องงบประมาณ",
+  "tags": ["procurement", "china", "supplier", "cost-analysis"]
+}
