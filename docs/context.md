@@ -180,6 +180,65 @@ Build a production-grade Thai-language voice assistant that runs as a foreground
 - Improve speaker lock accuracy with Thai language normalization
 - Keep memory system performing with eviction and decay
 - Ensure dating mode multi-agent analysis produces accurate insights
+- Maintain Hermes Continuity Protocol (HCP) checkpoint system for session continuity
+
+---
+
+---
+
+## Version Control (Git)
+
+| Property | Value |
+|----------|-------|
+| Remote | `https://github.com/hick0009-png/GiminiliveDEMO.git` |
+| Branch | `main` |
+| Commits | 3 (Initial commit, Level 3 HCP scripts, onError trigger) |
+| Status | Pushable, gitignored: `*.db`, `*.m4a`, `.checkpoints/` |
+
+---
+
+## Hermes Continuity Protocol (HCP)
+
+### Levels Implemented
+
+| Level | Features | Scripts |
+|-------|----------|---------|
+| 1 | Summary handoff | — |
+| 2 | Checkpoint + Resume | `checkpoint.ps1`, `resume.ps1` |
+| 2.5 | Auto-checkpoint + Audit | + `audit.ps1`, `hcp-config.json` |
+| 3 | Replay + Recover + onError | + `replay.ps1`, `recover.ps1`, `hcp-guard.ps1` |
+
+### Available Commands
+
+| Command | Script | Function |
+|---------|--------|----------|
+| `/checkpoint` | `checkpoint.ps1` | Save current work state as JSON |
+| `/resume` | `resume.ps1` | Load checkpoint to continue work |
+| `/audit` | `audit.ps1` | Show decision log + timeline summary |
+| `/replay` | `replay.ps1` | Replay all history with state transitions |
+| `/recover` | `recover.ps1` | Recover from error to last good state |
+| auto-checkpoint | `hcp-config.json` | Auto-save every 3 actions, on error, on decision |
+| hcp-guard | `hcp-guard.ps1` | Wrapper: executes command + auto-creates error checkpoint on failure |
+
+### Schema
+
+All checkpoints follow `hermes-work-package-v1` JSON schema with fields:
+`schema, id, sequence, createdAt, title, status, progress, objective, completed, pending, decisions, knowledge, risks, next_steps, error_info, memory_snapshot, context_summary`
+
+### Storage
+
+- `checkpoints/` — Public checkpoints (version controlled)
+- `.checkpoints/` — Private checkpoints (gitignored)
+- `.agents/skills/work-package/` — All HCP scripts + config
+
+### Current Checkpoints
+
+| Seq | Title | Status |
+|-----|-------|--------|
+| 1 | Build Work Package System Level 2.5 | completed |
+| 2 | Git Init + Push + Resolve Open Questions | completed |
+| 3 | Pre-Level 3 HCP | in_progress |
+| 4 | Level 3 HCP — replay + recover + error recovery | completed |
 
 ---
 
@@ -198,6 +257,9 @@ Build a production-grade Thai-language voice assistant that runs as a foreground
 
 ## Current Decisions
 
+- **HCP:** Using `hermes-work-package-v1` JSON schema for all checkpoints
+- **Recovery:** Checkpoint sequence numbers used to find last good state for recovery
+- **Git:** `checkpoints/` committed to git (public), `.checkpoints/` ignored (private)
 - Using `Gemini 3.1 Flash Live Preview` for real-time, `Gemini 3.5 Flash` for text-only
 - Using Deepgram Nova-2 model with Thai language
 - Using Open-Meteo (free, no API key) for weather
@@ -244,6 +306,7 @@ This agent optimizes for long-term maintainability.
 | `utils` | SpeakerLockManager, PermissionHelper, PerformanceMonitor, LocalVehicleDbHelper, DocumentParser, GoogleDriveServiceHelper, GoogleCalendarServiceHelper |
 | `ui` | MainActivity, SettingsActivity, MeetingActivity, MemoryActivity, FloatingWidgetService, GeminiTileService |
 | `error` | AppError |
+| `work-package (HCP)` | checkpoint.ps1, resume.ps1, audit.ps1, replay.ps1, recover.ps1, hcp-guard.ps1, hcp-config.json |
 
 ---
 
