@@ -372,11 +372,6 @@ class MeetingActivity : AppCompatActivity() {
         if (FloatingWidgetService.isSessionConnected) {
             Log.i("MeetingActivity", "Gemini Live session is connected. Disconnecting to release mic...")
             FloatingWidgetService.disconnectSession(this)
-            try {
-                Thread.sleep(500)
-            } catch (e: InterruptedException) {
-                // ignore
-            }
         }
 
         val meetingId = UUID.randomUUID().toString()
@@ -644,9 +639,14 @@ class MeetingActivity : AppCompatActivity() {
             mediaPlayer = MediaPlayer().apply {
                 try {
                     setDataSource(filePath)
-                    prepare()
-                    seekBarAudio.max = duration
-                    txtTotalPlayTime.text = formatTime(duration.toLong() / 1000).substring(3)
+                    setOnPreparedListener { mp ->
+                        seekBarAudio.max = mp.duration
+                        txtTotalPlayTime.text = formatTime(mp.duration.toLong() / 1000).substring(3)
+                        mp.start()
+                        isPlaying = true
+                        imgPlayPauseIcon.setImageResource(android.R.drawable.ic_media_pause)
+                        playHandler.post(playRunnable)
+                    }
                     setOnCompletionListener {
                         this@MeetingActivity.isPlaying = false
                         imgPlayPauseIcon.setImageResource(android.R.drawable.ic_media_play)
@@ -654,12 +654,14 @@ class MeetingActivity : AppCompatActivity() {
                         txtCurrentPlayTime.text = "00:00"
                         playHandler.removeCallbacks(playRunnable)
                     }
+                    prepareAsync()
                 } catch (e: Exception) {
                     Log.e("MeetingActivity", "Error preparing MediaPlayer", e)
                     Toast.makeText(this@MeetingActivity, "ไม่สามารถเล่นไฟล์เสียงนี้ได้", Toast.LENGTH_SHORT).show()
                     return
                 }
             }
+            return
         }
 
         mediaPlayer?.start()

@@ -57,8 +57,8 @@ class SmartNotificationListenerService : NotificationListenerService() {
             val widgetService = FloatingWidgetService.instance
             val liveClient = widgetService?.liveClient
             if (liveClient != null && liveClient.isConnected) {
-                // Send system notification alert to Gemini
-                val messageText = "SYSTEM: มีแจ้งเตือนข้อความเข้าใหม่จากแอป $appName โดยคุณ $title ส่งข้อความว่า \"$text\" ช่วยอ่านออกเสียงแจ้งเตือนนี้ให้ผู้ใช้ทราบโดยด่วนเป็นภาษาไทยอย่างกระชับ"
+                // Send system notification alert to Gemini — strip message body for privacy
+                val messageText = "SYSTEM: มีแจ้งเตือนข้อความเข้าใหม่จากแอป $appName โดยคุณ $title ช่วยแจ้งให้ผู้ใช้ทราบโดยด่วนเป็นภาษาไทยอย่างกระชับ (เนื้อหาข้อความถูกปกปิดเพื่อความเป็นส่วนตัว)"
                 
                 // Use a non-blocking coroutine or send directly
                 try {

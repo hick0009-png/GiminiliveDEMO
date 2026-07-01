@@ -7,6 +7,7 @@ import com.example.geminimultimodalliveapi.network.GeminiTextService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
 
 class DatingSkillAgentImpl(
@@ -80,7 +81,7 @@ class DatingSkillAgentImpl(
             deferred.complete(insight)
         }
 
-        val insight = deferred.await()
+        val insight = withTimeout(30_000) { deferred.await() }
         Log.i(TAG, "Analysis complete for skill '${skill.id}': engagement=${insight.engagementLevel}, redFlag=${insight.hasRedFlag}")
         onResult(insight)
     }

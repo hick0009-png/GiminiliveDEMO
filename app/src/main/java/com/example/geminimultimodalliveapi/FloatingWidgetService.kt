@@ -161,9 +161,9 @@ class FloatingWidgetService : Service() {
     private val DATING_ANALYSIS_MIN_INTERVAL = 10000L
 
     companion object {
-        @Volatile
-        var instance: FloatingWidgetService? = null
-            private set
+        private var weakInstance: java.lang.ref.WeakReference<FloatingWidgetService>? = null
+        val instance: FloatingWidgetService?
+            get() = weakInstance?.get()
 
         val isSessionConnected: Boolean
             get() = SessionStateHolder.state.value != SessionState.Disconnected
@@ -389,6 +389,10 @@ class FloatingWidgetService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.i("FloatingWidgetService", "Service created")
+
+        // Must call startForeground immediately to prevent service crash
+        notificationManager = SessionNotificationManager(this)
+        notificationManager.showOrUpdateNotification("กำลังเริ่มระบบ...")
         
         // Dynamically register PhoneStateReceiver to receive CALL_STATE events securely (not exported)
         phoneStateReceiver = PhoneStateReceiver()
@@ -399,13 +403,12 @@ class FloatingWidgetService : Service() {
             @Suppress("UnspecifiedRegisterReceiverFlag")
             registerReceiver(phoneStateReceiver, filter)
         }
-        instance = this
+        weakInstance = java.lang.ref.WeakReference(this)
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         dbHelper = LocalVehicleDbHelper(this)
         memoryManager = MemoryManager(this)
         memoryManager.decayAll()
 
-        notificationManager = SessionNotificationManager(this)
         notificationManager.showOrUpdateNotification("Floating Widget Ready")
 
         // Initialize Overlay controller with callbacks

@@ -13,7 +13,6 @@
 }
 
 # General optimization & obfuscation
--repackageclasses 'com.example.geminimultimodalliveapi.obfuscated'
 -allowaccessmodification
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile

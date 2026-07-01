@@ -171,6 +171,7 @@ class AudioRecorder(
     fun stop() {
         isRecording = false
         recordingJob?.cancel()
+        recordingJob?.join()
         recordingJob = null
         try {
             audioRecord?.let { record ->

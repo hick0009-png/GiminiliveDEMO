@@ -5,6 +5,8 @@ import com.example.geminimultimodalliveapi.data.DateInsight
 import com.example.geminimultimodalliveapi.data.DatingSkill
 import com.example.geminimultimodalliveapi.data.DatingSkillManager
 import com.example.geminimultimodalliveapi.network.GeminiTextService
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withTimeout
 
 class DatingAnalysisOrchestrator(
     private val apiKey: String,
@@ -160,7 +162,7 @@ class DatingAnalysisOrchestrator(
             deferred.complete(result ?: primary.id)
         }
 
-        val secondarySkillId = deferred.await().let { raw ->
+        val secondarySkillId = withTimeout(30_000) { deferred.await() }.let { raw ->
             if (raw != primary.id) {
                 val cleaned = raw.trim().lowercase()
                 allSkills.find { cleaned.contains(it.id.lowercase()) }?.id ?: primary.id

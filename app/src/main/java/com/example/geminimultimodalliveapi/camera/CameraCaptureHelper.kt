@@ -32,6 +32,8 @@ class CameraCaptureHelper(
     private lateinit var cameraId: String
     private lateinit var previewSize: Size
 
+    @Volatile
+    private var stopped = false
     private var captureJob: Job? = null
     @Volatile
     var isCameraActive = false
@@ -52,6 +54,10 @@ class CameraCaptureHelper(
 
     private val cameraStateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
+            if (stopped) {
+                camera.close()
+                return
+            }
             cameraDevice = camera
             createCameraPreviewSession()
         }
@@ -94,6 +100,7 @@ class CameraCaptureHelper(
     }
 
     fun stopPreview() {
+        stopped = true
         isCameraActive = false
         stopPeriodicImageCapture()
         closeCamera()

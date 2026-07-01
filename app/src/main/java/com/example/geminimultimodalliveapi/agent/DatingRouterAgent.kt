@@ -7,6 +7,7 @@ import com.example.geminimultimodalliveapi.network.GeminiTextService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
 
 class DatingRouterAgent(
@@ -88,7 +89,7 @@ class DatingRouterAgent(
             deferred.complete(parsed)
         }
 
-        val result = deferred.await()
+        val result = withTimeout(30_000) { deferred.await() }
         lastResult = result
         lastTranscriptLineCount = currentLineCount
         Log.i(TAG, "Router selected: ${result.selectedSkillId} (confidence=${result.confidence}, reason=${result.reasoning})")

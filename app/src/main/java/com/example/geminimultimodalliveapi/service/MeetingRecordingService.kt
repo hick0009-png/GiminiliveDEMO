@@ -309,7 +309,7 @@ class MeetingRecordingService : Service() {
                 deepgramClient?.connect(deepgramKey, wakeWord)
 
                 // Initialize Asynchronous pipeline Channel
-                val channel = kotlinx.coroutines.channels.Channel<ByteArray>(kotlinx.coroutines.channels.Channel.UNLIMITED)
+                val channel = kotlinx.coroutines.channels.Channel<ByteArray>(kotlinx.coroutines.channels.Channel.BUFFERED, kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST)
                 audioChannel = channel
 
                 // Asynchronous Writer Coroutine (Consumes queue, performs blocking writes and network requests)
