@@ -192,8 +192,34 @@ Build a production-grade Thai-language voice assistant that runs as a foreground
 |----------|-------|
 | Remote | `https://github.com/hick0009-png/GiminiliveDEMO.git` |
 | Branch | `main` |
-| Commits | 3 (Initial commit, Level 3 HCP scripts, onError trigger) |
+| Commits | 4 (Initial, Level 3 HCP, onError, Docs update) |
 | Status | Pushable, gitignored: `*.db`, `*.m4a`, `.checkpoints/` |
+
+### Git Commands
+
+```bash
+# Push ก่อนเปลี่ยน session
+git add -A
+git commit -m "ข้อความ"
+git push
+
+# Pull เมื่อเปิด session ใหม่
+git pull
+
+# ดูประวัติ
+git log --oneline
+
+# ดูสถานะ
+git status
+```
+
+### Gitignore ปัจจุบัน
+
+```
+*.iml, .gradle, local.properties, .idea/caches, .DS_Store,
+/build, /captures, .externalNativeBuild, .cxx,
+.checkpoints/, *.db, *.m4a, *.mp4, *.mkv
+```
 
 ---
 
@@ -210,20 +236,90 @@ Build a production-grade Thai-language voice assistant that runs as a foreground
 
 ### Available Commands
 
-| Command | Script | Function |
-|---------|--------|----------|
-| `/checkpoint` | `checkpoint.ps1` | Save current work state as JSON |
-| `/resume` | `resume.ps1` | Load checkpoint to continue work |
-| `/audit` | `audit.ps1` | Show decision log + timeline summary |
-| `/replay` | `replay.ps1` | Replay all history with state transitions |
-| `/recover` | `recover.ps1` | Recover from error to last good state |
-| auto-checkpoint | `hcp-config.json` | Auto-save every 3 actions, on error, on decision |
-| hcp-guard | `hcp-guard.ps1` | Wrapper: executes command + auto-creates error checkpoint on failure |
+ทุกคำสั่งเรียกผ่าน PowerShell (ต้องใช้ `-ExecutionPolicy Bypass`):
+```
+PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\<script>.ps1" [พารามิเตอร์]
+```
+
+#### `/checkpoint` — บันทึกสถานะงาน
+
+```powershell
+# Manual
+.\checkpoint.ps1 -Title "Implement login" -Completed '["ออกแบบ UI"]' -Pending '["เขียนเทส"]' -Progress 50
+
+# Auto (เพิ่ม sequence number)
+.\checkpoint.ps1 -Title "Implement login" -Auto
+
+# Error checkpoint
+.\checkpoint.ps1 -OnError -ErrorType "api_failure" -ErrorMessage "Connection timeout" -ToolUsed "GeminiLiveClient"
+```
+
+พารามิเตอร์: `-Title`, `-Objective`, `-Completed` (JSON), `-Pending` (JSON), `-Decisions` (JSON), `-Knowledge` (JSON), `-Risks` (JSON), `-NextSteps` (JSON), `-ContextSummary`, `-Status`, `-Progress`, `-Auto`, `-OnError`, `-ErrorType`, `-ErrorMessage`, `-ToolUsed`, `-ActionsBeforeError` (JSON), `-RecoveryInstruction`, `-ErrorException`
+
+#### `/resume` — โหลด checkpoint กลับมา
+
+```powershell
+.\resume.ps1 -Path "checkpoints/wp-20260701-210000-level3-hcp.json"
+```
+
+พารามิเตอร์: `-Path` (required)
+
+#### `/audit` — ดูสรุปการทำงาน
+
+```powershell
+# ทั้งหมด
+.\audit.ps1
+
+# กรอง
+.\audit.ps1 -Project "git"
+
+# JSON
+.\audit.ps1 -Json
+```
+
+พารามิเตอร์: `-Project`, `-Title`, `-Json`
+
+#### `/replay` — ดูประวัติละเอียด + state transition
+
+```powershell
+.\replay.ps1
+.\replay.ps1 -Full           # รวม memory_snapshot
+.\replay.ps1 -Id "wp-xxx"    # เช็คพอยท์เดียว
+.\replay.ps1 -Json
+```
+
+พารามิเตอร์: `-Id`, `-Project`, `-Full`, `-Json`
+
+#### `/recover` — กู้คืนจาก error
+
+```powershell
+# recover อัตโนมัติ
+.\recover.ps1
+
+# ระบุ checkpoint
+.\recover.ps1 -Id "wp-xxx-error-001"
+
+# Dry run
+.\recover.ps1 -Id "wp-xxx" -DryRun
+```
+
+พารามิเตอร์: `-Id`, `-Status`, `-DryRun`, `-Json`
+
+#### `hcp-guard` — Execute + auto error checkpoint
+
+```powershell
+.\hcp-guard.ps1 -Command "git push" -Context "Pushing to GitHub"
+
+# Auto-checkpoint on success
+.\hcp-guard.ps1 -Command "npm run build" -Context "Build" -CreateAutoCheckpointOnSuccess
+```
+
+พารามิเตอร์: `-Command` (required), `-Context`, `-Title`, `-Completed`, `-Pending`, `-Decisions`, `-Knowledge`, `-NextSteps`, `-RecoveryInstruction`, `-CreateAutoCheckpointOnSuccess`, `-PassThru`
 
 ### Schema
 
 All checkpoints follow `hermes-work-package-v1` JSON schema with fields:
-`schema, id, sequence, createdAt, title, status, progress, objective, completed, pending, decisions, knowledge, risks, next_steps, error_info, memory_snapshot, context_summary`
+`schema, id, sequence, createdAt, title, status, progress, objective, scope, completed, pending, artifacts, agents, decisions, knowledge, assumptions, risks, next_steps, dependencies, open_questions, error_info, memory_snapshot, context_summary, tags`
 
 ### Storage
 
