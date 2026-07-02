@@ -238,3 +238,18 @@ All remaining 20 critical issues have been successfully resolved across 3 execut
   - Parallelized multi-agent analysis in [DatingAnalysisOrchestrator.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/agent/DatingAnalysisOrchestrator.kt) (#41) using async and awaitAll.
 
 Verification: 19 new static analysis and unit tests successfully written and passing (total 47 passing). Full project successfully compiles and builds.
+
+## Major Bugs Status (2026-07-02)
+
+The first batch of Major Bugs has been successfully resolved:
+- **Batch 1 (WebSocket, Security, & De-duplication)**:
+  - Secured `GeminiLiveClient` WebSocket by using `x-goog-api-key` header and removing API Key from URL query parameters.
+  - Guarded connection reference cleanup in `GeminiLiveClient` `onClosed`/`onFailure` using identity comparisons (`this === webSocket`) to avoid stale callback reference leaks.
+  - Ensured `activeToolCalls` are cleared upon WebSocket disconnection in `GeminiLiveClient`.
+  - Downgraded sensitive tool response payloads in `GeminiLiveClient` from `Log.i` to `Log.d` to prevent PII exposure in standard info logs.
+  - Implemented automatic reconnection logic (exponential backoff up to 3 attempts) in `DeepgramLiveClient` for unexpected connection drops.
+  - Enforced main-thread execution for all callbacks in `DeepgramLiveClient` using `mainHandler`.
+  - Refactored `GeminiTextService.generateText` to delegate to `generateTextWithSystemInstruction`, removing ~80% duplicated code.
+
+Verification: Added static analysis tests in [MajorBugsBatch1Test.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/test/java/com/example/geminimultimodalliveapi/MajorBugsBatch1Test.kt). All 50 unit and static-analysis tests pass successfully.
+
