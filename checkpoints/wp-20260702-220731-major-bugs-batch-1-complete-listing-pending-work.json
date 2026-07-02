@@ -1,0 +1,62 @@
+﻿{
+    "next_steps":  [
+                       "Define and plan Major Bugs Batch 2: Background service leaks, SQLite on main thread, and continuous SpeechRecognizer battery drain"
+                   ],
+    "id":  "wp-20260702-220731-major-bugs-batch-1-complete-listing-pending-work",
+    "scope":  "",
+    "createdAt":  "2026-07-02T22:07:31+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  100,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "Address WebSocket leaks, security key exposure, Deepgram reconnection, and GeminiTextService deduplication; list remaining major issues",
+    "title":  "Major Bugs Batch 1 Complete \u0026 Listing Pending Work",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-02T22:07:31+07:00",
+    "status":  "completed",
+    "completed":  [
+                      "Header-based Auth added to GeminiLiveClient",
+                      "Stale callback nulling guarded in GeminiLiveClient",
+                      "activeToolCalls cleared on disconnect in GeminiLiveClient",
+                      "Log.i downgraded to Log.d for sensitive JSON tool responses",
+                      "DeepgramLiveClient reconnection with exponential backoff added",
+                      "DeepgramLiveClient callbacks posted to mainHandler",
+                      "GeminiTextService generateText refactored to delegate",
+                      "Created and verified MajorBugsBatch1Test.kt",
+                      "Ran 50 unit and static-analysis tests passing",
+                      "Updated BUG_REPORT.md with status",
+                      "Categorized and listed remaining Major and Minor bugs"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  "Successfully completed Batch 1 of Major Bug fixes. Secured Gemini WebSocket by using x-goog-api-key header and downgrading response logging to DEBUG. Hardened connection references and activeToolCalls map lifecycles. Implemented auto-reconnect and main-thread callback routing in DeepgramLiveClient. Eliminated 80% code duplication in GeminiTextService. Verified with a new 3-test suite in MajorBugsBatch1Test, passing all 50/50 unit tests successfully. Summarized remaining major and minor tasks for future planning."
+}

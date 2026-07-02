@@ -1,7 +1,7 @@
 ﻿{
     "status":  "completed",
-    "timestamp":  "2026-07-02T22:05:13+07:00",
+    "timestamp":  "2026-07-02T22:07:31+07:00",
     "schema":  "hermes-work-package-v1",
-    "latest_checkpoint_id":  "wp-20260702-220513-major-bugs-batch-1-completed",
-    "latest_checkpoint_path":  "checkpoints/wp-20260702-220513-major-bugs-batch-1-completed.json"
+    "latest_checkpoint_id":  "wp-20260702-220731-major-bugs-batch-1-complete-listing-pending-work",
+    "latest_checkpoint_path":  "checkpoints/wp-20260702-220731-major-bugs-batch-1-complete-listing-pending-work.json"
 }
