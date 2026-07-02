@@ -262,7 +262,7 @@ PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\<script>.p
 .\resume.ps1 -Path "checkpoints/wp-20260701-210000-level3-hcp.json"
 ```
 
-พารามิเตอร์: `-Path` (required)
+พารามิเตอร์: `-Path` (optional — หากไม่ระบุก็ค้นหาอัตโนมัติจาก latest.json หรือใช้ไฟล์เช็คพอยท์ล่าสุด)
 
 #### `/audit` — ดูสรุปการทำงาน
 
@@ -318,8 +318,9 @@ PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\<script>.p
 
 ### Schema
 
-All checkpoints follow `hermes-work-package-v1` JSON schema with fields:
-`schema, id, sequence, createdAt, title, status, progress, objective, scope, completed, pending, artifacts, agents, decisions, knowledge, assumptions, risks, next_steps, dependencies, open_questions, error_info, memory_snapshot, context_summary, tags`
+ระบบรองรับ 2 สกีมา:
+1. **Lite Schema (`hermes-work-package-v1-lite`)**: บันทึกความก้าวหน้าจำเป็นขั้นต่ำสำหรับ Auto-checkpoint เพื่อลดขนาด Token (ประกอบด้วยฟิลด์: `schema, id, sequence, createdAt, updatedAt, title, status, progress, objective, completed, pending, next_steps, context_summary`)
+2. **Full Schema (`hermes-work-package-v1`)**: บันทึกข้อมูลประวัติและวิเคราะห์แบบเต็มรูปแบบ (มีครบทุกฟิลด์ด้านบนบวกกับ: `scope, artifacts, agents, decisions, knowledge, assumptions, risks, dependencies, open_questions, memory_snapshot, tags, error_info`)
 
 ### Storage
 
@@ -358,8 +359,12 @@ All checkpoints follow `hermes-work-package-v1` JSON schema with fields:
 
 ## Current Decisions
 
-- **HCP:** Using `hermes-work-package-v1` JSON schema for all checkpoints
-- **Recovery:** Checkpoint sequence numbers used to find last good state for recovery
+- **HCP Schemas**: แยกใช้งานแบบ Lite (`hermes-work-package-v1-lite` สำหรับ auto-checkpoint) และแบบ Full (`hermes-work-package-v1` สำหรับ manual/milestones)
+- **HCP Attribution Guard**: การตัดสินใจใดๆ ที่ AI บันทึกขึ้นมาเอง ให้ใช้ค่าเริ่มต้น `decidedBy: "AI"` เสมอ ยกเว้นกรณีได้รับการยืนยันอย่างเป็นทางการจากผู้ใช้
+- **HCP Eviction Policy**: ลิมิตไฟล์ทำงานสูงสุดตามค่า `maxCheckpoints` (เริ่มต้น 50) หากเกินจะทำการย้ายไฟล์เก่าที่สุดไปเก็บไว้ที่ `checkpoints/archive/` อัตโนมัติ
+- **HCP Notification**: เพิ่มการส่งผ่านสถานะด้วยการสร้าง/อัปเดตไฟล์ `checkpoints/latest.json` เสมอในทุกครั้งที่บันทึก
+- **HCP Linux Compatibility**: ปรับปรุงคำสั่งทั้งหมดให้รองรับการรันแบบ Cross-platform ผ่าน PowerShell Core (`pwsh`) บนลินุกซ์
+- **Recovery:** Checkpoint sequence numbers used to find last good state for recovery (พร้อมระบบ fallback หาจุดที่เป็น `in_progress` ล่าสุดก่อนหน้าเมื่อไม่มีจุด `completed`)
 - **Git:** `checkpoints/` committed to git (public), `.checkpoints/` ignored (private)
 - **Service Instance:** `WeakReference` for `FloatingWidgetService.instance` to prevent context leak
 - **Audio Channel:** `Channel(BUFFERED, DROP_OLDEST)` for streaming audio to prevent OOM
