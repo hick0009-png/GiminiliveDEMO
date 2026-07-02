@@ -1,0 +1,59 @@
+﻿{
+    "next_steps":  [
+                       "Start implementing or refactoring GeminiLiveDemo Android app",
+                       "Verify compile-time checks and run Android tests"
+                   ],
+    "id":  "wp-20260702-203258-hcp-system-improvements",
+    "scope":  "",
+    "createdAt":  "2026-07-02T20:32:58+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  100,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "Implement design changes and fix loopholes in the HCP system",
+    "title":  "HCP System Improvements",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-02T20:32:58+07:00",
+    "status":  "completed",
+    "completed":  [
+                      "Modify checkpoint.ps1 to support Lite Schema (-Lite \u0026 auto-lite)",
+                      "Add eviction policy (maxCheckpoints) to checkpoint.ps1",
+                      "Add latest.json notification protocol to checkpoint.ps1",
+                      "Update recover.ps1 with fallback recovery logic (in_progress states)",
+                      "Document new rules, decidedBy default, and Linux Core in SKILL.md \u0026 MANUAL.md",
+                      "Verify all changes locally",
+                      "Update docs/context.md with new decisions and push to Git"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
