@@ -195,8 +195,8 @@ if ($goodCp) {
     }
 } else {
     Write-Output ""
-    Write-Output "[RESTORE POINT] No previous good checkpoint found."
-    Write-Output "  Recovering from scratch may be needed."
+    Write-Output "[RESTORE POINT] Clean Workspace State (สภาวะเริ่มต้นว่างเปล่าของ Workspace)"
+    Write-Output "  No previous checkpoints found. Fallback target is the initial clean repository state."
 }
 
 Write-Output ""
@@ -209,8 +209,8 @@ if ($goodCp) {
     Write-Output "3. Continue with pending items"
     Write-Output "4. Avoid repeating: $($errorCp.status) condition by checking preconditions"
 } else {
-    Write-Output "1. No viable restore point found"
-    Write-Output "2. Start fresh or locate a manual backup"
+    Write-Output "1. No viable restore point found in checkpoints directory."
+    Write-Output "2. Rollback to the Clean Workspace State (เริ่มงานใหม่ทั้งหมดจากสภาวะเริ่มต้นของ Workspace)"
 }
 if ($errorCp.error_info -and $errorCp.error_info.recovery_instruction) {
     Write-Output ""
