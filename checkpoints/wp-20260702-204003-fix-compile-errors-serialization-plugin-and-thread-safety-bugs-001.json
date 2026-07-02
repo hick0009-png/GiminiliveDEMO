@@ -1,0 +1,21 @@
+﻿{
+    "id":  "wp-20260702-204003-fix-compile-errors-serialization-plugin-and-thread-safety-bugs-1",
+    "pending":  [
+
+                ],
+    "sequence":  1,
+    "title":  "Fix compile errors, serialization plugin, and thread-safety bugs",
+    "schema":  "hermes-work-package-v1-lite",
+    "next_steps":  [
+
+                   ],
+    "status":  "in_progress",
+    "context_summary":  "",
+    "completed":  [
+
+                  ],
+    "progress":  0,
+    "objective":  "",
+    "createdAt":  "2026-07-02T20:40:03+07:00",
+    "updatedAt":  "2026-07-02T20:40:03+07:00"
+}
