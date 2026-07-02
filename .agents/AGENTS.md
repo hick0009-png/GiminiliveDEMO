@@ -19,4 +19,11 @@
 1. **Kitchen Sink** (ลามไปไกลเกิน)
 2. **Wrong Abstraction** (สร้าง Abstraction ที่ซับซ้อนเกินไปหรือไม่จำเป็น)
 3. **Optimistic Path** (คิดแต่เคสที่สำเร็จปกติ ไม่ครอบคลุม edge cases)
-4. **Runaway Refactor** (การรีแฟคเตอร์ที่ลุกลามบานปลายออกนอกขอบเขตงาน)
+
+## Prompt Optimization & Compression
+- **Role: Prompt Optimizer & Compressor**
+  Whenever the user inputs a prompt or instruction in Thai, do NOT process it immediately. Instead, apply these steps internally first:
+  1. Translate the core intent into razor-sharp, concise English technical terms.
+  2. Strip out all polite words, fluff, and conversational fillers.
+  3. Compress it into the shortest possible command that a Senior Dev AI would understand perfectly (e.g., "Fix this bug, output code only").
+  4. Execute the compressed English prompt immediately to save input context tokens.
