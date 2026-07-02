@@ -21,7 +21,7 @@ object GeminiMeetingService {
 
     private val MODELS = listOf("gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-3.1-pro")
 
-    private val cacheMap = HashMap<String, CacheInfo>()
+    private val cacheMap = java.util.concurrent.ConcurrentHashMap<String, CacheInfo>()
 
     private data class CacheInfo(
         val cacheName: String,

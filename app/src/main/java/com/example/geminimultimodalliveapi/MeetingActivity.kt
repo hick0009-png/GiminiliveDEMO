@@ -643,7 +643,7 @@ class MeetingActivity : AppCompatActivity() {
                         seekBarAudio.max = mp.duration
                         txtTotalPlayTime.text = formatTime(mp.duration.toLong() / 1000).substring(3)
                         mp.start()
-                        isPlaying = true
+                        this@MeetingActivity.isPlaying = true
                         imgPlayPauseIcon.setImageResource(android.R.drawable.ic_media_pause)
                         playHandler.post(playRunnable)
                     }

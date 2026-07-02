@@ -110,6 +110,7 @@ class GeminiLiveClient(
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                 // Managed connection close initiated by the server
+                webSocket.close(code, reason)
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
@@ -326,7 +327,9 @@ class GeminiLiveClient(
                 val serverContent = messageData.getJSONObject("serverContent")
                 
                 if (serverContent.has("interrupted") && serverContent.getBoolean("interrupted")) {
-                    listener.onInterrupted()
+                    mainHandler.post {
+                        listener.onInterrupted()
+                    }
                 }
 
                 if (serverContent.has("modelTurn")) {
@@ -337,7 +340,9 @@ class GeminiLiveClient(
                             val part = parts.getJSONObject(i)
                             if (part.has("text")) {
                                 val text = part.getString("text")
-                                listener.onTextMessageReceived(text)
+                                mainHandler.post {
+                                    listener.onTextMessageReceived(text)
+                                }
                             }
                             if (part.has("inlineData")) {
                                 val inlineData = part.getJSONObject("inlineData")
@@ -354,7 +359,9 @@ class GeminiLiveClient(
                                             Log.e("GeminiLiveClient", "Error parsing sample rate from mimeType: $mimeType", e)
                                         }
                                     }
-                                    listener.onAudioChunkReceived(audioData, rate)
+                                    mainHandler.post {
+                                        listener.onAudioChunkReceived(audioData, rate)
+                                    }
                                 }
                             }
                         }

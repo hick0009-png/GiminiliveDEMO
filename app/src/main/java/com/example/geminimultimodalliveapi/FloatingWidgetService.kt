@@ -1580,7 +1580,7 @@ class FloatingWidgetService : Service() {
 
         handleDisconnect()
         serviceScope.cancel()
-        instance = null
+        weakInstance = null
     }
 
     // --- Dating Assistant Mode Logic & Helpers ---

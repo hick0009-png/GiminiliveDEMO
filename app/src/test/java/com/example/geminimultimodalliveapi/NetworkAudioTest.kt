@@ -71,4 +71,21 @@ class NetworkAudioTest {
         assertEquals(2000L, calculateDelay(1))
         assertEquals(4000L, calculateDelay(2))
     }
+
+    @Test
+    fun testTranscriptSegmentSerialization() {
+        val segment = com.example.geminimultimodalliveapi.data.TranscriptSegment("owner", "สวัสดีครับ")
+        val json = kotlinx.serialization.json.Json.encodeToString(com.example.geminimultimodalliveapi.data.TranscriptSegment.serializer(), segment)
+        val decoded = kotlinx.serialization.json.Json.decodeFromString(com.example.geminimultimodalliveapi.data.TranscriptSegment.serializer(), json)
+        assertEquals("owner", decoded.speaker)
+        assertEquals("สวัสดีครับ", decoded.text)
+    }
+
+    @Test
+    fun testGeminiMeetingServiceCacheMapThreadSafety() {
+        val field = com.example.geminimultimodalliveapi.network.GeminiMeetingService::class.java.getDeclaredField("cacheMap")
+        field.isAccessible = true
+        val map = field.get(null)
+        assertTrue("cacheMap must be a ConcurrentHashMap for thread safety", map is java.util.concurrent.ConcurrentHashMap<*, *>)
+    }
 }
