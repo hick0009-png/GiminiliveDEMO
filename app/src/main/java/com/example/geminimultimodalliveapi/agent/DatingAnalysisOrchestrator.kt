@@ -5,8 +5,7 @@ import com.example.geminimultimodalliveapi.data.DateInsight
 import com.example.geminimultimodalliveapi.data.DatingSkill
 import com.example.geminimultimodalliveapi.data.DatingSkillManager
 import com.example.geminimultimodalliveapi.network.GeminiTextService
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 
 class DatingAnalysisOrchestrator(
     private val apiKey: String,
@@ -110,24 +109,29 @@ class DatingAnalysisOrchestrator(
         transcript: String,
         sensorContext: SensorContext,
         route: DatingRouterAgent.RouterResult
-    ): OrchestrationResult {
-        val results = mutableListOf<DateInsight>()
-        val agentIds = mutableListOf<String>()
+    ): OrchestrationResult = kotlinx.coroutines.coroutineScope {
+        val deferreds = candidates.map { (skill, agent) ->
+            async(Dispatchers.Default) {
+                val docs = documentSelector?.selectRelevantDocuments(transcript, skill.id)
+                    ?: emptyList()
+                val docContents = docs.map { it.content }
+                Log.i(TAG, "DocumentSelector found ${docs.size} relevant docs for skill '${skill.id}' (multi-agent)")
 
-        for ((skill, agent) in candidates) {
-            val docs = documentSelector?.selectRelevantDocuments(transcript, skill.id)
-                ?: emptyList()
-            val docContents = docs.map { it.content }
-            Log.i(TAG, "DocumentSelector found ${docs.size} relevant docs for skill '${skill.id}' (multi-agent)")
-
-            var result = DateInsight()
-            agent.analyze(skill, transcript, sensorContext, docContents) { result = it }
-            results.add(result)
-            agentIds.add(agent.agentId)
+                val deferredResult = CompletableDeferred<DateInsight>()
+                agent.analyze(skill, transcript, sensorContext, docContents) {
+                    deferredResult.complete(it)
+                }
+                val result = deferredResult.await()
+                Pair(result, agent.agentId)
+            }
         }
 
+        val pairs = deferreds.awaitAll()
+        val results = pairs.map { it.first }
+        val agentIds = pairs.map { it.second }
+
         val merged = mergeResults(results)
-        return OrchestrationResult(
+        OrchestrationResult(
             insight = merged,
             selectedSkillId = route.selectedSkillId,
             confidence = route.confidence,

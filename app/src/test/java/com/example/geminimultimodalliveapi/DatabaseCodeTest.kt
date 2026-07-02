@@ -283,6 +283,53 @@ class DatabaseCodeTest {
         assertFalse("Extra permissions should not use REQUIRED_PERMISSIONS_REQUEST_CODE", 
             extraPermLine.contains("REQUIRED_PERMISSIONS_REQUEST_CODE"))
     }
+
+    @Test
+    fun testAppPreferencesUsesAesGcm() {
+        val file = File("src/main/java/com/example/geminimultimodalliveapi/data/AppPreferences.kt")
+        val finalFile = if (!file.exists()) {
+            val alt = File("app/src/main/java/com/example/geminimultimodalliveapi/data/AppPreferences.kt")
+            assertTrue(alt.exists())
+            alt
+        } else {
+            file
+        }
+        val content = finalFile.readText()
+        val encryptFallbackBody = content.substringAfter("private fun encryptFallback").substringBefore("private fun decryptFallback")
+        assertTrue("encryptFallback should use AES/GCM/NoPadding", 
+            encryptFallbackBody.contains("AES/GCM/NoPadding") || encryptFallbackBody.contains("GCM"))
+    }
+
+    @Test
+    fun testAppPreferencesUsesSignatureFingerprint() {
+        val file = File("src/main/java/com/example/geminimultimodalliveapi/data/AppPreferences.kt")
+        val finalFile = if (!file.exists()) {
+            val alt = File("app/src/main/java/com/example/geminimultimodalliveapi/data/AppPreferences.kt")
+            assertTrue(alt.exists())
+            alt
+        } else {
+            file
+        }
+        val content = finalFile.readText()
+        assertTrue("AppPreferences should contain signature fingerprint retrieval logic", 
+            content.contains("GET_SIGNING_CERTIFICATES") || content.contains("GET_SIGNATURES") || content.contains("MessageDigest.getInstance(\"SHA-256\")"))
+    }
+
+    @Test
+    fun testDatingAnalysisOrchestratorParallelExecution() {
+        val file = File("src/main/java/com/example/geminimultimodalliveapi/agent/DatingAnalysisOrchestrator.kt")
+        val finalFile = if (!file.exists()) {
+            val alt = File("app/src/main/java/com/example/geminimultimodalliveapi/agent/DatingAnalysisOrchestrator.kt")
+            assertTrue(alt.exists())
+            alt
+        } else {
+            file
+        }
+        val content = finalFile.readText()
+        val multiAgentBody = content.substringAfter("private suspend fun executeMultiAgent").substringBefore("private suspend fun findTop2Skills")
+        assertTrue("executeMultiAgent should contain async block", multiAgentBody.contains("async"))
+        assertTrue("executeMultiAgent should contain awaitAll", multiAgentBody.contains("awaitAll()"))
+    }
 }
 
 

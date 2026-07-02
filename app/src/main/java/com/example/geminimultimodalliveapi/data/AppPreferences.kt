@@ -164,10 +164,16 @@ class AppPreferences private constructor(context: Context) {
         return try {
             val keyStr = getFallbackKey()
             val keySpec = javax.crypto.spec.SecretKeySpec(keyStr.toByteArray(Charsets.UTF_8).copyOf(16), "AES")
-            val cipher = javax.crypto.Cipher.getInstance("AES")
-            cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, keySpec)
-            val encryptedBytes = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
-            android.util.Base64.encodeToString(encryptedBytes, android.util.Base64.NO_WRAP)
+            val cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
+            val iv = ByteArray(12)
+            java.security.SecureRandom().nextBytes(iv)
+            val spec = javax.crypto.spec.GCMParameterSpec(128, iv)
+            cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, keySpec, spec)
+            val encrypted = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
+            val combined = ByteArray(iv.size + encrypted.size)
+            System.arraycopy(iv, 0, combined, 0, iv.size)
+            System.arraycopy(encrypted, 0, combined, iv.size, encrypted.size)
+            android.util.Base64.encodeToString(combined, android.util.Base64.NO_WRAP)
         } catch (e: Exception) {
             android.util.Log.e("AppPreferences", "Encryption failed", e)
             plainText
@@ -176,24 +182,79 @@ class AppPreferences private constructor(context: Context) {
 
     private fun decryptFallback(encryptedText: String): String {
         return try {
+            val combined = android.util.Base64.decode(encryptedText, android.util.Base64.NO_WRAP)
+            if (combined.size < 12) throw IllegalArgumentException("Ciphertext too short")
+            val iv = combined.copyOfRange(0, 12)
+            val ciphertext = combined.copyOfRange(12, combined.size)
+            
             val keyStr = getFallbackKey()
             val keySpec = javax.crypto.spec.SecretKeySpec(keyStr.toByteArray(Charsets.UTF_8).copyOf(16), "AES")
-            val cipher = javax.crypto.Cipher.getInstance("AES")
-            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, keySpec)
-            val decodedBytes = android.util.Base64.decode(encryptedText, android.util.Base64.NO_WRAP)
-            String(cipher.doFinal(decodedBytes), Charsets.UTF_8)
+            val cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
+            val spec = javax.crypto.spec.GCMParameterSpec(128, iv)
+            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, keySpec, spec)
+            
+            String(cipher.doFinal(ciphertext), Charsets.UTF_8)
         } catch (e: Exception) {
-            android.util.Log.e("AppPreferences", "Decryption failed", e)
-            encryptedText
+            try {
+                val oldKey = getOldFallbackKey()
+                val keySpec = javax.crypto.spec.SecretKeySpec(oldKey.toByteArray(Charsets.UTF_8).copyOf(16), "AES")
+                val cipher = javax.crypto.Cipher.getInstance("AES")
+                cipher.init(javax.crypto.Cipher.DECRYPT_MODE, keySpec)
+                val decodedBytes = android.util.Base64.decode(encryptedText, android.util.Base64.NO_WRAP)
+                val plainText = String(cipher.doFinal(decodedBytes), Charsets.UTF_8)
+                android.util.Log.i("AppPreferences", "Successfully migrated preference value from ECB to GCM")
+                plainText
+            } catch (e2: Exception) {
+                android.util.Log.e("AppPreferences", "Decryption failed completely", e2)
+                encryptedText
+            }
         }
     }
 
-    private fun getFallbackKey(): String {
+    private fun getOldFallbackKey(): String {
         val androidId = android.provider.Settings.Secure.getString(
             appContext.contentResolver,
             android.provider.Settings.Secure.ANDROID_ID
         ) ?: "DefaultFallbackKey123"
         return androidId
+    }
+
+    private fun getFallbackKey(): String {
+        return getOldFallbackKey() + getSignatureFingerprint()
+    }
+
+    private fun getSignatureFingerprint(): String {
+        try {
+            val packageInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                appContext.packageManager.getPackageInfo(
+                    appContext.packageName,
+                    android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                appContext.packageManager.getPackageInfo(
+                    appContext.packageName,
+                    android.content.pm.PackageManager.GET_SIGNATURES
+                )
+            }
+
+            val signatures = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                packageInfo.signingInfo?.apkContentsSigners
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.signatures
+            }
+
+            if (signatures != null && signatures.isNotEmpty()) {
+                val cert = signatures[0].toByteArray()
+                val md = java.security.MessageDigest.getInstance("SHA-256")
+                val fingerprintBytes = md.digest(cert)
+                return fingerprintBytes.joinToString("") { "%02x".format(it) }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AppPreferences", "Failed to get signature fingerprint", e)
+        }
+        return "AppSignatureBackupFingerprint"
     }
 
     companion object {
