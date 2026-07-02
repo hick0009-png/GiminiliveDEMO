@@ -1,7 +1,7 @@
-﻿{
-    "status":  "in_progress",
-    "timestamp":  "2026-07-02T20:48:07+07:00",
-    "schema":  "hermes-work-package-v1-lite",
-    "latest_checkpoint_id":  "wp-20260702-204807-add-ponytail-ruleset-to-agents-md-1",
-    "latest_checkpoint_path":  "checkpoints/wp-20260702-204807-add-ponytail-ruleset-to-agents-md-001.json"
+{
+    "status": "in_progress",
+    "timestamp": "2026-07-02T21:45:00+07:00",
+    "schema": "hermes-work-package-v1",
+    "latest_checkpoint_id": "wp-20260702-214500-batch-2-complete",
+    "latest_checkpoint_path": "checkpoints/wp-20260702-214500-batch-2-complete.json"
 }

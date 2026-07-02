@@ -41,6 +41,62 @@ class GeminiToolDispatcher(
         fun log(message: String)
     }
 
+    private fun showCameraLaunchNotification(intent: Intent) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val channelId = "camera_launch_channel"
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(
+                channelId,
+                "Camera Launch Channel",
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val pendingIntentFlags = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        } else {
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            context,
+            1001,
+            intent,
+            pendingIntentFlags
+        )
+
+        val notification = androidx.core.app.NotificationCompat.Builder(context, channelId)
+            .setContentTitle("เปิดกล้องถ่ายภาพ")
+            .setContentText("แตะเพื่อเริ่มถ่ายภาพและส่งข้อมูลให้ AI")
+            .setSmallIcon(android.R.drawable.ic_menu_camera)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .build()
+
+        notificationManager.notify(1001, notification)
+    }
+
+    private fun readTextWithTimeout(urlStr: String, connectTimeout: Int = 10000, readTimeout: Int = 10000): String {
+        val url = java.net.URL(urlStr)
+        val connection = url.openConnection() as java.net.HttpURLConnection
+        connection.connectTimeout = connectTimeout
+        connection.readTimeout = readTimeout
+        return connection.inputStream.bufferedReader().use { it.readText() }
+    }
+
+    private fun sendErrorToolResponse(callId: String, liveClient: GeminiLiveClient?, message: String?) {
+        try {
+            val output = JSONObject().apply {
+                put("success", false)
+                put("error", message ?: "Unknown error occurred")
+            }
+            liveClient?.sendToolResponse(callId, output)
+        } catch (e: Exception) {
+            Log.e("GeminiToolDispatcher", "Failed to send error tool response", e)
+        }
+    }
+
     fun handleCameraOpen(callId: String, liveClient: GeminiLiveClient?) {
         Log.i("GeminiToolDispatcher", "Tool call open_camera requested (id=$callId)")
         val intent = Intent(context, MainActivity::class.java).apply {
@@ -49,7 +105,11 @@ class GeminiToolDispatcher(
             putExtra("CAMERA_CALL_ID", callId)
         }
         try {
-            context.startActivity(intent)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && !android.provider.Settings.canDrawOverlays(context)) {
+                showCameraLaunchNotification(intent)
+            } else {
+                context.startActivity(intent)
+            }
         } catch (e: Exception) {
             Log.e("GeminiToolDispatcher", "Failed to start MainActivity from background", e)
             liveClient?.sendToolResponse(callId, false)
@@ -78,72 +138,87 @@ class GeminiToolDispatcher(
         infoValue: String,
         liveClient: GeminiLiveClient?
     ) {
-        Log.i("GeminiToolDispatcher", "Tool call save_vehicle_info: cat=$category, key=$keyName, val=$infoValue")
-        val success = dbHelper.saveInfo(category, keyName, infoValue)
-        liveClient?.sendToolResponse(callId, success)
-        if (success) {
-            logger.log("SYSTEM: Saved $category - $keyName to local memory")
-            val memoryId = "vehicle_${category}_${keyName}"
-            memoryManager.addFact(memoryId, "ข้อมูลรถหมวดหมู่ $category ($keyName): $infoValue", isPinned = false, category = category)
-        } else {
-            logger.log("SYSTEM: Failed to save to local memory")
+        try {
+            Log.i("GeminiToolDispatcher", "Tool call save_vehicle_info: cat=$category, key=$keyName, val=$infoValue")
+            val success = dbHelper.saveInfo(category, keyName, infoValue)
+            liveClient?.sendToolResponse(callId, success)
+            if (success) {
+                logger.log("SYSTEM: Saved $category - $keyName to local memory")
+                val memoryId = "vehicle_${category}_${keyName}"
+                memoryManager.addFact(memoryId, "ข้อมูลรถหมวดหมู่ $category ($keyName): $infoValue", isPinned = false, category = category)
+            } else {
+                logger.log("SYSTEM: Failed to save to local memory")
+            }
+        } catch (e: Exception) {
+            Log.e("GeminiToolDispatcher", "Error in handleSaveVehicleInfo", e)
+            liveClient?.sendToolResponse(callId, false)
         }
     }
 
     fun handleQueryVehicleInfo(callId: String, category: String?, liveClient: GeminiLiveClient?) {
-        Log.i("GeminiToolDispatcher", "Tool call query_vehicle_info: cat=$category")
-        val records = dbHelper.queryInfo(category)
-        
-        val output = JSONObject()
-        val resultsArray = JSONArray()
-        for (record in records) {
-            val recJson = JSONObject()
-            recJson.put("category", record["category"])
-            recJson.put("key_name", record["key_name"])
-            recJson.put("info_value", record["info_value"])
-            recJson.put("updated_at", record["updated_at"])
-            resultsArray.put(recJson)
+        try {
+            Log.i("GeminiToolDispatcher", "Tool call query_vehicle_info: cat=$category")
+            val records = dbHelper.queryInfo(category)
+            
+            val output = JSONObject()
+            val resultsArray = JSONArray()
+            for (record in records) {
+                val recJson = JSONObject()
+                recJson.put("category", record["category"])
+                recJson.put("key_name", record["key_name"])
+                recJson.put("info_value", record["info_value"])
+                recJson.put("updated_at", record["updated_at"])
+                resultsArray.put(recJson)
+            }
+            output.put("results", resultsArray)
+            
+            liveClient?.sendToolResponse(callId, output)
+            logger.log("SYSTEM: Queried local memory (found ${records.size} items)")
+        } catch (e: Exception) {
+            Log.e("GeminiToolDispatcher", "Error in handleQueryVehicleInfo", e)
+            sendErrorToolResponse(callId, liveClient, e.message)
         }
-        output.put("results", resultsArray)
-        
-        liveClient?.sendToolResponse(callId, output)
-        logger.log("SYSTEM: Queried local memory (found ${records.size} items)")
     }
 
     fun handleGetCurrentTime(callId: String, liveClient: GeminiLiveClient?) {
-        Log.i("GeminiToolDispatcher", "Tool call get_current_time")
-        val tz = java.util.TimeZone.getDefault()
-        val sdfDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).apply { timeZone = tz }
-        val sdfTime = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US).apply { timeZone = tz }
-        val sdfIso = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).apply { timeZone = tz }
-        val dayOfWeekEng = java.text.SimpleDateFormat("EEEE", java.util.Locale.US).apply { timeZone = tz }.format(java.util.Date())
-        
-        val dayOfWeekThai = when (dayOfWeekEng.lowercase()) {
-            "sunday" -> "วันอาทิตย์"
-            "monday" -> "วันจันทร์"
-            "tuesday" -> "วันอังคาร"
-            "wednesday" -> "วันพุธ"
-            "thursday" -> "วันพฤหัสบดี"
-            "friday" -> "วันศุกร์"
-            "saturday" -> "วันเสาร์"
-            else -> dayOfWeekEng
+        try {
+            Log.i("GeminiToolDispatcher", "Tool call get_current_time")
+            val tz = java.util.TimeZone.getDefault()
+            val sdfDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).apply { timeZone = tz }
+            val sdfTime = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US).apply { timeZone = tz }
+            val sdfIso = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).apply { timeZone = tz }
+            val dayOfWeekEng = java.text.SimpleDateFormat("EEEE", java.util.Locale.US).apply { timeZone = tz }.format(java.util.Date())
+            
+            val dayOfWeekThai = when (dayOfWeekEng.lowercase()) {
+                "sunday" -> "วันอาทิตย์"
+                "monday" -> "วันจันทร์"
+                "tuesday" -> "วันอังคาร"
+                "wednesday" -> "วันพุธ"
+                "thursday" -> "วันพฤหัสบดี"
+                "friday" -> "วันศุกร์"
+                "saturday" -> "วันเสาร์"
+                else -> dayOfWeekEng
+            }
+            
+            val dateStr = sdfDate.format(java.util.Date())
+            val timeStr = sdfTime.format(java.util.Date())
+            val isoStr = sdfIso.format(java.util.Date())
+            val timezoneStr = "${tz.id} (${tz.getDisplayName(false, java.util.TimeZone.SHORT, java.util.Locale.US)})"
+            
+            val output = JSONObject()
+            output.put("current_date", dateStr)
+            output.put("current_time", timeStr)
+            output.put("iso_datetime", isoStr)
+            output.put("day_of_week", dayOfWeekThai)
+            output.put("timezone", timezoneStr)
+            output.put("note", "นี่คือเวลาปัจจุบันของระบบบนเครื่องโทรศัพท์มือถือของผู้ใช้ เป็นเวลาท้องถิ่นประเทศไทยเรียบร้อยแล้ว ห้ามคุณคำนวณหรือปรับค่าโซนเวลาใดๆ เพิ่มเติมอีก ให้ใช้เวลา $timeStr และวันที่ $dateStr (วัน$dayOfWeekThai) ในการตอบได้ทันที")
+            
+            liveClient?.sendToolResponse(callId, output)
+            logger.log("SYSTEM: Provided device current time ($timeStr, $timezoneStr)")
+        } catch (e: Exception) {
+            Log.e("GeminiToolDispatcher", "Error in handleGetCurrentTime", e)
+            sendErrorToolResponse(callId, liveClient, e.message)
         }
-        
-        val dateStr = sdfDate.format(java.util.Date())
-        val timeStr = sdfTime.format(java.util.Date())
-        val isoStr = sdfIso.format(java.util.Date())
-        val timezoneStr = "${tz.id} (${tz.getDisplayName(false, java.util.TimeZone.SHORT, java.util.Locale.US)})"
-        
-        val output = JSONObject()
-        output.put("current_date", dateStr)
-        output.put("current_time", timeStr)
-        output.put("iso_datetime", isoStr)
-        output.put("day_of_week", dayOfWeekThai)
-        output.put("timezone", timezoneStr)
-        output.put("note", "นี่คือเวลาปัจจุบันของระบบบนเครื่องโทรศัพท์มือถือของผู้ใช้ เป็นเวลาท้องถิ่นประเทศไทยเรียบร้อยแล้ว ห้ามคุณคำนวณหรือปรับค่าโซนเวลาใดๆ เพิ่มเติมอีก ให้ใช้เวลา $timeStr และวันที่ $dateStr (วัน$dayOfWeekThai) ในการตอบได้ทันที")
-        
-        liveClient?.sendToolResponse(callId, output)
-        logger.log("SYSTEM: Provided device current time ($timeStr, $timezoneStr)")
     }
 
     private fun isLocationEnabled(): Boolean {
@@ -335,7 +410,7 @@ class GeminiToolDispatcher(
     private suspend fun fetchWeatherFromApi(lat: Double, lon: Double): JSONObject = withContext(Dispatchers.IO) {
         try {
             val urlString = "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current_weather=true&timezone=auto"
-            val response = URL(urlString).readText()
+            val response = readTextWithTimeout(urlString)
             JSONObject(response).apply {
                 put("success", true)
             }
@@ -402,7 +477,7 @@ class GeminiToolDispatcher(
 
             val osmQuery = "[out:json];node(around:5000,$userLat,$userLon)$osmFilter;out 15;"
             val urlString = "https://overpass-api.de/api/interpreter?data=${Uri.encode(osmQuery)}"
-            val response = URL(urlString).readText()
+            val response = readTextWithTimeout(urlString)
             val rawJson = JSONObject(response)
             
             val elements = rawJson.optJSONArray("elements")

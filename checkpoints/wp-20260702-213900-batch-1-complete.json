@@ -1,0 +1,131 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260702-213900-batch-1-complete",
+  "sequence": 2,
+  "createdAt": "2026-07-02T21:39:00+07:00",
+  "updatedAt": "2026-07-02T21:39:00+07:00",
+  "title": "Critical Bugs Batch Fix — Batch 1 Completed",
+  "status": "in_progress",
+  "progress": 55,
+
+  "objective": "Clear all 20 remaining critical bugs from BUG_REPORT.md in 3 batches",
+  "scope": "Fix bugs #11-14, #17-20, #22-24, #26-28, #31, #34-35, #37, #41, #43 across 15 Kotlin files",
+
+  "completed": [
+    "Reviewed BUG_REPORT.md — identified 20 remaining critical bugs (top 10 already fixed in prior session)",
+    "Created implementation_plan.md with 3-batch strategy (12 easy + 5 medium + 3 high-risk)",
+    "Analyzed real-world user impact of each bug group (ANR, data loss, UI crash, resource leak, performance)",
+    "Added serena MCP server config to C:\\Users\\ASUS\\.cursor\\mcp.json",
+    "Added Prompt Optimizer & Compressor + Ponytail Ruleset to .agents/AGENTS.md (prior session)",
+    "Batch 1 (12 bugs): Fixed cursor leaks in LocalVehicleDbHelper, transaction atomicity in MemoryDbHelper/MeetingDbHelper, optimized updateMemoryPin direct SQL path, offloaded MemoryViewModel IO, serviceScope.launch for MeetingRecordingService runBlocking, released AudioPlayer track on cancel, added AttentionState idle timeouts, SituationLogManager log rotation, and implemented Closeable on PerceptionEngine",
+    "Wrote and ran 11 unit/static-analysis tests in DatabaseCodeTest, all passing along with existing 28 tests"
+  ],
+
+  "pending": [
+    "Batch 2 (5 bugs): GeminiToolDispatcher try-catch + URL timeout + background activity start, MainActivity bitmap ANR + permission conflation",
+    "Batch 3 (3 bugs): AppPreferences AES-ECB→AES-GCM + ANDROID_ID key migration, DatingAnalysisOrchestrator parallel execution",
+    "Write unit tests for Batch 2 and 3",
+    "Run full test suite after each batch"
+  ],
+
+  "artifacts": [
+    {
+      "path": "docs/BUG_REPORT.md",
+      "type": "doc",
+      "description": "Master bug list — 30 critical, 35+ major, 24 minor issues"
+    },
+    {
+      "path": ".agents/AGENTS.md",
+      "type": "doc",
+      "description": "Workspace rules: TDD, Prompt Optimizer, Ponytail Ruleset"
+    },
+    {
+      "path": "docs/context.md",
+      "type": "doc",
+      "description": "Architecture overview — 6 layers, 15 features"
+    }
+  ],
+
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "timestamp": "2026-07-02T21:10:00+07:00",
+      "decision": "Fix bugs in 3 batches: easy wins → medium → high-risk",
+      "rationale": "Maximizes value delivery early; defers risky encryption migration to last batch",
+      "alternatives": ["Fix by file (scattered)", "Fix by severity only (ignores effort)"],
+      "decidedBy": "Agent + User review"
+    },
+    {
+      "id": "DEC-002",
+      "timestamp": "2026-07-02T21:14:00+07:00",
+      "decision": "AES-ECB → AES-GCM migration will use try-new-decrypt → fallback-old-decrypt → re-encrypt strategy",
+      "rationale": "Prevents permanent data loss for existing users while upgrading security",
+      "alternatives": ["Force reset all encrypted data", "Keep ECB (insecure)"],
+      "decidedBy": "Agent (pending user approval)"
+    }
+  ],
+
+  "knowledge": [
+    "Top 10 bugs already fixed in prior session (commits 216fd41, 153a899)",
+    "Also fixed in prior session: WebSocket handshake leak, callback threading, ConcurrentHashMap, Kotlin serialization plugin",
+    "All 39 unit tests pass as of this session (28 original + 11 new static analysis tests)",
+    "LocalVehicleDbHelper is in utils/ package, not root package",
+    "MemoryManager.addFact() calls insertOrUpdateMemory + evictLowestUtilityMemories separately (non-atomic)",
+    "MemoryManager.updateMemoryPin() loads ALL memories via getMemoryList() to toggle 1 row",
+    "AudioPlayer already has releaseAudioTrack() and abandonAudioFocus() methods — just not called in finally block",
+    "MeetingRecordingService.stopDeepgramStreaming() uses runBlocking on main thread at line 449",
+    "MemoryViewModel.loadData() calls SQLite synchronously in init{} block"
+  ],
+
+  "assumptions": [
+    {
+      "assumption": "User will approve implementation plan before execution begins",
+      "status": "completed"
+    },
+    {
+      "assumption": "AES-ECB → AES-GCM migration with fallback is acceptable approach",
+      "status": "pending"
+    }
+  ],
+
+  "risks": [
+    {
+      "risk": "AES encryption migration may fail silently if old data is corrupted",
+      "mitigation": "Log migration failures; keep old data as backup before re-encrypting"
+    },
+    {
+      "risk": "GeminiToolDispatcher background activity change alters user camera flow",
+      "mitigation": "Use PendingIntent via notification — minimal UX change"
+    }
+  ],
+
+  "open_questions": [
+    "Should we implement AES-GCM migration with automatic fallback, or prompt user to re-enter keys?",
+    "For bug #14 (background activity start), is notification-based camera launch acceptable UX?"
+  ],
+
+  "next_steps": [
+    "Execute Batch 2 (5 medium bugs)",
+    "Run testDebugUnitTest + assembleDebug after Batch 2",
+    "Execute Batch 3 (3 high-risk bugs)"
+  ],
+
+  "agents": [
+    {
+      "role": "current",
+      "name": "Antigravity (Gemini 3.5 Flash)",
+      "responsibility": "Plan and execute critical bug fixes in 3 batches"
+    }
+  ],
+
+  "memory_snapshot": [
+    "User prefers Thai communication with internal English compression",
+    "Ponytail Ruleset enforced: minimal code, Decision Ladder, no over-engineering",
+    "TDD required: write tests first, then fix code",
+    "MCP servers: memory (npx) + serena (claude-code context)"
+  ],
+
+  "tags": ["critical-bugs", "batch-fix", "batch-1-complete"],
+  "dependencies": [],
+  "context_summary": "Successfully completed Batch 1 fixes (12 easy-win bugs related to leaks, transaction atomicity, off-main-thread IO, and coroutine-cancellation safety). Wrote and ran 11 unit/static analysis tests verifying all fixes. Ready to proceed to Batch 2."
+}

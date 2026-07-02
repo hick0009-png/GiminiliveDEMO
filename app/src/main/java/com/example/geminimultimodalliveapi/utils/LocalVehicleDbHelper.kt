@@ -56,15 +56,13 @@ class LocalVehicleDbHelper(private val context: Context) : SQLiteOpenHelper(cont
             }
 
             // Check if this category and key combination already exists
-            val cursor = db.query(
+            val exists = db.query(
                 TABLE_NAME,
                 arrayOf(COL_ID),
                 "$COL_CATEGORY = ? AND $COL_KEY_NAME = ?",
                 arrayOf(category.lowercase().trim(), keyName.lowercase().trim()),
                 null, null, null
-            )
-            val exists = cursor.moveToFirst()
-            cursor.close()
+            ).use { it.moveToFirst() }
 
             val success = if (exists) {
                 db.update(
@@ -91,27 +89,26 @@ class LocalVehicleDbHelper(private val context: Context) : SQLiteOpenHelper(cont
             val selection = if (category.isNullOrEmpty()) null else "$COL_CATEGORY = ?"
             val selectionArgs = if (category.isNullOrEmpty()) null else arrayOf(category.lowercase().trim())
             
-            val cursor = db.query(
+            db.query(
                 TABLE_NAME,
                 null,
                 selection,
                 selectionArgs,
                 null, null,
                 "$COL_UPDATED_AT DESC"
-            )
-
-            if (cursor.moveToFirst()) {
-                do {
-                    val map = mapOf(
-                        "category" to cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY)),
-                        "key_name" to cursor.getString(cursor.getColumnIndexOrThrow(COL_KEY_NAME)),
-                        "info_value" to cursor.getString(cursor.getColumnIndexOrThrow(COL_INFO_VALUE)),
-                        "updated_at" to cursor.getString(cursor.getColumnIndexOrThrow(COL_UPDATED_AT))
-                    )
-                    list.add(map)
-                } while (cursor.moveToNext())
+            ).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    do {
+                        val map = mapOf(
+                            "category" to cursor.getString(cursor.getColumnIndexOrThrow(COL_CATEGORY)),
+                            "key_name" to cursor.getString(cursor.getColumnIndexOrThrow(COL_KEY_NAME)),
+                            "info_value" to cursor.getString(cursor.getColumnIndexOrThrow(COL_INFO_VALUE)),
+                            "updated_at" to cursor.getString(cursor.getColumnIndexOrThrow(COL_UPDATED_AT))
+                        )
+                        list.add(map)
+                    } while (cursor.moveToNext())
+                }
             }
-            cursor.close()
             Log.i("LocalVehicleDbHelper", "Queried SQLite: category=$category, found ${list.size} records")
         } catch (e: Exception) {
             Log.e("LocalVehicleDbHelper", "Failed to query info from database", e)

@@ -167,41 +167,48 @@ class MeetingDbHelper(private val context: Context) : SQLiteOpenHelper(context, 
 
 
     fun updateSpeakerName(meetingId: String, oldName: String, newName: String): Boolean {
+        var success = false
         try {
             val db = getWritableDatabase(dbPassword)
-            val cursor = db.query(TABLE_NAME, arrayOf(COL_TRANSCRIPT_JSON), "$COL_ID = ?", arrayOf(meetingId), null, null, null)
-            var jsonStr: String? = null
-            cursor?.use { c ->
-                if (c.moveToFirst()) {
-                    jsonStr = c.getString(0)
+            db.beginTransaction()
+            try {
+                val cursor = db.query(TABLE_NAME, arrayOf(COL_TRANSCRIPT_JSON), "$COL_ID = ?", arrayOf(meetingId), null, null, null)
+                var jsonStr: String? = null
+                cursor?.use { c ->
+                    if (c.moveToFirst()) {
+                        jsonStr = c.getString(0)
+                    }
                 }
-            }
 
-            if (jsonStr.isNullOrEmpty()) return false
+                if (!jsonStr.isNullOrEmpty()) {
+                    val array = org.json.JSONArray(jsonStr!!)
+                    var updated = false
+                    for (i in 0 until array.length()) {
+                        val obj = array.getJSONObject(i)
+                        val speaker = obj.optString("speaker", "")
+                        if (speaker == oldName) {
+                            obj.put("speaker", newName)
+                            updated = true
+                        }
+                    }
 
-            val array = org.json.JSONArray(jsonStr!!)
-            var updated = false
-            for (i in 0 until array.length()) {
-                val obj = array.getJSONObject(i)
-                val speaker = obj.optString("speaker", "")
-                if (speaker == oldName) {
-                    obj.put("speaker", newName)
-                    updated = true
+                    if (updated) {
+                        val newJsonStr = array.toString()
+                        val values = ContentValues().apply {
+                            put(COL_TRANSCRIPT_JSON, newJsonStr)
+                        }
+                        db.update(TABLE_NAME, values, "$COL_ID = ?", arrayOf(meetingId))
+                        Log.i("MeetingDbHelper", "Updated speaker name from $oldName to $newName in meeting $meetingId")
+                        success = true
+                    }
                 }
-            }
-
-            if (updated) {
-                val newJsonStr = array.toString()
-                val values = ContentValues().apply {
-                    put(COL_TRANSCRIPT_JSON, newJsonStr)
-                }
-                db.update(TABLE_NAME, values, "$COL_ID = ?", arrayOf(meetingId))
-                Log.i("MeetingDbHelper", "Updated speaker name from $oldName to $newName in meeting $meetingId")
-                return true
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
             }
         } catch (e: Exception) {
             Log.e("MeetingDbHelper", "Error updating speaker name", e)
         }
-        return false
+        return success
     }
 }

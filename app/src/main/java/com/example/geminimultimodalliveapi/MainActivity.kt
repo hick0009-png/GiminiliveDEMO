@@ -36,6 +36,7 @@ import com.example.geminimultimodalliveapi.session.SessionState
 import com.example.geminimultimodalliveapi.session.SessionStateHolder
 import com.example.geminimultimodalliveapi.error.AppError
 import com.google.android.material.card.MaterialCardView
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -106,6 +107,7 @@ class MainActivity : AppCompatActivity() {
 
     private val CAMERA_REQUEST_CODE = 100
     private val STORAGE_REQUEST_CODE = 400
+    private val EXTRA_PERMISSIONS_REQUEST_CODE = 101
     private var isExplicitCapture = false
     private var cameraCallId: String? = null
 
@@ -421,54 +423,56 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun processAndSendImage(imageBytes: ByteArray) {
-        val startTime = System.currentTimeMillis()
-        val currentTime = timeFormat.format(Date())
-        Log.d("ImageCapture", "Image processed and sending at: $currentTime")
+        lifecycleScope.launch(Dispatchers.Default) {
+            val startTime = System.currentTimeMillis()
+            val currentTime = timeFormat.format(Date())
+            Log.d("ImageCapture", "Image processed and sending at: $currentTime")
 
-        val sensorOrientation = getSensorOrientation()
-        val processedBytes = if (sensorOrientation != 0) {
-            rotateImageBytes(imageBytes, sensorOrientation.toFloat())
-        } else {
-            imageBytes
-        }
-
-        if (isExplicitCapture) {
-            isExplicitCapture = false
-            saveImageToGallery(processedBytes)
-        }
-
-        val currentLevel = performanceMonitor?.currentLevel ?: PerformanceMonitor.PerformanceLevel.MEDIUM
-
-        val b64Image = if (currentLevel.dimension == 480) {
-            Base64.encodeToString(processedBytes, Base64.DEFAULT or Base64.NO_WRAP)
-        } else {
-            val bitmap = BitmapFactory.decodeByteArray(processedBytes, 0, processedBytes.size)
-            if (bitmap != null) {
-                val scaledBitmap = scaleBitmap(bitmap, currentLevel.dimension)
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, currentLevel.quality, byteArrayOutputStream)
-                val bytes = byteArrayOutputStream.toByteArray()
-
-                if (scaledBitmap != bitmap) {
-                    scaledBitmap.recycle()
-                }
-                bitmap.recycle()
-                byteArrayOutputStream.close()
-                Base64.encodeToString(bytes, Base64.DEFAULT or Base64.NO_WRAP)
+            val sensorOrientation = getSensorOrientation()
+            val processedBytes = if (sensorOrientation != 0) {
+                rotateImageBytes(imageBytes, sensorOrientation.toFloat())
             } else {
-                Base64.encodeToString(processedBytes, Base64.DEFAULT or Base64.NO_WRAP)
+                imageBytes
             }
-        }
 
-        if (SessionStateHolder.state.value is SessionState.Active) {
-            FloatingWidgetService.sendImageFrame(b64Image)
-        } else {
-            Log.d("ImageCapture", "Skipped sending image frame because session is not Active")
-        }
+            if (isExplicitCapture) {
+                isExplicitCapture = false
+                saveImageToGallery(processedBytes)
+            }
 
-        val duration = System.currentTimeMillis() - startTime
-        performanceMonitor?.recordProcessingTime(duration)
-        Log.i("PerformanceMonitor", "Processed image in ${duration}ms (Level: ${currentLevel.name})")
+            val currentLevel = performanceMonitor?.currentLevel ?: PerformanceMonitor.PerformanceLevel.MEDIUM
+
+            val b64Image = if (currentLevel.dimension == 480) {
+                Base64.encodeToString(processedBytes, Base64.DEFAULT or Base64.NO_WRAP)
+            } else {
+                val bitmap = BitmapFactory.decodeByteArray(processedBytes, 0, processedBytes.size)
+                if (bitmap != null) {
+                    val scaledBitmap = scaleBitmap(bitmap, currentLevel.dimension)
+                    val byteArrayOutputStream = ByteArrayOutputStream()
+                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, currentLevel.quality, byteArrayOutputStream)
+                    val bytes = byteArrayOutputStream.toByteArray()
+
+                    if (scaledBitmap != bitmap) {
+                        scaledBitmap.recycle()
+                    }
+                    bitmap.recycle()
+                    byteArrayOutputStream.close()
+                    Base64.encodeToString(bytes, Base64.DEFAULT or Base64.NO_WRAP)
+                } else {
+                    Base64.encodeToString(processedBytes, Base64.DEFAULT or Base64.NO_WRAP)
+                }
+            }
+
+            if (SessionStateHolder.state.value is SessionState.Active) {
+                FloatingWidgetService.sendImageFrame(b64Image)
+            } else {
+                Log.d("ImageCapture", "Skipped sending image frame because session is not Active")
+            }
+
+            val duration = System.currentTimeMillis() - startTime
+            performanceMonitor?.recordProcessingTime(duration)
+            Log.i("PerformanceMonitor", "Processed image in ${duration}ms (Level: ${currentLevel.name})")
+        }
     }
 
     private fun scaleBitmap(bitmap: Bitmap, maxDimension: Int): Bitmap {
@@ -531,6 +535,11 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show()
                 }
+            }
+            EXTRA_PERMISSIONS_REQUEST_CODE -> {
+                val hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                val hasPhone = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
+                Log.i("MainActivity", "Extra permissions result: location=$hasLocation, phone=$hasPhone")
             }
         }
     }
@@ -824,7 +833,7 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 permissionsToRequest.toTypedArray(),
-                PermissionHelper.REQUIRED_PERMISSIONS_REQUEST_CODE
+                EXTRA_PERMISSIONS_REQUEST_CODE
             )
         } else if (requestCall || requestAnswer || requestLocation) {
             Toast.makeText(this, "ได้รับสิทธิ์ที่จำเป็นเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()

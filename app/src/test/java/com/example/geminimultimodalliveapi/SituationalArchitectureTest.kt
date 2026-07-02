@@ -130,4 +130,34 @@ class SituationalArchitectureTest {
         val topic2 = topicManager.processQueryIntent("ผ่อนมือถือคิดยังไง")
         assertEquals("used_car", topic2.name)
     }
+
+    @Test
+    fun testAttentionTimeout() = kotlinx.coroutines.runBlocking {
+        val attentionManager = AttentionManager { }
+        
+        // Configure short timeouts for testing
+        attentionManager.listeningTimeoutMs = 100L
+        attentionManager.activeSessionTimeoutMs = 200L
+
+        // Trigger LISTENING state
+        attentionManager.onNewEvent(PerceptionEvent.WakewordDetected("กอหญ้า"))
+        assertEquals(AttentionState.LISTENING, attentionManager.state.value)
+        assertTrue(attentionManager.isAttentionActive.value)
+
+        // Wait for listening timeout
+        kotlinx.coroutines.delay(150L)
+        assertEquals(AttentionState.IDLE, attentionManager.state.value)
+        assertFalse(attentionManager.isAttentionActive.value)
+
+        // Trigger ACTIVE_SESSION state
+        attentionManager.onNewEvent(PerceptionEvent.WakewordDetected("กอหญ้า"))
+        attentionManager.onNewEvent(PerceptionEvent.SpeechDetected("owner", 0.95f))
+        assertEquals(AttentionState.ACTIVE_SESSION, attentionManager.state.value)
+
+        // Wait for active session timeout
+        kotlinx.coroutines.delay(250L)
+        assertEquals(AttentionState.IDLE, attentionManager.state.value)
+        assertFalse(attentionManager.isAttentionActive.value)
+    }
 }
+

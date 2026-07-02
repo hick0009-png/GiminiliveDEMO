@@ -192,6 +192,8 @@ class AudioPlayer(
                 synchronized(this@AudioPlayer) {
                     isPlaying = false
                 }
+                abandonAudioFocus()
+                releaseAudioTrack()
             }
         }
     }

@@ -835,7 +835,9 @@ class MeetingActivity : AppCompatActivity() {
         builder.setNegativeButton("ยกเลิก", null)
         
         val dialog = builder.create()
-        dialog.show()
+        if (!isFinishing && !isDestroyed) {
+            dialog.show()
+        }
     }
 
     // Share Meeting Transcript & Summary
@@ -957,6 +959,7 @@ class MeetingActivity : AppCompatActivity() {
             }
 
             holder.deleteBtn.setOnClickListener {
+                if (isFinishing || isDestroyed) return@setOnClickListener
                 AlertDialog.Builder(this@MeetingActivity)
                     .setTitle("ลบการประชุม")
                     .setMessage("คุณต้องการลบการประชุมนี้และไฟล์เสียงที่บันทึกไว้ใช่หรือไม่?")

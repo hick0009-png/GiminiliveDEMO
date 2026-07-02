@@ -30,8 +30,7 @@ class MemoryManager(context: Context) {
             lastAccessedTime = System.currentTimeMillis(),
             category = category
         )
-        dbHelper.insertOrUpdateMemory(entry)
-        dbHelper.evictLowestUtilityMemories(MAX_BUDGET_LIMIT)
+        dbHelper.insertOrUpdateWithEviction(entry, MAX_BUDGET_LIMIT)
         Log.d("MemoryManager", "Added fact: $id ($content), Pinned: $isPinned")
     }
 
@@ -62,13 +61,8 @@ class MemoryManager(context: Context) {
      * Update the pinned state of a specific memory.
      */
     fun updateMemoryPin(id: String, isPinned: Boolean) {
-        val all = dbHelper.getMemoryList()
-        val entry = all.find { it.id == id }
-        if (entry != null) {
-            val updated = entry.copy(isPinned = isPinned)
-            dbHelper.insertOrUpdateMemory(updated)
-            Log.d("MemoryManager", "Updated pin state of memory $id to $isPinned")
-        }
+        dbHelper.updateMemoryPinState(id, isPinned)
+        Log.d("MemoryManager", "Updated pin state of memory $id to $isPinned")
     }
 
     /**

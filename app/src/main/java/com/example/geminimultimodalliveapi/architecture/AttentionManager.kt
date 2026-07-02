@@ -3,6 +3,11 @@ package com.example.geminimultimodalliveapi.architecture
 import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 enum class AttentionState {
     IDLE,            // Waiting for wakeword or widget activation
@@ -12,8 +17,14 @@ enum class AttentionState {
 }
 
 class AttentionManager(
+    private val scope: CoroutineScope,
     private val onAttentionChange: (Boolean) -> Unit
 ) {
+    constructor(onAttentionChange: (Boolean) -> Unit) : this(
+        scope = CoroutineScope(Dispatchers.Default),
+        onAttentionChange = onAttentionChange
+    )
+
     private val _state = MutableStateFlow(AttentionState.IDLE)
     val state: StateFlow<AttentionState> = _state
 
@@ -21,6 +32,10 @@ class AttentionManager(
     val isAttentionActive: StateFlow<Boolean> = _isAttentionActive
 
     private var ignoreOtherSpeakers = false
+
+    var listeningTimeoutMs: Long = 5 * 60 * 1000L
+    var activeSessionTimeoutMs: Long = 30 * 60 * 1000L
+    private var timeoutJob: Job? = null
 
     fun setIgnoreOtherSpeakers(ignore: Boolean) {
         ignoreOtherSpeakers = ignore
@@ -98,6 +113,23 @@ class AttentionManager(
                 current.copy(attentionState = newState.name)
             }
 
+            // Manage timeout job
+            timeoutJob?.cancel()
+            timeoutJob = null
+            if (newState == AttentionState.LISTENING) {
+                timeoutJob = scope.launch {
+                    delay(listeningTimeoutMs)
+                    Log.i("AttentionManager", "Idle timeout triggered for LISTENING state, resetting to IDLE")
+                    forceState(AttentionState.IDLE)
+                }
+            } else if (newState == AttentionState.ACTIVE_SESSION) {
+                timeoutJob = scope.launch {
+                    delay(activeSessionTimeoutMs)
+                    Log.i("AttentionManager", "Idle timeout triggered for ACTIVE_SESSION state, resetting to IDLE")
+                    forceState(AttentionState.IDLE)
+                }
+            }
+
             onAttentionChange(active)
         }
     }
@@ -115,6 +147,23 @@ class AttentionManager(
             
             com.example.geminimultimodalliveapi.session.SessionStateHolder.updateDiagnostics { current ->
                 current.copy(attentionState = newState.name)
+            }
+
+            // Manage timeout job
+            timeoutJob?.cancel()
+            timeoutJob = null
+            if (newState == AttentionState.LISTENING) {
+                timeoutJob = scope.launch {
+                    delay(listeningTimeoutMs)
+                    Log.i("AttentionManager", "Idle timeout triggered for LISTENING state, resetting to IDLE")
+                    forceState(AttentionState.IDLE)
+                }
+            } else if (newState == AttentionState.ACTIVE_SESSION) {
+                timeoutJob = scope.launch {
+                    delay(activeSessionTimeoutMs)
+                    Log.i("AttentionManager", "Idle timeout triggered for ACTIVE_SESSION state, resetting to IDLE")
+                    forceState(AttentionState.IDLE)
+                }
             }
             
             onAttentionChange(active)

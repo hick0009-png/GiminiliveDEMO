@@ -30,7 +30,7 @@ enum class MotionType { STILL, WALKING, DRIVING, UNKNOWN }
 class PerceptionEngine(
     private val context: Context,
     private val coroutineScope: CoroutineScope
-) {
+) : java.io.Closeable {
     private val _events = MutableSharedFlow<PerceptionEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<PerceptionEvent> = _events
 
@@ -143,5 +143,9 @@ class PerceptionEngine(
             // Might not be registered
         }
         motionDebounceJob?.cancel()
+    }
+
+    override fun close() {
+        destroy()
     }
 }

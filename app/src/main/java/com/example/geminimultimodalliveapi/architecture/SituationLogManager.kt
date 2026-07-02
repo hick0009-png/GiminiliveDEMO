@@ -105,6 +105,16 @@ class SituationLogManager(
             Log.w("SituationLogManager", logMsg)
             com.example.geminimultimodalliveapi.session.SessionStateHolder.appendChatLog(logMsg)
             
+            // Rotate logs: delete files older than 7 days
+            val cutoff = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
+            logDir.listFiles()?.forEach { file ->
+                if (file.isFile && file.name.startsWith("incident_") && file.name.endsWith(".json")) {
+                    if (file.lastModified() < cutoff) {
+                        file.delete()
+                    }
+                }
+            }
+            
         } catch (e: Exception) {
             Log.e("SituationLogManager", "Failed to write incident log to disk", e)
         }

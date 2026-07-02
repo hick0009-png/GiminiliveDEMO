@@ -222,4 +222,52 @@ class MemoryDbHelper(private val context: Context) : SQLiteOpenHelper(context, D
         }
         return list
     }
+
+    fun updateMemoryPinState(id: String, isPinned: Boolean) {
+        val db = getWritableDatabase(dbPassword)
+        val values = ContentValues().apply {
+            put(COL_IS_PINNED, if (isPinned) 1 else 0)
+        }
+        db.update(TABLE_NAME, values, "$COL_ID = ?", arrayOf(id))
+    }
+
+    fun insertOrUpdateWithEviction(entry: MemoryEntry, limit: Int = 50) {
+        val db = getWritableDatabase(dbPassword)
+        db.beginTransaction()
+        try {
+            val values = ContentValues().apply {
+                put(COL_ID, entry.id)
+                put(COL_CONTENT, entry.content)
+                put(COL_IS_PINNED, if (entry.isPinned) 1 else 0)
+                put(COL_BASE_IMPORTANCE, entry.baseImportance)
+                put(COL_ACCESS_COUNT, entry.accessCount)
+                put(COL_LAST_ACCESSED_TIME, entry.lastAccessedTime)
+                put(COL_CATEGORY, entry.category)
+            }
+            db.replace(TABLE_NAME, null, values)
+
+            val countQuery = "SELECT COUNT(*) FROM $TABLE_NAME WHERE $COL_IS_PINNED = 0"
+            val cursor = db.rawQuery(countQuery, null)
+            var unpinnedCount = 0
+            cursor.use { c ->
+                if (c.moveToFirst()) unpinnedCount = c.getInt(0)
+            }
+
+            if (unpinnedCount > limit) {
+                val excess = unpinnedCount - limit
+                db.execSQL("""
+                    DELETE FROM $TABLE_NAME WHERE $COL_ID IN (
+                        SELECT $COL_ID FROM $TABLE_NAME WHERE $COL_IS_PINNED = 0 
+                        ORDER BY ($COL_BASE_IMPORTANCE + ($COL_ACCESS_COUNT * 2)) ASC 
+                        LIMIT $excess
+                    )
+                """.trimIndent())
+                Log.i("MemoryDbHelper", "Evicted $excess low utility memories inside transaction")
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
 }
+

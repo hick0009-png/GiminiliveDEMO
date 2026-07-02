@@ -33,18 +33,27 @@ class MemoryViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun loadData() {
-        // Load vehicle info
-        val plates = dbHelper.queryInfo("license_plate")
-        _licensePlate.value = plates.firstOrNull()?.get("info_value") ?: ""
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            // Load vehicle info
+            val plates = dbHelper.queryInfo("license_plate")
+            val platesVal = plates.firstOrNull()?.get("info_value") ?: ""
 
-        val tax = dbHelper.queryInfo("tax_circle")
-        _taxCircle.value = tax.firstOrNull()?.get("info_value") ?: ""
+            val tax = dbHelper.queryInfo("tax_circle")
+            val taxVal = tax.firstOrNull()?.get("info_value") ?: ""
 
-        val maint = dbHelper.queryInfo("maintenance")
-        _maintenance.value = maint.firstOrNull()?.get("info_value") ?: ""
+            val maint = dbHelper.queryInfo("maintenance")
+            val maintVal = maint.firstOrNull()?.get("info_value") ?: ""
 
-        // Load memories
-        _memories.value = memoryManager.getAllMemories()
+            // Load memories
+            val mems = memoryManager.getAllMemories()
+
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                _licensePlate.value = platesVal
+                _taxCircle.value = taxVal
+                _maintenance.value = maintVal
+                _memories.value = mems
+            }
+        }
     }
 
     fun saveVehicleInfo(category: String, keyName: String, value: String) {

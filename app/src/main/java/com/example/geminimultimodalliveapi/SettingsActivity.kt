@@ -872,9 +872,11 @@ class SettingsActivity : AppCompatActivity() {
             builder.setView(layout)
             builder.setTitle(title)
             builder.setCancelable(false)
-            uploadProgressDialog = builder.create().apply {
-                window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.parseColor("#E61E1E1E")))
-                show()
+            if (!isFinishing && !isDestroyed) {
+                uploadProgressDialog = builder.create().apply {
+                    window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.parseColor("#E61E1E1E")))
+                    show()
+                }
             }
         }
     }

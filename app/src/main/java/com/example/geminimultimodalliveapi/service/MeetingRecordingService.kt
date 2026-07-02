@@ -446,7 +446,7 @@ class MeetingRecordingService : Service() {
                 audioChannel = null
 
                 try {
-                    runBlocking {
+                    serviceScope.launch(Dispatchers.IO) {
                         audioPipelineJob?.join()
                     }
                 } catch (e: Exception) {
