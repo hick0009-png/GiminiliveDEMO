@@ -1,5 +1,7 @@
 package com.example.geminimultimodalliveapi.network
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -13,6 +15,28 @@ import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
 class DeepgramLiveClient(private val callback: Callback) {
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var lastApiKey: String? = null
+    private var lastWakeWord: String? = null
+    private var reconnectAttempts = 0
+    private var isExplicitDisconnect = false
+
+    private val reconnectRunnable = Runnable {
+        Log.i("DeepgramLiveClient", "Attempting to reconnect (Attempt ${reconnectAttempts + 1}/3)...")
+        reconnectAttempts++
+        val apiKey = lastApiKey
+        val wakeWord = lastWakeWord
+        if (apiKey != null && wakeWord != null) {
+            connect(apiKey, wakeWord)
+        }
+    }
+
+    private fun scheduleReconnect() {
+        val delay = 2000L * (reconnectAttempts + 1)
+        Log.i("DeepgramLiveClient", "Scheduling reconnect in ${delay}ms...")
+        mainHandler.postDelayed(reconnectRunnable, delay)
+    }
 
     interface Callback {
         fun onTranscriptReceived(transcript: String, speakerId: Int, isFinal: Boolean, wordDetails: List<WordDetail>)
@@ -37,6 +61,11 @@ class DeepgramLiveClient(private val callback: Callback) {
         .build()
 
     fun connect(apiKey: String, wakeWord: String) {
+        lastApiKey = apiKey
+        lastWakeWord = wakeWord
+        isExplicitDisconnect = false
+        mainHandler.removeCallbacks(reconnectRunnable)
+
         if (webSocket != null) {
             Log.w("DeepgramLiveClient", "WebSocket is already connected or connecting. Disconnecting first...")
             disconnect()
@@ -74,7 +103,10 @@ class DeepgramLiveClient(private val callback: Callback) {
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.i("DeepgramLiveClient", "Deepgram WebSocket connection established successfully.")
-                callback.onOpen()
+                reconnectAttempts = 0
+                mainHandler.post {
+                    callback.onOpen()
+                }
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -88,13 +120,31 @@ class DeepgramLiveClient(private val callback: Callback) {
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 Log.i("DeepgramLiveClient", "Deepgram WebSocket closed.")
-                callback.onClose()
+                if (this@DeepgramLiveClient.webSocket === webSocket) {
+                    this@DeepgramLiveClient.webSocket = null
+                }
+                mainHandler.post {
+                    if (!isExplicitDisconnect && reconnectAttempts < 3) {
+                        scheduleReconnect()
+                    } else {
+                        callback.onClose()
+                    }
+                }
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 val code = response?.code
                 Log.e("DeepgramLiveClient", "Deepgram WebSocket failure: ${t.message} (HTTP Code: $code)", t)
-                callback.onError(t, code)
+                if (this@DeepgramLiveClient.webSocket === webSocket) {
+                    this@DeepgramLiveClient.webSocket = null
+                }
+                mainHandler.post {
+                    if (!isExplicitDisconnect && reconnectAttempts < 3) {
+                        scheduleReconnect()
+                    } else {
+                        callback.onError(t, code)
+                    }
+                }
             }
         })
     }
@@ -123,6 +173,9 @@ class DeepgramLiveClient(private val callback: Callback) {
     }
 
     fun disconnect() {
+        isExplicitDisconnect = true
+        mainHandler.removeCallbacks(reconnectRunnable)
+        reconnectAttempts = 0
         val socket = webSocket
         if (socket != null) {
             try {
@@ -146,7 +199,9 @@ class DeepgramLiveClient(private val callback: Callback) {
             // Handle UtteranceEnd event from Deepgram
             if (json.has("type") && json.getString("type") == "UtteranceEnd") {
                 Log.d("DeepgramLiveClient", "Detected UtteranceEnd event")
-                callback.onUtteranceEnd()
+                mainHandler.post {
+                    callback.onUtteranceEnd()
+                }
                 return
             }
 
@@ -180,12 +235,16 @@ class DeepgramLiveClient(private val callback: Callback) {
             }
 
             if (transcript.isNotEmpty()) {
-                callback.onTranscriptReceived(transcript, majoritySpeaker, isFinal, wordDetails)
+                mainHandler.post {
+                    callback.onTranscriptReceived(transcript, majoritySpeaker, isFinal, wordDetails)
+                }
             }
 
             if (speechFinal) {
                 Log.d("DeepgramLiveClient", "Detected speech_final: true in results chunk, triggering onUtteranceEnd")
-                callback.onUtteranceEnd()
+                mainHandler.post {
+                    callback.onUtteranceEnd()
+                }
             }
         } catch (e: Exception) {
             Log.e("DeepgramLiveClient", "Error parsing Deepgram JSON response: ${e.message}", e)

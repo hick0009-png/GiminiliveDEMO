@@ -74,8 +74,8 @@ class GeminiLiveClient(
         isExplicitDisconnect = false
         mainHandler.removeCallbacks(reconnectRunnable)
         
-        val wsUrl = "wss://$HOST/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=$apiKey"
-        Log.i("GeminiLiveClient", "Connecting to WebSocket at wss://$HOST/... (key masked)")
+        val wsUrl = "wss://$HOST/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent"
+        Log.i("GeminiLiveClient", "Connecting to WebSocket at wss://$HOST/ws/... with x-goog-api-key header")
 
         if (client == null) {
             client = OkHttpClient.Builder()
@@ -88,6 +88,7 @@ class GeminiLiveClient(
 
         val request = Request.Builder()
             .url(wsUrl)
+            .addHeader("x-goog-api-key", apiKey)
             .build()
 
         webSocket = client?.newWebSocket(request, object : WebSocketListener() {
@@ -116,10 +117,13 @@ class GeminiLiveClient(
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 mainHandler.post {
                     isConnected = false
-                    this@GeminiLiveClient.webSocket = null
+                    if (this@GeminiLiveClient.webSocket === webSocket) {
+                        this@GeminiLiveClient.webSocket = null
+                    }
                     if (!isExplicitDisconnect && reconnectAttempts < 3) {
                         scheduleReconnect()
                     } else {
+                        activeToolCalls.clear()
                         listener.onDisconnected(reason.ifEmpty { "Connection closed" })
                     }
                 }
@@ -128,11 +132,14 @@ class GeminiLiveClient(
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 mainHandler.post {
                     isConnected = false
-                    this@GeminiLiveClient.webSocket = null
+                    if (this@GeminiLiveClient.webSocket === webSocket) {
+                        this@GeminiLiveClient.webSocket = null
+                    }
                     if (!isExplicitDisconnect && reconnectAttempts < 3) {
                         scheduleReconnect()
                     } else {
-                        listener.onError(t.message ?: "WebSocket failure")
+                        activeToolCalls.clear()
+                        listener.onDisconnected(t.message ?: "Connection failed")
                     }
                 }
             }
@@ -150,6 +157,7 @@ class GeminiLiveClient(
     fun disconnect() {
         isExplicitDisconnect = true
         mainHandler.removeCallbacks(reconnectRunnable)
+        activeToolCalls.clear()
         try {
             webSocket?.close(1000, "Explicit disconnect")
         } catch (e: Exception) {
@@ -238,7 +246,8 @@ class GeminiLiveClient(
         
         try {
             val jsonString = setupMessage.toString()
-            Log.i("GeminiLiveClient", "Sending tool response (callId=$callId): $jsonString")
+            Log.i("GeminiLiveClient", "Sending tool response (callId=$callId, name=$name)")
+            Log.d("GeminiLiveClient", "Tool response payload: $jsonString")
             val startTime = System.currentTimeMillis()
             webSocket?.send(jsonString)
             Log.d("GeminiLiveClient", "Tool response sent in ${System.currentTimeMillis() - startTime} ms")
