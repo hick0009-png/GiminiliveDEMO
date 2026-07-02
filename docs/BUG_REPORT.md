@@ -207,4 +207,34 @@ Rank  Issue                                           Impact                  St
 10    CameraCaptureHelper: stop/opened race            Camera device leak      ✅ FIXED (commit 153a899)
 ```
 
-> All 10 critical bugs fixed as of 2026-07-01. See checkpoints `wp-20260701-221357-fix-10-easy-bugs-write-tests-001` and `wp-20260701-222601-fix-10-easy-bugs-write-tests-session-resume-002`.
+> All 10 priority critical bugs fixed as of 2026-07-01. See checkpoints `wp-20260701-221357-fix-10-easy-bugs-write-tests-001` and `wp-20260701-222601-fix-10-easy-bugs-write-tests-session-resume-002`.
+
+## Remaining Critical Bugs Status (2026-07-02)
+
+All remaining 20 critical issues have been successfully resolved across 3 execution batches:
+- **Batch 1 (Easy Wins)**:
+  - Fixed cursor leaks in [LocalVehicleDbHelper.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/utils/LocalVehicleDbHelper.kt) (#13).
+  - Wrapped SQLite writes in transactions in [MemoryDbHelper.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/memory/MemoryDbHelper.kt) (#35) and [MeetingDbHelper.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/data/MeetingDbHelper.kt) (#37).
+  - Optimized toggling memory pins with direct SQL update in [MemoryDbHelper.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/memory/MemoryDbHelper.kt) (#34).
+  - Guarded dialog shows in [MeetingActivity.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/MeetingActivity.kt) (#17) and [SettingsActivity.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/SettingsActivity.kt) (#20) to prevent WindowLeaks.
+  - Offloaded data loading in [MemoryViewModel.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/ui/memory/MemoryViewModel.kt) (#43) to background coroutines.
+  - Prevented main-thread blocking `runBlocking` in [MeetingRecordingService.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/service/MeetingRecordingService.kt) (#24).
+  - Ensured resource release in [AudioPlayer.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/audio/AudioPlayer.kt) (#31) on coroutine cancellation.
+  - Implemented idle timeouts in [AttentionManager.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/architecture/AttentionManager.kt) (#26).
+  - Added age-based log rotation in [SituationLogManager.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/architecture/SituationLogManager.kt) (#27).
+  - Implemented `Closeable` in [PerceptionEngine.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/architecture/PerceptionEngine.kt) (#28) to unregister BroadcastReceivers.
+
+- **Batch 2 (Medium Complexity)**:
+  - Hardened tool handlers in [GeminiToolDispatcher.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/service/GeminiToolDispatcher.kt) (#11) with try-catch blocks.
+  - Implemented strict 10s connection/read timeouts on [GeminiToolDispatcher.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/service/GeminiToolDispatcher.kt) (#12) HTTP operations.
+  - Added Notification-based fallback for API 29+ background activity launch in [GeminiToolDispatcher.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/service/GeminiToolDispatcher.kt) (#14).
+  - Offloaded image processing in [MainActivity.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/MainActivity.kt) (#18) to background dispatcher threads.
+  - Restructured permission request code assignments in [MainActivity.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/MainActivity.kt) (#19) to avoid connection logic conflation.
+
+- **Batch 3 (High Risk)**:
+  - Migrated legacy [AppPreferences.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/data/AppPreferences.kt) (#22) fallback encryption from insecure AES-ECB to AES-GCM.
+  - Implemented automatic fallback decryption for legacy ECB-encrypted data to prevent user key loss (#22).
+  - Combined `androidId` with app signature fingerprint for secure key derivation (#23) in [AppPreferences.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/data/AppPreferences.kt).
+  - Parallelized multi-agent analysis in [DatingAnalysisOrchestrator.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/agent/DatingAnalysisOrchestrator.kt) (#41) using async and awaitAll.
+
+Verification: 19 new static analysis and unit tests successfully written and passing (total 47 passing). Full project successfully compiles and builds.
