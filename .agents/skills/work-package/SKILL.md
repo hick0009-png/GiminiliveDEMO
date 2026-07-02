@@ -443,3 +443,76 @@ Replay การทำงานทั้งหมดจาก checkpoints เร
 | 2 | Checkpoint + Resume | checkpoint.ps1, resume.ps1 |
 | 2.5 | Auto-checkpoint + Audit | + audit.ps1, hcp-config.json |
 | **3** | **Replay + Recover** | **+ replay.ps1, recover.ps1** |
+
+---
+
+## Agent Rules (กฎการควบคุมพฤติกรรมใน Workspace)
+
+เอเจนต์ที่เรียกใช้ความสามารถของ HCP นี้ ต้องปฏิบัติตามกฎต่อไปนี้อย่างเคร่งครัด:
+
+### 1. Verification
+- ต้องเขียน Test ก่อน แล้วค่อยแก้โค้ด (Test-Driven) เพื่อแก้ปัญหา “AI คิดว่าเสร็จ แต่รันแล้วพัง”
+
+### 2. Goal-Driven Execution (อัปเกรด)
+- ต้องนิยาม “เสร็จ” ด้วยเกณฑ์ที่วัดผลได้จริง + วางแผนก่อนเริ่ม
+
+### 3. Debugging
+- ต้องอ่าน Error Log + Stack Trace ให้ครบ, จำลองปัญหา, แก้ทีละจุด
+
+### 4. Dependencies
+- ห้ามโหลด Library ใหม่ถ้าไม่จำเป็น ต้องเช็คของเดิมก่อน
+
+### 5. Communication
+- ห้ามพูดแบบ “น่าจะเวิร์ค” ต้องบอกตรง ๆ เวลาไม่แน่ใจ
+
+### 6. Common Failure Modes (อาการอันตรายที่ต้องเบรกตัวเอง)
+- **Kitchen Sink** (ลามไปไกลเกิน)
+- **Wrong Abstraction** (สร้าง Abstraction ที่ซับซ้อนเกินไปหรือไม่จำเป็น)
+- **Optimistic Path** (คิดแต่เคสที่สำเร็จปกติ ไม่ครอบคลุม edge cases)
+- **Runaway Refactor** (การรีแฟคเตอร์ที่ลุกลามบานปลายออกนอกขอบเขตงาน)
+
+---
+
+## HCP System Rules & Technical Specifications
+
+### 1. Checkpoint Schema Types (Lite vs. Full)
+เพื่อป้องกันปัญหาข้อมูลล้นเกิน (Kitchen Sink) และภาระของ Token/ประสิทธิภาพระหว่างการรันแบบอัตโนมัติ:
+- **Lite Checkpoint (`hermes-work-package-v1-lite`)**:
+  - เปิดใช้งานอัตโนมัติเมื่อเป็น Auto-checkpoint (ไม่มีข้อผิดพลาดหรือตัดสินใจสำคัญ) หรือเรียกด้วยสวิตช์ `-Lite`
+  - ประกอบด้วยข้อมูลจำเป็นขั้นต่ำ: `schema`, `id`, `sequence`, `createdAt`, `updatedAt`, `title`, `status`, `progress`, `objective`, `completed`, `pending`, `next_steps`, `context_summary`
+- **Full Checkpoint (`hermes-work-package-v1`)**:
+  - ทำงานเมื่อเรียก manual `/checkpoint`, เกิดข้อผิดพลาด (`-OnError`), หรือส่งข้อมูลตัดสินใจและบทเรียน
+  - บันทึกข้อมูลวิเคราะห์ครบถ้วน (เช่น decisions, knowledge, assumptions, risks, artifacts)
+
+### 2. Decision Attribution Guard (`decidedBy` Attribution)
+- ห้ามไม่ให้ AI คาดเดาหรือ Attribution ชื่อบุคคลอื่นโดยพลการ
+- **ค่าเริ่มต้น (Default)**: กรณี AI เป็นผู้บันทึกข้อตัดสินใจที่คิดขึ้นเอง ให้กำหนดฟิลด์ `decidedBy: "AI"` เสมอ
+- จะใช้ `decidedBy: "User"` หรือ `decidedBy: "User + AI"` ได้ก็ต่อเมื่อได้รับการยืนยันอย่างชัดเจนโดยผู้ใช้ในบทสนทนาเท่านั้น
+
+### 3. Eviction Policy (การหมุนเวียนไฟล์สูงสุด)
+- การสร้าง Checkpoint ใหม่จะตรวจสอบจำนวนไฟล์ `wp-*.json` ทั้งหมดในโฟลเดอร์ `checkpoints/`
+- หากไฟล์มีจำนวนเกินกว่าค่า `maxCheckpoints` ที่ตั้งไว้ในคอนฟิก (เริ่มต้นคือ 50) ไฟล์ที่เก่าที่สุด (FIFO) จะถูกย้ายไปเก็บที่โฟลเดอร์ `checkpoints/archive/` เพื่อไม่ให้รบกวนข้อมูลประวัติที่กำลังใช้งานปัจจุบัน
+
+### 4. Notification Protocol (`latest.json`)
+- ทุกครั้งที่มีการสร้าง Checkpoint สำเร็จ ระบบจะอัปเดตไฟล์ [checkpoints/latest.json](file:///d:/New%20folder%20(2)/GeminiLiveDemo/checkpoints/latest.json) อัตโนมัติ
+- ตัวประสานงาน (Orchestrator) หรือเอเจนต์เซสชันถัดไปสามารถอ่านไฟล์นี้เพื่อเริ่มต้นทำงานต่อ (Resume) ได้โดยตรงทันที ไม่ต้องรันคำสั่งลิสต์ไฟล์
+
+### 5. VPS Linux Compatibility (PowerShell Core)
+เนื่องจากสภาพแวดล้อมรันอาจเป็น Linux VPS:
+- สคริปต์ทั้งหมดรองรับการรันข้ามแพลตฟอร์มด้วย **PowerShell Core (`pwsh`)**
+- ห้ามใช้ Windows-only API หรือ Path Join ที่ขัดกับ Linux (ต้องใช้ `Join-Path` ของ PowerShell)
+- **การติดตั้ง pwsh บน Linux Ubuntu/Debian**:
+  ```bash
+  # Update package list and install prerequisites
+  sudo apt-get update
+  sudo apt-get install -y wget apt-transport-https software-properties-common
+  # Download Microsoft repository GPG keys
+  wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb"
+  # Register Microsoft repository GPG keys
+  sudo dpkg -i packages-microsoft-prod.deb
+  # Update package list and install PowerShell
+  sudo apt-get update
+  sudo apt-get install -y powershell
+  # Run pwsh command
+  pwsh
+  ```

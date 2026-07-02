@@ -1,10 +1,45 @@
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$Path
+    [string]$Path = ""
 )
 
-if (-not (Test-Path $Path)) {
-    Write-Error "File not found: $Path"
+$projectRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$checkpointsDir = Join-Path $projectRoot "checkpoints"
+
+if (-not $Path) {
+    $latestJsonPath = Join-Path $checkpointsDir "latest.json"
+    if (Test-Path $latestJsonPath) {
+        try {
+            $latestObj = Get-Content $latestJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($latestObj.latest_checkpoint_path) {
+                $resolvedPath = Join-Path $projectRoot $latestObj.latest_checkpoint_path
+                if (Test-Path $resolvedPath) {
+                    $Path = $resolvedPath
+                }
+            }
+        } catch {}
+    }
+    
+    if (-not $Path) {
+        # Fallback to the newest wp-*.json file in checkpoints folder
+        if (Test-Path $checkpointsDir) {
+            $newestFile = Get-ChildItem -Path $checkpointsDir -Filter "wp-*.json" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if ($newestFile) {
+                $Path = $newestFile.FullName
+            }
+        }
+    }
+} else {
+    # Resolve relative paths relative to project root
+    if (-not (Test-Path $Path)) {
+        $resolvedPath = Join-Path $projectRoot $Path
+        if (Test-Path $resolvedPath) {
+            $Path = $resolvedPath
+        }
+    }
+}
+
+if (-not $Path -or -not (Test-Path $Path)) {
+    Write-Error "No checkpoint file found to resume from."
     exit 1
 }
 

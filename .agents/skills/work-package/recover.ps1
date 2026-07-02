@@ -56,13 +56,28 @@ if (-not $errorCp) {
 $goodCp = $null
 if ($errorCp.sequence -gt 1) {
     $goodSeq = $errorCp.sequence - 1
+    # Try to find a completed checkpoint at the preceding sequence first
     $goodCp = $allCheckpoints | Where-Object { $_.sequence -eq $goodSeq -and $_.status -eq "completed" } | Select-Object -Last 1
+    # Fallback to an in_progress checkpoint at the preceding sequence
+    if (-not $goodCp) {
+        $goodCp = $allCheckpoints | Where-Object { $_.sequence -eq $goodSeq -and $_.status -eq "in_progress" } | Select-Object -Last 1
+    }
 }
 if (-not $goodCp) {
-    $goodCp = $allCheckpoints | Where-Object { $_.sequence -lt $errorCp.sequence -and $_.status -eq "completed" } | Select-Object -Last 1
+    # Try to find the latest completed checkpoint before the error sequence
+    $goodCp = $allCheckpoints | Where-Object { $_.sequence -lt $errorCp.sequence -and $_.status -eq "completed" } | Sort-Object sequence | Select-Object -Last 1
+}
+if (-not $goodCp) {
+    # Fallback to the latest in_progress checkpoint before the error sequence
+    $goodCp = $allCheckpoints | Where-Object { $_.sequence -lt $errorCp.sequence -and $_.status -eq "in_progress" } | Sort-Object sequence | Select-Object -Last 1
 }
 if (-not $goodCp -and $allCheckpoints.Count -gt 0) {
-    $goodCp = $allCheckpoints | Where-Object { $_.id -ne $errorCp.id -and $_.status -eq "completed" } | Select-Object -Last 1
+    # Last resort: any completed checkpoint in history that is not the error itself
+    $goodCp = $allCheckpoints | Where-Object { $_.id -ne $errorCp.id -and $_.status -eq "completed" } | Sort-Object sequence | Select-Object -Last 1
+}
+if (-not $goodCp -and $allCheckpoints.Count -gt 0) {
+    # Absolute last resort: any checkpoint in history that is not the error itself
+    $goodCp = $allCheckpoints | Where-Object { $_.id -ne $errorCp.id } | Sort-Object sequence | Select-Object -Last 1
 }
 
 # Build recovery data

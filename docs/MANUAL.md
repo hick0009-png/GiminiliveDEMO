@@ -627,3 +627,27 @@ PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\resume.ps1
 /git push                  → git add -A; git commit -m "..."; git push
 /git pull                  → git pull
 ```
+
+---
+
+## 14. กฎระเบียบและข้อกำหนดระบบเพิ่มเติม (HCP Improvements)
+
+### 14.1 ประเภท Checkpoint (Lite vs. Full)
+- **Lite Checkpoint (`hermes-work-package-v1-lite`)**: บันทึกความคืบหน้าของงานทั่วไปในระหว่างการพัฒนาแบบอัตโนมัติ (Auto) โดยไม่ต้องใช้ฟิลด์วิเคราะห์ข้อมูลเชิงลึก (เช่น decisions, knowledge) เพื่อลด token และความล่าช้า
+- **Full Checkpoint (`hermes-work-package-v1`)**: ใช้เมื่อประมวลผลคำสั่ง manual `/checkpoint` บันทึกการเกิดข้อผิดพลาด หรือการปิดเฟสงานที่มีการวิเคราะห์ประเมินผล
+
+### 14.2 หลักการกำหนดผู้ออกการตัดสินใจ (`decidedBy`)
+- **ห้ามเดา**: ห้ามไม่ให้เอเจนต์สมมติหรืออ้างอิงชื่อบุคคลอื่นๆ ในการตัดสินใจโดยไม่จำเป็น
+- **Default**: กำหนดเป็น `"AI"` เสมอสำหรับการตัดสินใจที่เอเจนต์บันทึกขึ้นมาด้วยตนเอง ยกเว้นกรณีที่ผู้ใช้ออกปากยืนยันอย่างเป็นทางการในแชท ให้ใช้ `"User"` หรือ `"User + AI"`
+
+### 14.3 การจำกัดจำนวน Checkpoint (Eviction Policy)
+- ดึงข้อมูล `maxCheckpoints` จากไฟล์คอนฟิก `hcp-config.json`
+- หากไฟล์ Checkpoint มีจำนวนรวมเกินค่าดังกล่าว ระบบจะย้ายไฟล์ Checkpoint ที่เก่าที่สุดไปยังโฟลเดอร์ `checkpoints/archive/` ทันทีเพื่อเก็บข้อมูลสำรองไว้แต่ไม่รบกวนการทำงานปัจจุบัน
+
+### 14.4 โปรโตคอลการแจ้งเตือนสถานะเอเจนต์ (`latest.json`)
+- ทุกครั้งที่มีการบันทึกสถานะ Checkpoint ระบบจะสร้าง/เขียนทับไฟล์ [checkpoints/latest.json](file:///d:/New%20folder%20(2)/GeminiLiveDemo/checkpoints/latest.json)
+- ไฟล์นี้ทำหน้าที่เป็นตัวบอกสถานะปัจจุบันให้กับเอเจนต์ถัดไป หรือระบบ Orchestrator เพื่อสั่ง Resume การทำงานได้ทันที
+
+### 14.5 การใช้งานบน Linux VPS (PowerShell Core)
+- การประมวลผลคำสั่งสามารถรันได้อย่างสมบูรณ์บน Linux VPS ผ่าน **PowerShell Core (`pwsh`)**
+- หลีกเลี่ยง Windows API หรือการต่อ Path ที่เจาะจงเฉพาะ OS (แนะนำให้รันด้วย `pwsh` และติดตั้งตามคู่มือใน [SKILL.md](file:///d:/New%20folder%20(2)/GeminiLiveDemo/.agents/skills/work-package/SKILL.md))

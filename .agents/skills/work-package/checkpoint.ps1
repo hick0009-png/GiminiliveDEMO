@@ -12,6 +12,7 @@ param(
     [int]$Progress = 0,
     [switch]$Auto,
     [switch]$OnError,
+    [switch]$Lite,
     [string]$ErrorType = "",
     [string]$ErrorMessage = "",
     [string]$ToolUsed = "",
@@ -19,6 +20,28 @@ param(
     [string]$RecoveryInstruction = "",
     [string]$ErrorException = ""
 )
+
+function Convert-JsonArray {
+    param([string]$JsonString)
+    $list = New-Object System.Collections.ArrayList
+    if ($JsonString -and $JsonString -ne "[]" -and $JsonString -ne "") {
+        # Auto-replace single quotes with double quotes to support easy CLI inputs
+        if ($JsonString -match "'") {
+            $JsonString = $JsonString -replace "'", '"'
+        }
+        try {
+            $raw = $JsonString | ConvertFrom-Json
+            if ($raw -is [array]) {
+                foreach ($item in $raw) { $list.Add($item) | Out-Null }
+            } else {
+                $list.Add($raw) | Out-Null
+            }
+        } catch {
+            $list.Add($JsonString) | Out-Null
+        }
+    }
+    return ,$list
+}
 
 $projectRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $checkpointsDir = Join-Path $projectRoot "checkpoints"
@@ -58,31 +81,61 @@ if ($Auto -or $OnError) {
 
 $filePath = Join-Path $checkpointsDir $filename
 
-$wp = @{
-    schema = "hermes-work-package-v1"
-    id = $id
-    sequence = $seq
-    createdAt = $isoNow
-    updatedAt = $isoNow
-    title = $Title
-    status = $Status
-    progress = $Progress
-    objective = $Objective
-    scope = ""
-    completed = if ($Completed -eq "[]") { @() } else { $Completed | ConvertFrom-Json }
-    pending = if ($Pending -eq "[]") { @() } else { $Pending | ConvertFrom-Json }
-    artifacts = @()
-    agents = @()
-    decisions = if ($Decisions -eq "[]") { @() } else { $Decisions | ConvertFrom-Json }
-    knowledge = if ($Knowledge -eq "[]") { @() } else { $Knowledge | ConvertFrom-Json }
-    assumptions = @()
-    risks = if ($Risks -eq "[]") { @() } else { $Risks | ConvertFrom-Json }
-    next_steps = if ($NextSteps -eq "[]") { @() } else { $NextSteps | ConvertFrom-Json }
-    dependencies = @()
-    open_questions = @()
-    memory_snapshot = @()
-    context_summary = $ContextSummary
-    tags = @()
+# Deserialize JSON array inputs safely using our helper function
+$completedArr = Convert-JsonArray -JsonString $Completed
+$pendingArr = Convert-JsonArray -JsonString $Pending
+$decisionsArr = Convert-JsonArray -JsonString $Decisions
+$knowledgeArr = Convert-JsonArray -JsonString $Knowledge
+$risksArr = Convert-JsonArray -JsonString $Risks
+$nextStepsArr = Convert-JsonArray -JsonString $NextSteps
+$actionsBeforeErrorArr = Convert-JsonArray -JsonString $ActionsBeforeError
+
+# Lite schema activation logic
+$isLite = $Lite -or ($Auto -and -not $OnError -and $Decisions -eq "[]" -and $Knowledge -eq "[]" -and $Risks -eq "[]")
+
+if ($isLite) {
+    $wp = @{
+        schema = "hermes-work-package-v1-lite"
+        id = $id
+        sequence = $seq
+        createdAt = $isoNow
+        updatedAt = $isoNow
+        title = $Title
+        status = $Status
+        progress = $Progress
+        objective = $Objective
+        completed = $completedArr
+        pending = $pendingArr
+        next_steps = $nextStepsArr
+        context_summary = $ContextSummary
+    }
+} else {
+    $wp = @{
+        schema = "hermes-work-package-v1"
+        id = $id
+        sequence = $seq
+        createdAt = $isoNow
+        updatedAt = $isoNow
+        title = $Title
+        status = $Status
+        progress = $Progress
+        objective = $Objective
+        scope = ""
+        completed = $completedArr
+        pending = $pendingArr
+        artifacts = New-Object System.Collections.ArrayList
+        agents = New-Object System.Collections.ArrayList
+        decisions = $decisionsArr
+        knowledge = $knowledgeArr
+        assumptions = New-Object System.Collections.ArrayList
+        risks = $risksArr
+        next_steps = $nextStepsArr
+        dependencies = New-Object System.Collections.ArrayList
+        open_questions = New-Object System.Collections.ArrayList
+        memory_snapshot = New-Object System.Collections.ArrayList
+        context_summary = $ContextSummary
+        tags = New-Object System.Collections.ArrayList
+    }
 }
 
 # Populate error_info for OnError checkpoints
@@ -92,7 +145,7 @@ if ($OnError) {
     $errorInfo.error_message = if ($ErrorMessage) { $ErrorMessage } else { "No error message captured" }
     $errorInfo.error_timestamp = $isoNow
     $errorInfo.tool_used = if ($ToolUsed) { $ToolUsed } else { "" }
-    $errorInfo.actions_before_error = if ($ActionsBeforeError -ne "[]") { $ActionsBeforeError | ConvertFrom-Json } else { @() }
+    $errorInfo.actions_before_error = $actionsBeforeErrorArr
     $errorInfo.recovery_instruction = if ($RecoveryInstruction) { $RecoveryInstruction } else { "Review error and retry with caution" }
 
     # Capture last PowerShell error if available
@@ -109,6 +162,47 @@ if ($OnError) {
 
 $wpJson = $wp | ConvertTo-Json -Depth 10
 Set-Content -Path $filePath -Value $wpJson -Encoding UTF8
+
+# Write/update checkpoints/latest.json
+$latestPath = Join-Path $checkpointsDir "latest.json"
+$latestObj = @{
+    latest_checkpoint_id = $id
+    latest_checkpoint_path = "checkpoints/$filename"
+    timestamp = $isoNow
+    status = $Status
+    schema = $wp.schema
+}
+$latestJson = $latestObj | ConvertTo-Json -Depth 5
+Set-Content -Path $latestPath -Value $latestJson -Encoding UTF8
+
+# Enforce Eviction Policy (maxCheckpoints)
+$configFile = Join-Path $PSScriptRoot "hcp-config.json"
+$maxCheckpoints = 50
+if (Test-Path $configFile) {
+    try {
+        $config = Get-Content $configFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($config.storage.maxCheckpoints) {
+            $maxCheckpoints = [int]$config.storage.maxCheckpoints
+        }
+    } catch {}
+}
+
+# Find all checkpoint files sorted by creation time
+$allFiles = Get-ChildItem -Path $checkpointsDir -Filter "wp-*.json" | Sort-Object LastWriteTime
+if ($allFiles.Count -gt $maxCheckpoints) {
+    $archiveDir = Join-Path $checkpointsDir "archive"
+    if (-not (Test-Path $archiveDir)) { New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null }
+    
+    $evictCount = $allFiles.Count - $maxCheckpoints
+    for ($i = 0; $i -lt $evictCount; $i++) {
+        $fileToEvict = $allFiles[$i]
+        try {
+            Move-Item -Path $fileToEvict.FullName -Destination (Join-Path $archiveDir $fileToEvict.Name) -Force | Out-Null
+        } catch {
+            Write-Warning "Failed to archive checkpoint $($fileToEvict.Name): $_"
+        }
+    }
+}
 
 if ($OnError) {
     Write-Output "[error-checkpoint] $id"
