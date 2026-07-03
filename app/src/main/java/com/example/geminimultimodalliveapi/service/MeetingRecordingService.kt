@@ -31,6 +31,7 @@ import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.CopyOnWriteArrayList
 
 class MeetingRecordingService : Service() {
 
@@ -59,7 +60,7 @@ class MeetingRecordingService : Service() {
     private var currentMeetingId: String? = null
     private var rawAudioBytesWritten = 0L
 
-    private val committedSegments = mutableListOf<TranscriptSegment>()
+    private val committedSegments = CopyOnWriteArrayList<TranscriptSegment>()
     private var interimSegment: TranscriptSegment? = null
 
     // High-priority dedicated audio thread resources
@@ -240,6 +241,13 @@ class MeetingRecordingService : Service() {
             Log.i("MeetingRecordingService", "Started offline recording into file: $filePath")
         } catch (e: Exception) {
             Log.e("MeetingRecordingService", "Failed to start offline recording", e)
+            try {
+                mediaRecorder?.reset()
+                mediaRecorder?.release()
+            } catch (ex: Exception) {
+                Log.e("MeetingRecordingService", "Error releasing mediaRecorder on start exception", ex)
+            }
+            mediaRecorder = null
             showErrorToast(e.localizedMessage)
             isRecording = false
             MeetingRecordingStateHolder.updateRecordingState(false)

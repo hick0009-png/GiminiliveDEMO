@@ -100,6 +100,7 @@ class FloatingWidgetService : Service() {
     private var audioManager: AudioManager? = null
     private var sessionAudioFocusRequest: AudioFocusRequest? = null
     private val sessionFocusLock = Any()
+    private var wakeLock: android.os.PowerManager.WakeLock? = null
 
     // Situational sensors variables
     private var sensorManager: SensorManager? = null
@@ -370,6 +371,24 @@ class FloatingWidgetService : Service() {
             }
         }
         return START_STICKY
+    }
+
+    private fun acquireWakeLock() {
+        if (wakeLock == null) {
+            val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+            wakeLock = pm.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "GeminiLiveDemo:ServiceWakeLock").apply {
+                acquire(10 * 60 * 1000L) // 10 minutes safety timeout
+            }
+            Log.i("FloatingWidgetService", "WakeLock acquired")
+        }
+    }
+
+    private fun releaseWakeLock() {
+        if (wakeLock?.isHeld == true) {
+            wakeLock?.release()
+            Log.i("FloatingWidgetService", "WakeLock released")
+        }
+        wakeLock = null
     }
 
     fun updateWidgetVisibility() {
@@ -748,6 +767,7 @@ class FloatingWidgetService : Service() {
     }
 
     fun connect(apiKey: String) {
+        acquireWakeLock()
         val isConnected = SessionStateHolder.state.value != SessionState.Disconnected
         if (isConnected) return
         if (!PermissionHelper.hasRecordAudioPermission(this) || !PermissionHelper.hasCameraPermission(this)) {
@@ -836,6 +856,7 @@ class FloatingWidgetService : Service() {
     }
 
     fun disconnect() {
+        releaseWakeLock()
         isGeminiConnected = false
         isDeepgramConnected = false
         releaseAudioResources()
@@ -931,7 +952,7 @@ class FloatingWidgetService : Service() {
                             )
                             .setAcceptsDelayedFocusGain(false)
                             .setOnAudioFocusChangeListener { focusChange ->
-                                Log.d("FloatingWidgetService", "Session audio focus change: $focusChange")
+                                handleAudioFocusChange(focusChange)
                             }
                             .build()
                     }
@@ -940,7 +961,7 @@ class FloatingWidgetService : Service() {
                 } else {
                     @Suppress("DEPRECATION")
                     val res = manager.requestAudioFocus(
-                        { focusChange -> Log.d("FloatingWidgetService", "Session audio focus change (legacy): $focusChange") },
+                        { focusChange -> handleAudioFocusChange(focusChange) },
                         AudioManager.STREAM_MUSIC,
                         AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
                     )
@@ -967,6 +988,23 @@ class FloatingWidgetService : Service() {
                 }
             } catch (e: Exception) {
                 Log.e("FloatingWidgetService", "Error abandoning session audio focus", e)
+            }
+        }
+    }
+
+    private fun handleAudioFocusChange(focusChange: Int) {
+        Log.i("FloatingWidgetService", "Audio focus change: $focusChange")
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_LOSS,
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                Log.w("FloatingWidgetService", "Audio focus lost, halting audio playback")
+                audioPlayer?.stop()
+                val state = SessionStateHolder.state.value
+                if (state is SessionState.Active) {
+                    val appPrefs = AppPreferences.getInstance(this)
+                    transitionToState(SessionState.Standby(appPrefs.wakeWord))
+                }
             }
         }
     }
@@ -1554,6 +1592,7 @@ class FloatingWidgetService : Service() {
     }
 
     override fun onDestroy() {
+        releaseWakeLock()
         super.onDestroy()
         Log.i("FloatingWidget", "Service destroyed")
         stopSensorIntegration()

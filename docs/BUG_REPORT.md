@@ -263,3 +263,12 @@ Verification: Added static analysis tests in [MajorBugsBatch1Test.kt](file:///d:
 
 Verification: All 56 unit and static-analysis tests pass successfully (both debug and release variants). Full project compiles and builds cleanly.
 
+- **Phase 1 Major Bug Fixes (Service Leaks & Resource Management)**:
+  - Addressed memory leaks from anonymous inner listeners in `FloatingWidgetService.kt` (sensor, location, and telephony callbacks) by ensuring explicit cleanups on lifecycle events.
+  - Implemented robust Audio Focus handling in `FloatingWidgetService.kt` by responding to focus loss events (`AUDIOFOCUS_LOSS`, `AUDIOFOCUS_LOSS_TRANSIENT`) to immediately stop playing voice synthesis via `audioPlayer?.stop()` and transition the state to standby.
+  - Added CPU `WakeLock` management in `FloatingWidgetService.kt` (`acquireWakeLock` / `releaseWakeLock`) to prevent the processor from sleeping during active real-time WebSocket connection loops.
+  - Resolved `MediaRecorder` leak in `MeetingRecordingService.kt` by ensuring that `reset()` and `release()` are safely called within error catch blocks when starting offline recordings fails.
+  - Fixed `committedSegments` data race in `MeetingRecordingService.kt` by migrating the list implementation to `CopyOnWriteArrayList` for thread-safe access from WebSocket/ASR callback threads.
+
+Verification: Added static analysis and functional checks in [MajorBugsPhase1Test.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/test/java/com/example/geminimultimodalliveapi/MajorBugsPhase1Test.kt). All 58 unit and static-analysis tests pass successfully.
+

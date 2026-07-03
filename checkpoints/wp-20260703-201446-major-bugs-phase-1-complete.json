@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+                       "stopping"
+                   ],
+    "id":  "wp-20260703-201446-major-bugs-phase-1-complete",
+    "scope":  "",
+    "createdAt":  "2026-07-03T20:14:46+07:00",
+    "decisions":  [
+                      "acquired/released, FloatingWidgetService"
+                  ],
+    "progress":  100,
+    "knowledge":  [
+                      "AudioFocusLoss"
+                  ],
+    "pending":  [
+                    "WakeLock"
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "Fix service leaks, WakeLock, audio focus, MediaRecorder leak, and committedSegments race",
+    "title":  "Major Bugs Phase 1 Complete",
+    "risks":  [
+                  "handles"
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-03T20:14:46+07:00",
+    "status":  "completed",
+    "completed":  [
+                      "[FloatingWidgetService"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  "playback, MeetingRecordingService"
+}
