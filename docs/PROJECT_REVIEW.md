@@ -207,7 +207,7 @@ Thai-language voice assistant app using **Gemini Live API (WebSocket real-time)*
 | Floating Widget | ✅ Fixed | LOW | Gestures & Click race fixed |
 | Vehicle Info | ✅ Fixed | LOW | Tool schemas & database threading fixed |
 | Memory System | ✅ Fixed | LOW | Refactored to Room & atomic transactions |
-| Google Calendar | ⚠️ Partial | HIGH | No OAuth refresh |
+| Google Calendar | ✅ Fixed | LOW | OAuth token refresh fixed |
 | Google Drive | ✅ Fixed | LOW | SQL injection & escape characters fixed |
 | Meeting Recorder | ✅ Fixed | LOW | ANR, OOM, & committedSegments race fixed |
 | Dating Assistant | ✅ Fixed | LOW | Timeout added |
