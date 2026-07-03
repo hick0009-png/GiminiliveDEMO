@@ -215,6 +215,9 @@ class CalendarManager(
                 val holidays = helper.fetchThaiHolidays(startCal.timeInMillis, endCal.timeInMillis)
                 val combined = (userEvents + holidays).sortedBy { it.startTime }
                 refreshEventsUI(combined)
+            } catch (e: com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException) {
+                Log.e("CalendarManager", "OAuth Token expired or revoked", e)
+                callbacks.launchGoogleSignIn(e.intent)
             } catch (e: Exception) {
                 Log.e("CalendarManager", "Error fetching events for selected date", e)
                 val errorTv = TextView(activity).apply {
@@ -233,13 +236,21 @@ class CalendarManager(
     private fun deleteCalendarEvent(eventId: String) {
         val helper = calendarServiceHelper ?: return
         managerScope.launch {
-            val success = helper.deleteEvent(eventId)
-            if (success) {
-                Toast.makeText(activity, "ลบรายการบันทึกสำเร็จ!", Toast.LENGTH_SHORT).show()
-                loadEventsForDate(selectedYear, selectedMonth, selectedDay)
-                rebuildCalendarGrid()
-            } else {
-                Toast.makeText(activity, "ไม่สามารถลบรายการบันทึกได้", Toast.LENGTH_SHORT).show()
+            try {
+                val success = helper.deleteEvent(eventId)
+                if (success) {
+                    Toast.makeText(activity, "ลบรายการบันทึกสำเร็จ!", Toast.LENGTH_SHORT).show()
+                    loadEventsForDate(selectedYear, selectedMonth, selectedDay)
+                    rebuildCalendarGrid()
+                } else {
+                    Toast.makeText(activity, "ไม่สามารถลบรายการบันทึกได้", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException) {
+                Log.e("CalendarManager", "OAuth Token expired or revoked", e)
+                callbacks.launchGoogleSignIn(e.intent)
+            } catch (e: Exception) {
+                Log.e("CalendarManager", "Error deleting event", e)
+                Toast.makeText(activity, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -521,33 +532,44 @@ class CalendarManager(
                 btnSave.text = "กำลังบันทึก..."
 
                 managerScope.launch {
-                    val success = if (existingEvent != null) {
-                        calendarServiceHelper?.updateEvent(
-                            existingEvent.id,
-                            title,
-                            startCal.timeInMillis,
-                            endCal.timeInMillis,
-                            desc,
-                            reminderMinutes
-                        ) ?: false
-                    } else {
-                        calendarServiceHelper?.insertEvent(
-                            title,
-                            startCal.timeInMillis,
-                            endCal.timeInMillis,
-                            desc,
-                            reminderMinutes
-                        ) ?: false
-                    }
+                    try {
+                        val success = if (existingEvent != null) {
+                            calendarServiceHelper?.updateEvent(
+                                existingEvent.id,
+                                title,
+                                startCal.timeInMillis,
+                                endCal.timeInMillis,
+                                desc,
+                                reminderMinutes
+                            ) ?: false
+                        } else {
+                            calendarServiceHelper?.insertEvent(
+                                title,
+                                startCal.timeInMillis,
+                                endCal.timeInMillis,
+                                desc,
+                                reminderMinutes
+                            ) ?: false
+                        }
 
-                    if (success) {
-                        val msg = if (existingEvent != null) "แก้ไขใน Google Calendar สำเร็จ!" else "บันทึกใน Google Calendar สำเร็จ!"
-                        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
-                        loadEventsForDate(selectedYear, selectedMonth, selectedDay)
-                        rebuildCalendarGrid()
+                        if (success) {
+                            val msg = if (existingEvent != null) "แก้ไขใน Google Calendar สำเร็จ!" else "บันทึกใน Google Calendar สำเร็จ!"
+                            Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
+                            loadEventsForDate(selectedYear, selectedMonth, selectedDay)
+                            rebuildCalendarGrid()
+                            dialog.dismiss()
+                        } else {
+                            Toast.makeText(activity, "บันทึกข้อมูลล้มเหลว", Toast.LENGTH_SHORT).show()
+                            btnSave.isEnabled = true
+                            btnSave.text = if (existingEvent != null) "แก้ไข" else "บันทึก"
+                        }
+                    } catch (e: com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException) {
+                        Log.e("AddEvent", "OAuth Token expired or revoked", e)
+                        callbacks.launchGoogleSignIn(e.intent)
                         dialog.dismiss()
-                    } else {
-                        Toast.makeText(activity, "บันทึกข้อมูลล้มเหลว", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Log.e("AddEvent", "Error saving event", e)
+                        Toast.makeText(activity, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
                         btnSave.isEnabled = true
                         btnSave.text = if (existingEvent != null) "แก้ไข" else "บันทึก"
                     }
@@ -662,6 +684,9 @@ class CalendarManager(
                 if (updated) {
                     calendarAdapter.notifyDataSetChanged()
                 }
+            } catch (e: com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException) {
+                Log.e("CalendarManager", "OAuth Token expired or revoked", e)
+                callbacks.launchGoogleSignIn(e.intent)
             } catch (e: Exception) {
                 Log.e("CalendarManager", "Failed to fetch month events/holidays", e)
             }

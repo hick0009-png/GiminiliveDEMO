@@ -33,7 +33,7 @@ class AudioPlayer(
     // Thread isolation - dedicated high-priority single thread
     private val playbackExecutor = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "gemini-playback-thread").apply {
-            priority = Thread.MAX_PRIORITY
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO)
         }
     }
     private val playbackDispatcher = playbackExecutor.asCoroutineDispatcher()

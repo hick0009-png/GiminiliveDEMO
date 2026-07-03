@@ -391,7 +391,7 @@ class MeetingActivity : AppCompatActivity() {
 
         val meetingId = UUID.randomUUID().toString()
         currentMeetingId = meetingId
-        val audioFile = File(cacheDir, "meeting_$meetingId.m4a")
+        val audioFile = File(filesDir, "meeting_$meetingId.m4a")
         currentFilePath = audioFile.absolutePath
 
         // Save initial DB draft
