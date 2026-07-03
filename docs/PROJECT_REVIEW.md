@@ -202,19 +202,19 @@ Thai-language voice assistant app using **Gemini Live API (WebSocket real-time)*
 |---------|-----------|------------|----------|
 | Voice Chat | ✅ Fixed | LOW | Tool schemas fixed |
 | Camera Vision | ✅ Fixed | MED | Thread safety, camera race fixed |
-| Deepgram ASR | ✅ Likely | MED | No reconnect |
-| Wake Word | ✅ Likely | MED | Battery drain |
-| Floating Widget | ✅ Fixed | LOW | startForeground + WeakRef fixed |
-| Vehicle Info | ✅ Fixed | LOW | Tool schemas fixed |
-| Memory System | ✅ Basic | LOW | Minor perf issues |
+| Deepgram ASR | ✅ Fixed | LOW | Reconnect & Main Thread callbacks fixed |
+| Wake Word | ✅ Fixed | LOW | Screen-off battery optimization added |
+| Floating Widget | ✅ Fixed | LOW | Gestures & Click race fixed |
+| Vehicle Info | ✅ Fixed | LOW | Tool schemas & database threading fixed |
+| Memory System | ✅ Fixed | LOW | Refactored to Room & atomic transactions |
 | Google Calendar | ⚠️ Partial | HIGH | No OAuth refresh |
-| Google Drive | ✅ Fixed | LOW | SQL injection fixed |
-| Meeting Recorder | ✅ Fixed | MED | ANR, OOM fixed |
+| Google Drive | ✅ Fixed | LOW | SQL injection & escape characters fixed |
+| Meeting Recorder | ✅ Fixed | LOW | ANR, OOM, & committedSegments race fixed |
 | Dating Assistant | ✅ Fixed | LOW | Timeout added |
-| Situational Awareness | ✅ Basic | MED | Sensor leaks |
-| Dynamic Rules | ✅ Basic | MED | Perf with many rules |
+| Situational Awareness | ✅ Fixed | LOW | Sensor leaks & ContextManager thread safety fixed |
+| Dynamic Rules | ✅ Fixed | LOW | rules_list cache added |
 | Notification Perception | ✅ Fixed | LOW | Privacy fixed |
-| Weather & Places | ✅ Basic | MED | No timeout |
+| Weather & Places | ✅ Fixed | LOW | HttpURLConnection timeouts added |
 
 ---
 
@@ -222,6 +222,10 @@ Thai-language voice assistant app using **Gemini Live API (WebSocket real-time)*
 
 > ✅ Items 1-8 completed as of 2026-07-01 (commits 216fd41, 153a899)
 > ✅ Items 9-10 (State preservation, DI + Room migration) completed as of 2026-07-03
+> ✅ Items 11-12 (Major Bugs Batch 2 and Phased fixes 1-3) completed as of 2026-07-03
 
 9. Fix **state preservation** (onSaveInstanceState) in MainActivity ✅ (Completed)
 10. Begin **DI + Room migration** for long-term maintainability ✅ (Completed AppDatabase, DiModules, and SQLite Helper refactoring to Room DAOs)
+11. Resolve **Major Bugs Batch 2** (WakeWord screen-off VAD, Spinner SQLite threading, sensor leaks) ✅ (Completed)
+12. Resolve **Phased Major Bug Fixes** (Phases 1-3) for architectural stability, memory leak cleanups, WakeLock streams, Audio Focus handling, and execution caching ✅ (Completed)
+
