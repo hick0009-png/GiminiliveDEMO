@@ -253,3 +253,13 @@ The first batch of Major Bugs has been successfully resolved:
 
 Verification: Added static analysis tests in [MajorBugsBatch1Test.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/test/java/com/example/geminimultimodalliveapi/MajorBugsBatch1Test.kt). All 50 unit and static-analysis tests pass successfully.
 
+- **Batch 2 (Service Leaks, IO Threading, Battery Optimization)**:
+  - Added explicit `sensorManager?.unregisterListener` safety net in `FloatingWidgetService.onDestroy()` to prevent accelerometer listener leaks.
+  - Wrapped `writeIncidentLog` file I/O in `serviceScope.launch(Dispatchers.IO)` in [FloatingWidgetService.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/FloatingWidgetService.kt) to prevent main-thread blocking.
+  - Implemented screen-off battery optimization in [WakeWordDetector.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/service/WakeWordDetector.kt): added `pauseListening()`, `resumeListening()`, `isScreenOn()` methods using `PowerManager.isInteractive`, and guards in `startListening()` to skip recognition when screen is off or paused.
+  - Removed side-effect muting of `STREAM_NOTIFICATION` in `WakeWordDetector.muteSystemStream()` — now only mutes `STREAM_SYSTEM` to prevent silencing user notifications.
+  - Moved `DateProfileDbHelper` SQLite calls in `setupProfileSpinner()` in [MainActivity.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/MainActivity.kt) off the main thread using `lifecycleScope.launch` + `withContext(Dispatchers.IO)`.
+  - Moved `saveReportToDisk` file I/O in [SituationLogManager.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/main/java/com/example/geminimultimodalliveapi/architecture/SituationLogManager.kt) to a background `ioScope` coroutine to prevent blocking the caller thread.
+
+Verification: All 56 unit and static-analysis tests pass successfully (both debug and release variants). Full project compiles and builds cleanly.
+

@@ -221,6 +221,7 @@ Thai-language voice assistant app using **Gemini Live API (WebSocket real-time)*
 ## Next Steps (Recommended Order)
 
 > ✅ Items 1-8 completed as of 2026-07-01 (commits 216fd41, 153a899)
+> ✅ Items 9-10 (State preservation, DI + Room migration) completed as of 2026-07-03
 
-9. Fix **state preservation** (onSaveInstanceState) in all 3 activities
-10. Begin **DI + Room migration** for long-term maintainability
+9. Fix **state preservation** (onSaveInstanceState) in MainActivity ✅ (Completed)
+10. Begin **DI + Room migration** for long-term maintainability ✅ (Completed AppDatabase, DiModules, and SQLite Helper refactoring to Room DAOs)

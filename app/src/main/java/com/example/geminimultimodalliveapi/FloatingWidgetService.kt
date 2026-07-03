@@ -1525,6 +1525,7 @@ class FloatingWidgetService : Service() {
     }
 
     private fun writeIncidentLog(eventType: String, details: String) {
+        serviceScope.launch(Dispatchers.IO) {
         try {
             val logDir = File(filesDir, "situational_logs")
             if (!logDir.exists()) {
@@ -1549,12 +1550,15 @@ class FloatingWidgetService : Service() {
         } catch (e: Exception) {
             Log.e("SensorIntegration", "Failed to write incident log", e)
         }
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.i("FloatingWidget", "Service destroyed")
         stopSensorIntegration()
+        // Explicitly unregisterListener for sensors as safety net
+        accelerometerListener?.let { sensorManager?.unregisterListener(it) }
         try {
             phoneStateReceiver?.let { unregisterReceiver(it) }
         } catch (e: Exception) {

@@ -10,6 +10,7 @@ import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.os.PowerManager
 import android.util.Log
 
 class WakeWordDetector(
@@ -26,6 +27,8 @@ class WakeWordDetector(
     private var recognizerIntent: Intent? = null
     private var currentWakeWord = "กอหญ้า"
     private var isListening = false
+    @Volatile
+    private var isPaused = false
     private val mainHandler = Handler(Looper.getMainLooper())
 
     init {
@@ -120,6 +123,10 @@ class WakeWordDetector(
     fun startListening() {
         mainHandler.post {
             try {
+                if (isPaused || !isScreenOn()) {
+                    Log.d("WakeWordDetector", "Skipping startListening: isPaused=$isPaused, isScreenOn=${isScreenOn()}")
+                    return@post
+                }
                 if (speechRecognizer == null) {
                     initSpeechRecognizer()
                 } else {
@@ -161,6 +168,22 @@ class WakeWordDetector(
         currentWakeWord = newWord
     }
 
+    fun pauseListening() {
+        isPaused = true
+        stopListening()
+        Log.d("WakeWordDetector", "Paused listening (screen off / battery optimization)")
+    }
+
+    fun resumeListening() {
+        isPaused = false
+        Log.d("WakeWordDetector", "Resumed listening (screen on)")
+    }
+
+    fun isScreenOn(): Boolean {
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        return pm.isInteractive
+    }
+
     fun destroy() {
         mainHandler.post {
             try {
@@ -178,12 +201,9 @@ class WakeWordDetector(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val direction = if (mute) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE
                 audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, direction, 0)
-                audioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, direction, 0)
             } else {
                 @Suppress("DEPRECATION")
                 audioManager.setStreamMute(AudioManager.STREAM_SYSTEM, mute)
-                @Suppress("DEPRECATION")
-                audioManager.setStreamMute(AudioManager.STREAM_NOTIFICATION, mute)
             }
         } catch (e: Exception) {
             Log.e("WakeWordDetector", "Error muting/unmuting stream: mute=$mute", e)

@@ -107,23 +107,33 @@ class MeetingActivity : AppCompatActivity() {
     private val playHandler = Handler(Looper.getMainLooper())
     private var isPlaying = false
 
-    private val playRunnable = object : Runnable {
+    private class SafePlayRunnable(activity: MeetingActivity) : Runnable {
+        private val activityRef = java.lang.ref.WeakReference(activity)
         override fun run() {
-            mediaPlayer?.let { mp ->
+            val act = activityRef.get() ?: return
+            act.mediaPlayer?.let { mp ->
                 if (mp.isPlaying) {
-                    seekBarAudio.progress = mp.currentPosition
-                    txtCurrentPlayTime.text = formatTime(mp.currentPosition.toLong() / 1000)
-                    playHandler.postDelayed(this, 200)
+                    act.seekBarAudio.progress = mp.currentPosition
+                    act.txtCurrentPlayTime.text = act.formatTime(mp.currentPosition.toLong() / 1000)
+                    act.playHandler.postDelayed(this, 200)
                 }
             }
         }
     }
+
+    private val playRunnable = SafePlayRunnable(this)
 
     private var waveAnimator: AnimatorSet? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_meeting)
+
+        if (savedInstanceState != null) {
+            currentMeetingId = savedInstanceState.getString("currentMeetingId")
+            currentFilePath = savedInstanceState.getString("currentFilePath")
+            isPlaying = savedInstanceState.getBoolean("isPlaying", false)
+        }
 
         appPrefs = AppPreferences.getInstance(this)
         meetingDbHelper = MeetingDbHelper.getInstance(this)
@@ -909,7 +919,15 @@ class MeetingActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        playHandler.removeCallbacks(playRunnable)
         releaseMediaPlayer()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("currentMeetingId", currentMeetingId)
+        outState.putString("currentFilePath", currentFilePath)
+        outState.putBoolean("isPlaying", isPlaying)
     }
 
     // Adapter for Meetings List

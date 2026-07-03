@@ -1,0 +1,37 @@
+{
+    "id": "wp-20260703-192900-major-bugs-batch-2-complete",
+    "schema": "hermes-work-package-v1",
+    "title": "Major Bugs Batch 2 Complete — Service Leaks, IO Threading, Battery",
+    "objective": "Fix background service leaks, move SQLite/File I/O off main thread, add WakeWordDetector battery optimization",
+    "status": "completed",
+    "progress": 100,
+    "sequence": 2,
+    "createdAt": "2026-07-03T19:29:00+07:00",
+    "updatedAt": "2026-07-03T19:29:00+07:00",
+    "completed": [
+        "FloatingWidgetService.onDestroy: explicit sensorManager.unregisterListener safety net",
+        "FloatingWidgetService.writeIncidentLog: wrapped in serviceScope.launch(Dispatchers.IO)",
+        "WakeWordDetector: added pauseListening/resumeListening/isScreenOn for battery optimization",
+        "WakeWordDetector: removed STREAM_NOTIFICATION mute side effect",
+        "WakeWordDetector: added isPaused guard in startListening",
+        "MainActivity.setupProfileSpinner: DateProfileDbHelper calls moved to Dispatchers.IO",
+        "SituationLogManager: saveReportToDisk runs on ioScope (Dispatchers.IO)",
+        "All 56 unit tests passing (debug + release)"
+    ],
+    "pending": [],
+    "next_steps": [
+        "Address remaining Major bugs: anonymous listener inner class leaks in FloatingWidgetService, audio focus loss handler, TopicManager unbounded keyword growth, DynamicRulesManager performance, ContextManager synchronization"
+    ],
+    "context_summary": "Successfully completed Batch 2 of Major Bug fixes. Fixed sensor listener leak in FloatingWidgetService.onDestroy with explicit unregisterListener. Moved file I/O in writeIncidentLog and SituationLogManager.saveReportToDisk to background IO dispatchers. Implemented battery-aware WakeWordDetector with screen-off detection (PowerManager.isInteractive), pause/resume methods, and removed notification stream muting side effect. Moved DateProfileDbHelper SQLite calls off main thread in MainActivity.setupProfileSpinner. All 56 tests pass on both debug and release variants.",
+    "decisions": [],
+    "risks": [],
+    "assumptions": [],
+    "knowledge": [],
+    "open_questions": [],
+    "memory_snapshot": [],
+    "tags": [],
+    "artifacts": [],
+    "agents": [],
+    "dependencies": [],
+    "scope": ""
+}

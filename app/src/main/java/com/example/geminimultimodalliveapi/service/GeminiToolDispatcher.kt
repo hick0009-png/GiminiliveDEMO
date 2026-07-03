@@ -138,45 +138,53 @@ class GeminiToolDispatcher(
         infoValue: String,
         liveClient: GeminiLiveClient?
     ) {
-        try {
-            Log.i("GeminiToolDispatcher", "Tool call save_vehicle_info: cat=$category, key=$keyName, val=$infoValue")
-            val success = dbHelper.saveInfo(category, keyName, infoValue)
-            liveClient?.sendToolResponse(callId, success)
-            if (success) {
-                logger.log("SYSTEM: Saved $category - $keyName to local memory")
-                val memoryId = "vehicle_${category}_${keyName}"
-                memoryManager.addFact(memoryId, "ข้อมูลรถหมวดหมู่ $category ($keyName): $infoValue", isPinned = false, category = category)
-            } else {
-                logger.log("SYSTEM: Failed to save to local memory")
+        scope.launch {
+            try {
+                Log.i("GeminiToolDispatcher", "Tool call save_vehicle_info: cat=$category, key=$keyName, val=$infoValue")
+                val success = withContext(Dispatchers.IO) {
+                    dbHelper.saveInfo(category, keyName, infoValue)
+                }
+                liveClient?.sendToolResponse(callId, success)
+                if (success) {
+                    logger.log("SYSTEM: Saved $category - $keyName to local memory")
+                    val memoryId = "vehicle_${category}_${keyName}"
+                    memoryManager.addFact(memoryId, "ข้อมูลรถหมวดหมู่ $category ($keyName): $infoValue", isPinned = false, category = category)
+                } else {
+                    logger.log("SYSTEM: Failed to save to local memory")
+                }
+            } catch (e: Exception) {
+                Log.e("GeminiToolDispatcher", "Error in handleSaveVehicleInfo", e)
+                liveClient?.sendToolResponse(callId, false)
             }
-        } catch (e: Exception) {
-            Log.e("GeminiToolDispatcher", "Error in handleSaveVehicleInfo", e)
-            liveClient?.sendToolResponse(callId, false)
         }
     }
 
     fun handleQueryVehicleInfo(callId: String, category: String?, liveClient: GeminiLiveClient?) {
-        try {
-            Log.i("GeminiToolDispatcher", "Tool call query_vehicle_info: cat=$category")
-            val records = dbHelper.queryInfo(category)
-            
-            val output = JSONObject()
-            val resultsArray = JSONArray()
-            for (record in records) {
-                val recJson = JSONObject()
-                recJson.put("category", record["category"])
-                recJson.put("key_name", record["key_name"])
-                recJson.put("info_value", record["info_value"])
-                recJson.put("updated_at", record["updated_at"])
-                resultsArray.put(recJson)
+        scope.launch {
+            try {
+                Log.i("GeminiToolDispatcher", "Tool call query_vehicle_info: cat=$category")
+                val records = withContext(Dispatchers.IO) {
+                    dbHelper.queryInfo(category)
+                }
+                
+                val output = JSONObject()
+                val resultsArray = JSONArray()
+                for (record in records) {
+                    val recJson = JSONObject()
+                    recJson.put("category", record["category"])
+                    recJson.put("key_name", record["key_name"])
+                    recJson.put("info_value", record["info_value"])
+                    recJson.put("updated_at", record["updated_at"])
+                    resultsArray.put(recJson)
+                }
+                output.put("results", resultsArray)
+                
+                liveClient?.sendToolResponse(callId, output)
+                logger.log("SYSTEM: Queried local memory (found ${records.size} items)")
+            } catch (e: Exception) {
+                Log.e("GeminiToolDispatcher", "Error in handleQueryVehicleInfo", e)
+                sendErrorToolResponse(callId, liveClient, e.message)
             }
-            output.put("results", resultsArray)
-            
-            liveClient?.sendToolResponse(callId, output)
-            logger.log("SYSTEM: Queried local memory (found ${records.size} items)")
-        } catch (e: Exception) {
-            Log.e("GeminiToolDispatcher", "Error in handleQueryVehicleInfo", e)
-            sendErrorToolResponse(callId, liveClient, e.message)
         }
     }
 
@@ -572,13 +580,22 @@ class GeminiToolDispatcher(
     }
 
     fun handleDeleteVehicleInfo(callId: String, category: String, keyName: String?, liveClient: GeminiLiveClient?) {
-        Log.i("GeminiToolDispatcher", "Tool call delete_vehicle_info: cat=$category, key=$keyName")
-        val success = dbHelper.deleteInfo(category, keyName)
-        liveClient?.sendToolResponse(callId, success)
-        if (success) {
-            logger.log("SYSTEM: Deleted $category memory log")
-        } else {
-            logger.log("SYSTEM: Failed to delete memory log or no matching record")
+        scope.launch {
+            try {
+                Log.i("GeminiToolDispatcher", "Tool call delete_vehicle_info: cat=$category, key=$keyName")
+                val success = withContext(Dispatchers.IO) {
+                    dbHelper.deleteInfo(category, keyName)
+                }
+                liveClient?.sendToolResponse(callId, success)
+                if (success) {
+                    logger.log("SYSTEM: Deleted $category memory log")
+                } else {
+                    logger.log("SYSTEM: Failed to delete memory log or no matching record")
+                }
+            } catch (e: Exception) {
+                Log.e("GeminiToolDispatcher", "Error in handleDeleteVehicleInfo", e)
+                liveClient?.sendToolResponse(callId, false)
+            }
         }
     }
 

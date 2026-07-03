@@ -3,6 +3,7 @@ package com.example.geminimultimodalliveapi.architecture
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import kotlinx.coroutines.*
 import java.io.File
 
 enum class TriggerType { USER_CORRECTION, MANUAL_CANCEL, SYSTEM_ERROR }
@@ -24,6 +25,7 @@ class SituationLogManager(
     private val contextManager: ContextManager,
     private val rulesManager: DynamicRulesManager
 ) {
+    private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val conversationBuffer = mutableListOf<ChatTurn>()
     private val maxBufferSize = 5
     private val gson = Gson()
@@ -87,7 +89,7 @@ class SituationLogManager(
             activeRules = allRules
         )
 
-        saveReportToDisk(report)
+        ioScope.launch { saveReportToDisk(report) }
     }
 
     private fun saveReportToDisk(report: IncidentReport) {

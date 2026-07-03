@@ -131,6 +131,34 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        if (savedInstanceState != null) {
+            wasCameraActiveBeforeStop = savedInstanceState.getBoolean("wasCameraActiveBeforeStop", false)
+            isExplicitCapture = savedInstanceState.getBoolean("isExplicitCapture", false)
+            cameraCallId = savedInstanceState.getString("cameraCallId")
+            val savedProfile = savedInstanceState.getString("activeProfileName", "")
+            if (savedProfile.isNotEmpty()) {
+                SessionStateHolder.activeProfileName = savedProfile
+            }
+            val savedLogs = savedInstanceState.getString("chatLogs", "")
+            if (savedLogs.isNotEmpty()) {
+                SessionStateHolder.updateChatLogs(savedLogs)
+            }
+            val savedAttention = savedInstanceState.getString("diag_attentionState", "IDLE")
+            val savedTopic = savedInstanceState.getString("diag_activeTopic", "None")
+            val savedLastEvent = savedInstanceState.getString("diag_lastEvent", "None")
+            val savedMotion = savedInstanceState.getString("diag_motionState", "STILL")
+            val savedLocation = savedInstanceState.getString("diag_locationState", "home")
+            SessionStateHolder.updateDiagnostics {
+                it.copy(
+                    attentionState = savedAttention,
+                    activeTopic = savedTopic,
+                    lastEvent = savedLastEvent,
+                    motionState = savedMotion,
+                    locationState = savedLocation
+                )
+            }
+        }
+
         appPrefs = AppPreferences.getInstance(this)
 
         // Preload SQLCipher libraries in background thread to speed up MeetingActivity launch
@@ -932,6 +960,21 @@ class MainActivity : AppCompatActivity() {
         activityScope.cancel()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("wasCameraActiveBeforeStop", wasCameraActiveBeforeStop)
+        outState.putBoolean("isExplicitCapture", isExplicitCapture)
+        outState.putString("cameraCallId", cameraCallId)
+        outState.putString("activeProfileName", SessionStateHolder.activeProfileName)
+        outState.putString("chatLogs", SessionStateHolder.chatLogs.value)
+        val diag = SessionStateHolder.diagnostics.value
+        outState.putString("diag_attentionState", diag.attentionState)
+        outState.putString("diag_activeTopic", diag.activeTopic)
+        outState.putString("diag_lastEvent", diag.lastEvent)
+        outState.putString("diag_motionState", diag.motionState)
+        outState.putString("diag_locationState", diag.locationState)
+    }
+
     private fun enableImmersiveFullscreen() {
         runOnUiThread {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -1054,15 +1097,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupProfileSpinner() {
-        val names = dateDbHelper.getAllProfileNames().toMutableList()
-        // If empty, add a default profile
-        if (names.isEmpty()) {
-            names.add("คู่เดตทั่วไป")
-            dateDbHelper.saveProfile("คู่เดตทั่วไป", emptyList(), emptyList(), emptyList())
+        lifecycleScope.launch {
+        val names = withContext(Dispatchers.IO) {
+            val loaded = dateDbHelper.getAllProfileNames().toMutableList()
+            if (loaded.isEmpty()) {
+                loaded.add("คู่เดตทั่วไป")
+                dateDbHelper.saveProfile("คู่เดตทั่วไป", emptyList(), emptyList(), emptyList())
+            }
+            loaded
         }
         names.add("+ เพิ่มโปรไฟล์ใหม่...")
 
-        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, names)
+        val adapter = android.widget.ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, names)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerProfile.adapter = adapter
 
@@ -1101,6 +1147,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }
+    }
     }
 
 

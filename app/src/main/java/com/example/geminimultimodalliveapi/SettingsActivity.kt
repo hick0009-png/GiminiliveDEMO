@@ -40,6 +40,9 @@ import java.io.IOException
 
 class SettingsActivity : AppCompatActivity() {
 
+    private var deepgramApiKeyWatcher: android.text.TextWatcher? = null
+    private var wakeWordWatcher: android.text.TextWatcher? = null
+
     private lateinit var appPrefs: AppPreferences
     private lateinit var btnBack: ImageButton
     private lateinit var apiKeyInput: EditText
@@ -141,6 +144,12 @@ class SettingsActivity : AppCompatActivity() {
 
         txtSettingsTitle = findViewById(R.id.txtSettingsTitle)
         layoutCategoryMenu = findViewById(R.id.layoutCategoryMenu)
+
+        if (savedInstanceState != null) {
+            val menuVis = savedInstanceState.getInt("menu_visibility", android.view.View.VISIBLE)
+            layoutCategoryMenu.visibility = menuVis
+            txtSettingsTitle.text = savedInstanceState.getCharSequence("title_text", "การตั้งค่า")
+        }
         layoutDetailsContainer = findViewById(R.id.layoutDetailsContainer)
 
         menuItemAi = findViewById(R.id.menuItemAi)
@@ -264,13 +273,14 @@ class SettingsActivity : AppCompatActivity() {
         // Deepgram API Key Preference
         val rawSavedDeepgramKey = appPrefs.deepgramApiKey
         deepgramApiKeyInput.setText(rawSavedDeepgramKey)
-        deepgramApiKeyInput.addTextChangedListener(object : android.text.TextWatcher {
+        deepgramApiKeyWatcher = object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: android.text.Editable?) {
                 appPrefs.deepgramApiKey = s.toString().trim()
             }
-        })
+        }
+        deepgramApiKeyInput.addTextChangedListener(deepgramApiKeyWatcher)
 
         btnTestDeepgram.setOnClickListener {
             val key = deepgramApiKeyInput.text.toString().trim()
@@ -303,7 +313,7 @@ class SettingsActivity : AppCompatActivity() {
         // Wake Word Preference
         val savedWakeWord = appPrefs.wakeWord
         wakeWordInput.setText(savedWakeWord)
-        wakeWordInput.addTextChangedListener(object : android.text.TextWatcher {
+        wakeWordWatcher = object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: android.text.Editable?) {
@@ -313,7 +323,8 @@ class SettingsActivity : AppCompatActivity() {
                     FloatingWidgetService.instance?.updateWakeWord(newWord)
                 }
             }
-        })
+        }
+        wakeWordInput.addTextChangedListener(wakeWordWatcher)
 
         // Floating widget preference
         val isFloatingWidgetEnabled = appPrefs.isFloatingWidgetEnabled
@@ -751,6 +762,8 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        deepgramApiKeyWatcher?.let { deepgramApiKeyInput.removeTextChangedListener(it) }
+        wakeWordWatcher?.let { wakeWordInput.removeTextChangedListener(it) }
         activityScope.cancel()
         if (::calendarManager.isInitialized) {
             calendarManager.onDestroy()
@@ -758,6 +771,12 @@ class SettingsActivity : AppCompatActivity() {
         if (::documentManager.isInitialized) {
             documentManager.onDestroy()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("menu_visibility", layoutCategoryMenu.visibility)
+        outState.putCharSequence("title_text", txtSettingsTitle.text)
     }
 
     val pickDocumentLauncher = registerForActivityResult(
