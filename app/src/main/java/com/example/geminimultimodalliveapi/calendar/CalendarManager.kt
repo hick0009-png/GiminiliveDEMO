@@ -25,6 +25,8 @@ import com.example.geminimultimodalliveapi.utils.GoogleCalendarServiceHelper
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.services.drive.DriveScopes
+import com.example.geminimultimodalliveapi.utils.GoogleSignInHelper
+import com.example.geminimultimodalliveapi.utils.dpToPx
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -124,15 +126,7 @@ class CalendarManager(
         }
 
         btnCalendarSignIn.setOnClickListener {
-            val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestScopes(
-                    com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
-                    com.google.android.gms.common.api.Scope("https://www.googleapis.com/auth/calendar"),
-                    com.google.android.gms.common.api.Scope("https://www.googleapis.com/auth/calendar.events")
-                )
-                .build()
-            val googleSignInClient = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(activity, gso)
+            val googleSignInClient = GoogleSignInHelper.getClient(activity)
             callbacks.launchGoogleSignIn(googleSignInClient.signInIntent)
         }
     }
@@ -290,7 +284,7 @@ class CalendarManager(
 
                 // Left color bar indicator for modern look
                 val colorBar = View(activity).apply {
-                    val barWidth = (4 * activity.resources.displayMetrics.density).toInt()
+                    val barWidth = activity.dpToPx(4)
                     layoutParams = LinearLayout.LayoutParams(
                         barWidth,
                         LinearLayout.LayoutParams.MATCH_PARENT
@@ -349,8 +343,8 @@ class CalendarManager(
                         setBackgroundColor(Color.TRANSPARENT)
                         setColorFilter(Color.parseColor("#80FFFFFF"))
                         layoutParams = LinearLayout.LayoutParams(
-                            (32 * activity.resources.displayMetrics.density).toInt(),
-                            (32 * activity.resources.displayMetrics.density).toInt()
+                            activity.dpToPx(32),
+                            activity.dpToPx(32)
                         ).apply {
                             setMargins(8, 0, 0, 0)
                         }
@@ -365,8 +359,8 @@ class CalendarManager(
                         setBackgroundColor(Color.TRANSPARENT)
                         setColorFilter(Color.parseColor("#FF5252"))
                         layoutParams = LinearLayout.LayoutParams(
-                            (32 * activity.resources.displayMetrics.density).toInt(),
-                            (32 * activity.resources.displayMetrics.density).toInt()
+                            activity.dpToPx(32),
+                            activity.dpToPx(32)
                         ).apply {
                             setMargins(8, 0, 0, 0)
                         }

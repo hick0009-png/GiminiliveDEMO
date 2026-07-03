@@ -36,6 +36,9 @@ import com.example.geminimultimodalliveapi.session.SessionState
 import com.example.geminimultimodalliveapi.session.SessionStateHolder
 import com.example.geminimultimodalliveapi.error.AppError
 import com.google.android.material.card.MaterialCardView
+import com.example.geminimultimodalliveapi.utils.GoogleSignInHelper
+import com.example.geminimultimodalliveapi.utils.isNotificationServiceEnabled
+import com.example.geminimultimodalliveapi.utils.showReAuthDialog
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
@@ -323,15 +326,7 @@ class MainActivity : AppCompatActivity() {
         handleCameraIntent(intent)
         handlePermissionIntent(intent)
 
-        val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(
-                com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
-                com.google.android.gms.common.api.Scope("https://www.googleapis.com/auth/calendar"),
-                com.google.android.gms.common.api.Scope("https://www.googleapis.com/auth/calendar.events")
-            )
-            .build()
-        googleSignInClient = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(this, gso)
+        googleSignInClient = GoogleSignInHelper.getClient(this)
 
         isConnected = FloatingWidgetService.isSessionConnected
         updateStatusIndicator(SessionStateHolder.state.value)
@@ -383,18 +378,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showReAuthDialog() {
-        if (isFinishing || isDestroyed) return
-        if (reAuthDialog?.isShowing == true) return
-
-        reAuthDialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle(R.string.reauth_title)
-            .setMessage(R.string.reauth_message)
-            .setPositiveButton(R.string.reauth_positive) { _, _ ->
-                googleSignInLauncher.launch(googleSignInClient.signInIntent)
-            }
-            .setNegativeButton("ยกเลิก", null)
-            .create()
-        reAuthDialog?.show()
+        reAuthDialog = showReAuthDialog(reAuthDialog) {
+            googleSignInLauncher.launch(googleSignInClient.signInIntent)
+        }
     }
 
     private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
@@ -1276,9 +1262,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun isNotificationServiceEnabled(): Boolean {
-        val cn = android.content.ComponentName(this, com.example.geminimultimodalliveapi.service.SmartNotificationListenerService::class.java)
-        val flat = android.provider.Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-        return flat != null && flat.contains(cn.flattenToString())
-    }
 }

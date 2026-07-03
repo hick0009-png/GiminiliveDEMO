@@ -19,6 +19,7 @@ import android.content.Intent
 import com.example.geminimultimodalliveapi.R
 import com.example.geminimultimodalliveapi.utils.DocumentParser
 import com.example.geminimultimodalliveapi.utils.GoogleDriveServiceHelper
+import com.example.geminimultimodalliveapi.utils.GoogleSignInHelper
 import com.example.geminimultimodalliveapi.utils.dpToPx
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -59,15 +60,7 @@ class DocumentManager(
     private var driveServiceHelper: GoogleDriveServiceHelper? = null
 
     init {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(
-                Scope(DriveScopes.DRIVE_FILE),
-                Scope("https://www.googleapis.com/auth/calendar"),
-                Scope("https://www.googleapis.com/auth/calendar.events")
-            )
-            .build()
-        googleSignInClient = GoogleSignIn.getClient(activity, gso)
+        googleSignInClient = GoogleSignInHelper.getClient(activity)
 
         connectDriveButton.setOnClickListener {
             toggleDriveConnection()

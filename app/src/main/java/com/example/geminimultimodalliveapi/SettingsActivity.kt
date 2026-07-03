@@ -38,6 +38,9 @@ import okhttp3.Callback
 import okhttp3.Response
 import java.io.IOException
 import com.example.geminimultimodalliveapi.utils.dpToPx
+import com.example.geminimultimodalliveapi.utils.GoogleSignInHelper
+import com.example.geminimultimodalliveapi.utils.isNotificationServiceEnabled
+import com.example.geminimultimodalliveapi.utils.showReAuthDialog
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -717,28 +720,10 @@ class SettingsActivity : AppCompatActivity() {
     private var reAuthDialog: androidx.appcompat.app.AlertDialog? = null
 
     private fun showReAuthDialog() {
-        if (isFinishing || isDestroyed) return
-        if (reAuthDialog?.isShowing == true) return
-
-        val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(
-                com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
-                com.google.android.gms.common.api.Scope("https://www.googleapis.com/auth/calendar"),
-                com.google.android.gms.common.api.Scope("https://www.googleapis.com/auth/calendar.events")
-            )
-            .build()
-        val googleSignInClient = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(this, gso)
-
-        reAuthDialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle(R.string.reauth_title)
-            .setMessage(R.string.reauth_message)
-            .setPositiveButton(R.string.reauth_positive) { _, _ ->
-                googleSignInLauncher.launch(googleSignInClient.signInIntent)
-            }
-            .setNegativeButton("ยกเลิก", null)
-            .create()
-        reAuthDialog?.show()
+        val googleSignInClient = GoogleSignInHelper.getClient(this)
+        reAuthDialog = showReAuthDialog(reAuthDialog) {
+            googleSignInLauncher.launch(googleSignInClient.signInIntent)
+        }
     }
 
     override fun onResume() {
@@ -1529,9 +1514,4 @@ class SettingsActivity : AppCompatActivity() {
 
 
 
-    private fun isNotificationServiceEnabled(): Boolean {
-        val cn = android.content.ComponentName(this, com.example.geminimultimodalliveapi.service.SmartNotificationListenerService::class.java)
-        val flat = android.provider.Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-        return flat != null && flat.contains(cn.flattenToString())
-    }
 }
