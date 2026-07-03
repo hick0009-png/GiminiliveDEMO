@@ -15,6 +15,8 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.example.geminimultimodalliveapi.R
+import com.example.geminimultimodalliveapi.utils.dpToPx
+
 
 class OverlayWidgetController(
     private val context: Context,
@@ -63,14 +65,14 @@ class OverlayWidgetController(
         }
 
         params = WindowManager.LayoutParams(
-            dpToPx(60),
-            dpToPx(60),
+            context.dpToPx(60),
+            context.dpToPx(60),
             layoutType,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = context.resources.displayMetrics.widthPixels - dpToPx(70)
+            x = context.resources.displayMetrics.widthPixels - context.dpToPx(70)
             y = context.resources.displayMetrics.heightPixels / 2
         }
 
@@ -146,6 +148,7 @@ class OverlayWidgetController(
     fun hide() {
         if (!isBubbleVisible) return
         try {
+            stopPulseAnimation()
             windowManager.removeView(floatingView)
             isBubbleVisible = false
             Log.i("OverlayWidgetController", "Overlay bubble removed from window")
@@ -213,8 +216,5 @@ class OverlayWidgetController(
 
     fun isVisible(): Boolean = isBubbleVisible
 
-    private fun dpToPx(dp: Int): Int {
-        val density = context.resources.displayMetrics.density
-        return (dp * density).toInt()
-    }
+
 }

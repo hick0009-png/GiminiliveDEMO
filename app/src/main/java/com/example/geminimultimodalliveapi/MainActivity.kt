@@ -41,7 +41,9 @@ import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.example.geminimultimodalliveapi.utils.dpToPx
 import java.util.Locale
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -130,6 +132,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (cameraCaptureHelper?.isCameraActive == true) {
+                    cameraCaptureHelper?.stopPreview()
+                    updateCaptureButtonState(false)
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        })
 
         if (savedInstanceState != null) {
             wasCameraActiveBeforeStop = savedInstanceState.getBoolean("wasCameraActiveBeforeStop", false)
@@ -372,9 +387,9 @@ class MainActivity : AppCompatActivity() {
         if (reAuthDialog?.isShowing == true) return
 
         reAuthDialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("สิทธิ์การเข้าถึงหมดอายุ")
-            .setMessage("สิทธิ์การเข้าถึงบัญชี Google หมดอายุ กรุณาลงชื่อเข้าใช้งานอีกครั้ง")
-            .setPositiveButton("ลงชื่อเข้าใช้") { _, _ ->
+            .setTitle(R.string.reauth_title)
+            .setMessage(R.string.reauth_message)
+            .setPositiveButton(R.string.reauth_positive) { _, _ ->
                 googleSignInLauncher.launch(googleSignInClient.signInIntent)
             }
             .setNegativeButton("ยกเลิก", null)
@@ -771,11 +786,11 @@ class MainActivity : AppCompatActivity() {
             launch {
                 SessionStateHolder.errorFlow.collect { error ->
                     val thaiMessage = when (error) {
-                        is AppError.Network -> "การเชื่อมต่อเครือข่ายล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต"
-                        is AppError.Permission -> "ขาดสิทธิ์การใช้งานที่จำเป็น: ${error.type}"
-                        is AppError.AuthExpired -> "สิทธิ์การเข้าถึงบัญชี Google หมดอายุ กรุณาลงชื่อเข้าใช้งานอีกครั้ง"
-                        is AppError.Api -> "ข้อผิดพลาดระบบ API: ${error.message}"
-                        is AppError.Tool -> "เครื่องมือขัดข้อง (${error.name}): ${error.message}"
+                        is AppError.Network -> getString(R.string.error_network)
+                        is AppError.Permission -> getString(R.string.error_permission, error.type)
+                        is AppError.AuthExpired -> getString(R.string.error_auth_expired)
+                        is AppError.Api -> getString(R.string.error_api, error.message)
+                        is AppError.Tool -> getString(R.string.error_tool, error.name, error.message)
                     }
                     if (error is AppError.AuthExpired) {
                         showReAuthDialog()
@@ -1038,16 +1053,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        if (cameraCaptureHelper?.isCameraActive == true) {
-            cameraCaptureHelper?.stopPreview()
-            updateCaptureButtonState(false)
-        } else {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
-        }
-    }
+
 
     private fun saveImageToGallery(imageBytes: ByteArray) {
         val timeStamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())
@@ -1251,10 +1257,7 @@ class MainActivity : AppCompatActivity() {
         return tv
     }
 
-    private fun dpToPx(dp: Int): Int {
-        val density = resources.displayMetrics.density
-        return (dp * density).toInt()
-    }
+
 
     private fun checkNotificationAccessPermission() {
         if (!isNotificationServiceEnabled()) {

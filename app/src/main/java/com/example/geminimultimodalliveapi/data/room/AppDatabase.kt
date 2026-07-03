@@ -59,7 +59,7 @@ interface MemoryDao {
     @Query("SELECT * FROM memories ORDER BY last_accessed_time DESC")
     fun getAll(): List<MemoryEntryEntity>
 
-    @Query("SELECT * FROM memories WHERE content LIKE '%' || :query || '%' OR category LIKE '%' || :query || '%'")
+    @Query("SELECT * FROM memories WHERE content LIKE '%' || :query || '%' ESCAPE '\\' OR category LIKE '%' || :query || '%' ESCAPE '\\' ORDER BY is_pinned DESC, last_accessed_time DESC")
     fun search(query: String): List<MemoryEntryEntity>
 
     @Query("UPDATE memories SET access_count = access_count + 1, last_accessed_time = :time WHERE id = :id")

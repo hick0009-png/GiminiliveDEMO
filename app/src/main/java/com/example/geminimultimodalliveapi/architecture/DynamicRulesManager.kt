@@ -60,6 +60,12 @@ class DynamicRulesManager(private val context: Context) {
     }
 
     @Synchronized
+    fun clearCache() {
+        cachedRules = null
+        Log.d("DynamicRulesManager", "Cleared rules memory cache")
+    }
+
+    @Synchronized
     fun clearAllRules() {
         cachedRules = null
         prefs.edit().remove("rules_list").apply()

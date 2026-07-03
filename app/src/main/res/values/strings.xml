@@ -5,4 +5,16 @@
     <string name="label_attention">ATTENTION: %s</string>
     <string name="label_topic">TOPIC: %s</string>
     <string name="label_event">EVENT: %s</string>
+
+    <!-- General Error Strings -->
+    <string name="error_network">การเชื่อมต่อเครือข่ายล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต</string>
+    <string name="error_permission">ขาดสิทธิ์การใช้งานที่จำเป็น: %1$s</string>
+    <string name="error_auth_expired">สิทธิ์การเข้าถึงบัญชี Google หมดอายุ กรุณาลงชื่อเข้าใช้งานอีกครั้ง</string>
+    <string name="error_api">ข้อผิดพลาดระบบ API: %1$s</string>
+    <string name="error_tool">เครื่องมือขัดข้อง (%1$s): %2$s</string>
+
+    <!-- Reauth Dialog -->
+    <string name="reauth_title">สิทธิ์การเข้าถึงหมดอายุ</string>
+    <string name="reauth_message">สิทธิ์การเข้าถึงบัญชี Google หมดอายุ กรุณาลงชื่อเข้าใช้งานอีกครั้ง</string>
+    <string name="reauth_positive">ลงชื่อเข้าใช้</string>
 </resources>

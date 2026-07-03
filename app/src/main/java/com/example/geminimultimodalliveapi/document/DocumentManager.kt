@@ -19,6 +19,8 @@ import android.content.Intent
 import com.example.geminimultimodalliveapi.R
 import com.example.geminimultimodalliveapi.utils.DocumentParser
 import com.example.geminimultimodalliveapi.utils.GoogleDriveServiceHelper
+import com.example.geminimultimodalliveapi.utils.dpToPx
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -269,7 +271,7 @@ class DocumentManager(
                 backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#FF5252")) // red
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    dpToPx(32)
+                    activity.dpToPx(32)
                 )
                 setOnClickListener {
                     AlertDialog.Builder(activity)
@@ -367,10 +369,7 @@ class DocumentManager(
         }
     }
 
-    private fun dpToPx(dp: Int): Int {
-        val density = activity.resources.displayMetrics.density
-        return (dp * density).toInt()
-    }
+
 
     private fun spToPx(sp: Int): Int {
         return (sp * activity.resources.displayMetrics.scaledDensity).toInt()

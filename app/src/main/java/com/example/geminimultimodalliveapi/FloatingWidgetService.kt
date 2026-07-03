@@ -1827,4 +1827,20 @@ class FloatingWidgetService : Service() {
         }
         return false
     }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        Log.i("FloatingWidgetService", "onTrimMemory level: $level")
+        if (::dynamicRulesManager.isInitialized) {
+            dynamicRulesManager.clearCache()
+        }
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        Log.w("FloatingWidgetService", "onLowMemory called")
+        if (::dynamicRulesManager.isInitialized) {
+            dynamicRulesManager.clearCache()
+        }
+    }
 }

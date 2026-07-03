@@ -38,6 +38,8 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import com.example.geminimultimodalliveapi.utils.dpToPx
+
 // removed unused serialization imports
 import java.io.File
 import java.text.SimpleDateFormat
@@ -285,7 +287,7 @@ class MeetingActivity : AppCompatActivity() {
                 }
             }
         }
-        meetingsAdapter.notifyDataSetChanged()
+        meetingsAdapter.submitList(meetingsList)
     }
 
     private fun observeRecordingState() {
@@ -755,6 +757,7 @@ class MeetingActivity : AppCompatActivity() {
     }
 
     private fun displayTranscript(transcriptJson: String?) {
+        val oldList = ArrayList(transcriptList)
         transcriptList.clear()
         if (!transcriptJson.isNullOrEmpty()) {
             try {
@@ -769,7 +772,21 @@ class MeetingActivity : AppCompatActivity() {
                 Log.e("MeetingActivity", "Error decoding transcript JSON manually", e)
             }
         }
-        transcriptAdapter?.notifyDataSetChanged()
+        val adapter = transcriptAdapter
+        if (adapter != null) {
+            val diffResult = androidx.recyclerview.widget.DiffUtil.calculateDiff(object : androidx.recyclerview.widget.DiffUtil.Callback() {
+                override fun getOldListSize(): Int = oldList.size
+                override fun getNewListSize(): Int = transcriptList.size
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return oldList[oldItemPosition].text == transcriptList[newItemPosition].text &&
+                           oldList[oldItemPosition].speaker == transcriptList[newItemPosition].speaker
+                }
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return oldList[oldItemPosition] == transcriptList[newItemPosition]
+                }
+            })
+            diffResult.dispatchUpdatesTo(adapter)
+        }
     }
 
     // Speaker Rename Dialog
@@ -892,10 +909,7 @@ class MeetingActivity : AppCompatActivity() {
         return String.format("%02d:%02d:%02d", h, m, s)
     }
 
-    private fun dpToPx(dp: Int): Int {
-        val density = resources.displayMetrics.density
-        return (dp * density).toInt()
-    }
+
 
     private fun checkAudioPermission(): Boolean {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -948,6 +962,23 @@ class MeetingActivity : AppCompatActivity() {
     inner class MeetingsAdapter(private val onItemClick: (Meeting) -> Unit) :
         RecyclerView.Adapter<MeetingsAdapter.MeetingViewHolder>() {
 
+        private var list: List<Meeting> = emptyList()
+
+        fun submitList(newList: List<Meeting>) {
+            val diffResult = androidx.recyclerview.widget.DiffUtil.calculateDiff(object : androidx.recyclerview.widget.DiffUtil.Callback() {
+                override fun getOldListSize(): Int = list.size
+                override fun getNewListSize(): Int = newList.size
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return list[oldItemPosition].id == newList[newItemPosition].id
+                }
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return list[oldItemPosition] == newList[newItemPosition]
+                }
+            })
+            list = newList.toList()
+            diffResult.dispatchUpdatesTo(this)
+        }
+
         inner class MeetingViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val title: TextView = view.findViewById(R.id.txtMeetingTitle)
             val date: TextView = view.findViewById(R.id.txtMeetingDate)
@@ -963,7 +994,7 @@ class MeetingActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: MeetingViewHolder, position: Int) {
-            val meeting = meetingsList[position]
+            val meeting = list[position]
             holder.title.text = meeting.title
 
             val sdf = SimpleDateFormat("d MMM yyyy, HH:mm", Locale("th", "TH"))
@@ -1005,7 +1036,7 @@ class MeetingActivity : AppCompatActivity() {
             }
         }
 
-        override fun getItemCount(): Int = meetingsList.size
+        override fun getItemCount(): Int = list.size
     }
 
     // Adapter for Transcript Bubble segments

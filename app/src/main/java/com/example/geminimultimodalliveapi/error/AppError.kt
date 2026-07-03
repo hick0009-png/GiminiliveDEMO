@@ -12,6 +12,9 @@ sealed class AppError {
             val msg = e.message?.lowercase() ?: ""
             return e is com.google.api.client.googleapis.json.GoogleJsonResponseException && (e.statusCode == 401 || e.statusCode == 403) ||
                    e is com.google.android.gms.auth.UserRecoverableAuthException ||
+                   e is com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException ||
+                   e is com.google.api.client.auth.oauth2.TokenResponseException ||
+                   e is com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAuthIOException ||
                    msg.contains("auth") || msg.contains("401") || msg.contains("403") || msg.contains("credential")
         }
 

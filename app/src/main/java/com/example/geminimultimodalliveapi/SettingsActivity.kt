@@ -37,6 +37,8 @@ import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
 import java.io.IOException
+import com.example.geminimultimodalliveapi.utils.dpToPx
+
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -117,6 +119,18 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (layoutCategoryMenu.visibility == View.GONE) {
+                    handleBackPress()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        })
 
         appPrefs = AppPreferences.getInstance(this)
 
@@ -717,9 +731,9 @@ class SettingsActivity : AppCompatActivity() {
         val googleSignInClient = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(this, gso)
 
         reAuthDialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("สิทธิ์การเข้าถึงหมดอายุ")
-            .setMessage("สิทธิ์การเข้าถึงบัญชี Google หมดอายุ กรุณาลงชื่อเข้าใช้งานอีกครั้ง")
-            .setPositiveButton("ลงชื่อเข้าใช้") { _, _ ->
+            .setTitle(R.string.reauth_title)
+            .setMessage(R.string.reauth_message)
+            .setPositiveButton(R.string.reauth_positive) { _, _ ->
                 googleSignInLauncher.launch(googleSignInClient.signInIntent)
             }
             .setNegativeButton("ยกเลิก", null)
@@ -845,13 +859,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        if (layoutCategoryMenu.visibility == View.GONE) {
-            handleBackPress()
-        } else {
-            super.onBackPressed()
-        }
-    }
+
 
     private val pickPsychologyPdfLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
@@ -1519,10 +1527,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun dpToPx(dp: Int): Int {
-        val density = resources.displayMetrics.density
-        return (dp * density).toInt()
-    }
+
 
     private fun isNotificationServiceEnabled(): Boolean {
         val cn = android.content.ComponentName(this, com.example.geminimultimodalliveapi.service.SmartNotificationListenerService::class.java)
