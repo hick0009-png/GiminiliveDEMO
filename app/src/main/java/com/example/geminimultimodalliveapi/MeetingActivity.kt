@@ -122,6 +122,7 @@ class MeetingActivity : AppCompatActivity() {
     }
 
     private val playRunnable = SafePlayRunnable(this)
+    private var searchWatcher: android.text.TextWatcher? = null
 
     private var waveAnimator: AnimatorSet? = null
 
@@ -216,13 +217,15 @@ class MeetingActivity : AppCompatActivity() {
             shareMeeting()
         }
 
-        findViewById<EditText>(R.id.editSearchMeetings).addTextChangedListener(object : android.text.TextWatcher {
+        searchWatcher = object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                filterMeetings(s.toString())
+                val q = s?.toString() ?: ""
+                filterMeetings(q)
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
-        })
+        }
+        findViewById<EditText>(R.id.editSearchMeetings).addTextChangedListener(searchWatcher!!)
 
         seekBarAudio.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -917,9 +920,20 @@ class MeetingActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (isPlaying) {
+            pauseAudio()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         playHandler.removeCallbacks(playRunnable)
+        searchWatcher?.let {
+            findViewById<EditText>(R.id.editSearchMeetings)?.removeTextChangedListener(it)
+        }
+        searchWatcher = null
         releaseMediaPlayer()
     }
 

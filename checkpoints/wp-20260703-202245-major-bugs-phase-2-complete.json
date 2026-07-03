@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+                       "unregistered"
+                   ],
+    "id":  "wp-20260703-202245-major-bugs-phase-2-complete",
+    "scope":  "",
+    "createdAt":  "2026-07-03T20:22:45+07:00",
+    "decisions":  [
+                      "TextWatcher"
+                  ],
+    "progress":  100,
+    "knowledge":  [
+                      "registered"
+                  ],
+    "pending":  [
+                    "search"
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "Fix activity leaks, UI event cleanup, click races, and optimistic tile updates",
+    "title":  "Major Bugs Phase 2 Complete",
+    "risks":  [
+                  "and"
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-03T20:22:45+07:00",
+    "status":  "completed",
+    "completed":  [
+                      "[MeetingActivity"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  "in"
+}

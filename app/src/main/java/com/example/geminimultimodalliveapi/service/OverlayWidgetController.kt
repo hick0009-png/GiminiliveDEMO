@@ -104,7 +104,7 @@ class OverlayWidgetController(
                     MotionEvent.ACTION_UP -> {
                         mainHandler.removeCallbacks(longPressRunnable)
                         if (!isMoving && !isLongPressed) {
-                            v.performClick()
+                            handleWidgetClick()
                         }
                         return true
                     }
@@ -130,20 +130,6 @@ class OverlayWidgetController(
                 return false
             }
         })
-
-        floatingView.setOnClickListener {
-            if (singleClickRunnable != null) {
-                mainHandler.removeCallbacks(singleClickRunnable!!)
-                singleClickRunnable = null
-                callbacks.onDoubleClick()
-            } else {
-                singleClickRunnable = Runnable {
-                    singleClickRunnable = null
-                    callbacks.onSingleClick()
-                }
-                mainHandler.postDelayed(singleClickRunnable!!, 250)
-            }
-        }
     }
 
     fun show() {
@@ -165,6 +151,21 @@ class OverlayWidgetController(
             Log.i("OverlayWidgetController", "Overlay bubble removed from window")
         } catch (e: Exception) {
             Log.e("OverlayWidgetController", "Error removing bubble from window", e)
+        }
+    }
+
+    private fun handleWidgetClick() {
+        if (singleClickRunnable != null) {
+            mainHandler.removeCallbacks(singleClickRunnable!!)
+            singleClickRunnable = null
+            callbacks.onDoubleClick()
+        } else {
+            val r = Runnable {
+                singleClickRunnable = null
+                callbacks.onSingleClick()
+            }
+            singleClickRunnable = r
+            mainHandler.postDelayed(r, 250)
         }
     }
 

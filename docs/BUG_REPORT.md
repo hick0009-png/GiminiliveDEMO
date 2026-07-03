@@ -272,3 +272,11 @@ Verification: All 56 unit and static-analysis tests pass successfully (both debu
 
 Verification: Added static analysis and functional checks in [MajorBugsPhase1Test.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/test/java/com/example/geminimultimodalliveapi/MajorBugsPhase1Test.kt). All 58 unit and static-analysis tests pass successfully.
 
+- **Phase 2 Major Bug Fixes (Activity Leaks & UI Event Cleanup)**:
+  - Fixed TextWatcher leaks in `MeetingActivity.kt` by storing references to active `TextWatcher` instances and explicitly removing them in `onDestroy()` to prevent layout hierarchy leaks.
+  - Implemented proper activity lifecycle state preservation for media playback in `MeetingActivity.kt` by overriding `onPause()` to pause the active `MediaPlayer` playback when backgrounding or transitioning activities.
+  - Resolved touch/click race conditions and duplicate callbacks in `OverlayWidgetController.kt` by removing the redundant `setOnClickListener` on `floatingView` and handling click/double-click logic inside `onTouch()` ACTION_UP directly.
+  - Removed optimistic Quick Settings tile updates in `GeminiTileService.kt` to ensure that tile state transitions only reflect actual background service connection states.
+
+Verification: Added static analysis and functional checks in [MajorBugsPhase2Test.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/test/java/com/example/geminimultimodalliveapi/MajorBugsPhase2Test.kt). All 61 unit and static-analysis tests pass successfully.
+

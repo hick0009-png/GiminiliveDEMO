@@ -28,14 +28,11 @@ class GeminiTileService : TileService() {
         if (isConnected) {
             // Directly disconnect from the background
             FloatingWidgetService.disconnectSession(this)
-            // Update tile immediately
-            updateTileState(false)
         } else {
             // Check if we have API key and permissions to connect in the background
             val hasMicPermission = PermissionHelper.hasRecordAudioPermission(this)
             if (apiKey.isNotEmpty() && hasMicPermission) {
                 FloatingWidgetService.connectSession(this, apiKey)
-                updateTileState(true)
             } else {
                 // If API Key or permission is missing, launch MainActivity to guide the user
                 val intent = Intent(this, MainActivity::class.java).apply {
