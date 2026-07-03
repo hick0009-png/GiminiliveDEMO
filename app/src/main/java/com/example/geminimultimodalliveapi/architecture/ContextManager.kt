@@ -15,9 +15,9 @@ class ContextManager(
     private val topicManager: TopicManager
 ) {
     // Current environmental states kept up-to-date by the service
-    var currentLocation = "home"
-    var currentMotion = "STILL"
-    var currentAttention = "IDLE"
+    @Volatile var currentLocation = "home"
+    @Volatile var currentMotion = "STILL"
+    @Volatile var currentAttention = "IDLE"
 
     fun getCurrentSnapshot(): ContextSnapshot {
         return ContextSnapshot(

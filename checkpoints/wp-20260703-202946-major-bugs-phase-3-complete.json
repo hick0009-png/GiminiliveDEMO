@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+                       "from"
+                   ],
+    "id":  "wp-20260703-202946-major-bugs-phase-3-complete",
+    "scope":  "",
+    "createdAt":  "2026-07-03T20:29:46+07:00",
+    "decisions":  [
+                      "endCall"
+                  ],
+    "progress":  100,
+    "knowledge":  [
+                      "on"
+                  ],
+    "pending":  [
+                    "guards"
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "Fix reflection endCall, CancellationTokenSource leaks, TopicManager unbounded growth, ContextManager thread safety, DynamicRulesManager performance caching, and AppError classification",
+    "title":  "Major Bugs Phase 3 Complete",
+    "risks":  [
+                  "P+"
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-03T20:29:46+07:00",
+    "status":  "completed",
+    "completed":  [
+                      "[GeminiToolDispatcher"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  "reflection, GeminiToolDispatcher"
+}

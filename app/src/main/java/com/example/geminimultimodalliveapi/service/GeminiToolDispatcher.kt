@@ -255,6 +255,7 @@ class GeminiToolDispatcher(
                             .addOnSuccessListener { location ->
                                 if (!delivered) {
                                     delivered = true
+                                    cancellationTokenSource.cancel()
                                     if (location != null) {
                                         Log.i("GeminiToolDispatcher", "getUserLocation: getCurrentLocation success (fresh fix)")
                                         onLocationReceived(location)
@@ -268,6 +269,7 @@ class GeminiToolDispatcher(
                                 Log.e("GeminiToolDispatcher", "getUserLocation: getCurrentLocation failed, falling back to old lastLocation", e)
                                 if (!delivered) {
                                     delivered = true
+                                    cancellationTokenSource.cancel()
                                     onLocationReceived(lastLoc)
                                 }
                             }
@@ -293,6 +295,7 @@ class GeminiToolDispatcher(
                         .addOnSuccessListener { location ->
                             if (!delivered) {
                                 delivered = true
+                                cancellationTokenSource.cancel()
                                 onLocationReceived(location)
                             }
                         }
@@ -300,6 +303,7 @@ class GeminiToolDispatcher(
                             Log.e("GeminiToolDispatcher", "getUserLocation: getCurrentLocation failed", e)
                             if (!delivered) {
                                 delivered = true
+                                cancellationTokenSource.cancel()
                                 onLocationReceived(null)
                             }
                         }
@@ -324,12 +328,14 @@ class GeminiToolDispatcher(
                     .addOnSuccessListener { location ->
                         if (!delivered) {
                             delivered = true
+                            cancellationTokenSource.cancel()
                             onLocationReceived(location)
                         }
                     }
                     .addOnFailureListener {
                         if (!delivered) {
                             delivered = true
+                            cancellationTokenSource.cancel()
                             onLocationReceived(null)
                         }
                     }
@@ -720,9 +726,10 @@ class GeminiToolDispatcher(
                     Log.e("GeminiToolDispatcher", "TelecomManager endCall failed", e)
                 }
             }
+            return false // Do NOT fallback to reflection on P+
         }
 
-        // Reflection fallback for older versions
+        // Reflection fallback for older versions (pre-P)
         try {
             val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as? android.telephony.TelephonyManager
             if (telephonyManager != null) {

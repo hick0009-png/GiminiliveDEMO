@@ -280,3 +280,13 @@ Verification: Added static analysis and functional checks in [MajorBugsPhase1Tes
 
 Verification: Added static analysis and functional checks in [MajorBugsPhase2Test.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/test/java/com/example/geminimultimodalliveapi/MajorBugsPhase2Test.kt). All 61 unit and static-analysis tests pass successfully.
 
+- **Phase 3 Major Bug Fixes (Dispatcher, Tool API Security & Architecture Engines)**:
+  - Guarded reflection-based `endCall()` in `GeminiToolDispatcher.kt` to prevent runtime private API crashes on modern Android P+ (API 28+) devices, falling back safely to public TelecomManager API.
+  - Eliminated `CancellationTokenSource` resource leaks inside `GeminiToolDispatcher.getUserLocation()` by explicitly calling `cancel()` upon location retrieval success or failure.
+  - Added a capacity limit (50 keywords max) to dynamic keywords collection in `TopicManager.kt` to prevent unbounded memory growth while keeping core keywords intact.
+  - Applied `@Volatile` to public mutable states (`currentLocation`, `currentMotion`, `currentAttention`) in `ContextManager.kt` to establish thread safety and prevent data race/inconsistency issues.
+  - Optimized `DynamicRulesManager.kt` execution speeds by implementing a memory cache (`cachedRules`) to avoid repeated SharedPreferences reads and Gson JSON deserialization tasks during situational rule matching.
+  - Upgraded `AppError.fromThrowable` inside `AppError.kt` to correctly map security exceptions to `AppError.Permission` and tool-related exceptions to `AppError.Tool`.
+
+Verification: Added static analysis and functional checks in [MajorBugsPhase3Test.kt](file:///d:/New%20folder%20(2)/GeminiLiveDemo/app/src/test/java/com/example/geminimultimodalliveapi/MajorBugsPhase3Test.kt). All 66 unit and static-analysis tests pass successfully.
+

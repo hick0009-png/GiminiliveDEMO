@@ -29,6 +29,8 @@ sealed class AppError {
                 lowerMsg.contains("timeout") || 
                 lowerMsg.contains("connect") -> Network(msg)
                 e is com.google.api.client.googleapis.json.GoogleJsonResponseException -> Api(e.statusCode, e.details?.message ?: msg)
+                e is SecurityException -> Permission(if (lowerMsg.contains("call")) "phone" else if (lowerMsg.contains("camera")) "camera" else "unknown")
+                lowerMsg.contains("tool") || lowerMsg.contains("calendar") || lowerMsg.contains("drive") || e is IllegalArgumentException -> Tool("ToolExecution", msg)
                 else -> Api(-1, msg)
             }
         }

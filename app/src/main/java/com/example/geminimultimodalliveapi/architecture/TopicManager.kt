@@ -29,6 +29,12 @@ class TopicManager(
 
         val list = topicKeywords.getOrPut(topicName) { mutableListOf() }
         if (!list.contains(normalizedKeyword)) {
+            if (list.size >= 50) {
+                val indexToRemove = if (list.size > 5) 5 else 0
+                if (indexToRemove < list.size) {
+                    list.removeAt(indexToRemove)
+                }
+            }
             list.add(normalizedKeyword)
             Log.i("TopicManager", "Added dynamic keyword '$normalizedKeyword' to topic '$topicName'")
             com.example.geminimultimodalliveapi.session.SessionStateHolder.appendChatLog(

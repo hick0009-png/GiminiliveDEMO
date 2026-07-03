@@ -18,6 +18,7 @@ data class DynamicSystemRule(
 class DynamicRulesManager(private val context: Context) {
     private val prefs = context.getSharedPreferences("dynamic_situational_rules", Context.MODE_PRIVATE)
     private val gson = Gson()
+    private var cachedRules: List<DynamicSystemRule>? = null
 
     @Synchronized
     fun saveRule(rule: DynamicSystemRule) {
@@ -32,6 +33,7 @@ class DynamicRulesManager(private val context: Context) {
         }
         
         rules.add(rule)
+        cachedRules = rules
         prefs.edit().putString("rules_list", gson.toJson(rules)).apply()
         
         Log.i("DynamicRulesManager", "Saved rule: ${rule.conditionType}=${rule.conditionValue} -> ${rule.instructionToInject}")
@@ -43,10 +45,14 @@ class DynamicRulesManager(private val context: Context) {
 
     @Synchronized
     fun getAllRules(): List<DynamicSystemRule> {
+        val cached = cachedRules
+        if (cached != null) return cached
         val json = prefs.getString("rules_list", null) ?: return emptyList()
         return try {
             val type = object : TypeToken<List<DynamicSystemRule>>() {}.type
-            gson.fromJson(json, type)
+            val rules: List<DynamicSystemRule> = gson.fromJson(json, type)
+            cachedRules = rules
+            rules
         } catch (e: Exception) {
             Log.e("DynamicRulesManager", "Failed to parse rules, returning empty", e)
             emptyList()
@@ -55,6 +61,7 @@ class DynamicRulesManager(private val context: Context) {
 
     @Synchronized
     fun clearAllRules() {
+        cachedRules = null
         prefs.edit().remove("rules_list").apply()
         Log.i("DynamicRulesManager", "Cleared all dynamic rules")
         com.example.geminimultimodalliveapi.session.SessionStateHolder.appendChatLog("[Rules] Cleared all custom rules")
