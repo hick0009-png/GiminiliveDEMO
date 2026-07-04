@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+
+                   ],
+    "id":  "wp-20260704-113024-live-translate-design-and-documentation-complete",
+    "scope":  "",
+    "createdAt":  "2026-07-04T11:30:24+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  0,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "",
+    "title":  "Live Translate design and documentation complete",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-04T11:30:24+07:00",
+    "status":  "in_progress",
+    "completed":  [
+
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
