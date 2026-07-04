@@ -713,6 +713,22 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         enableImmersiveFullscreen()
 
+        // Auto-start FloatingWidgetService if enabled in preferences but not running
+        if (appPrefs.isFloatingWidgetEnabled && FloatingWidgetService.instance == null) {
+            if (PermissionHelper.hasOverlayPermission(this)) {
+                val serviceIntent = Intent(this, FloatingWidgetService::class.java)
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(serviceIntent)
+                    } else {
+                        startService(serviceIntent)
+                    }
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "Failed to auto-start FloatingWidgetService", e)
+                }
+            }
+        }
+
         // Sync active skill ID from preferences
         val activeId = appPrefs.lastDatingSkillId
         val skills = datingSkillManager.getAllSkills()
