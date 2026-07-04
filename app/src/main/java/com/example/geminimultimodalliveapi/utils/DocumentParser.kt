@@ -9,13 +9,15 @@ import com.tom_roush.pdfbox.text.PDFTextStripper
 import java.io.File
 import java.io.InputStream
 import java.util.zip.ZipInputStream
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 object DocumentParser {
 
-    fun extractText(context: Context, uri: Uri, mimeType: String?): String {
-        return try {
+    suspend fun extractText(context: Context, uri: Uri, mimeType: String?): String = withContext(Dispatchers.IO) {
+        try {
             val contentResolver = context.contentResolver
-            val inputStream = contentResolver.openInputStream(uri) ?: return ""
+            val inputStream = contentResolver.openInputStream(uri) ?: return@withContext ""
 
             val rawText = when {
                 mimeType == "application/pdf" || uri.path?.endsWith(".pdf", ignoreCase = true) == true -> {
@@ -140,16 +142,16 @@ object DocumentParser {
         }
     }
 
-    fun queryDocuments(context: Context, query: String): String {
+    suspend fun queryDocuments(context: Context, query: String): String = withContext(Dispatchers.IO) {
         try {
             val docsDir = File(context.filesDir, "documents")
             if (!docsDir.exists() || !docsDir.isDirectory) {
-                return "ไม่พบโฟลเดอร์เอกสารสำหรับค้นหา"
+                return@withContext "ไม่พบโฟลเดอร์เอกสารสำหรับค้นหา"
             }
 
             val files = docsDir.listFiles { file -> file.isFile && file.name.endsWith(".txt") }
             if (files.isNullOrEmpty()) {
-                return "ยังไม่มีเอกสารประกันภัยหรือคู่มือที่อัปโหลดไว้ในเครื่อง"
+                return@withContext "ยังไม่มีเอกสารประกันภัยหรือคู่มือที่อัปโหลดไว้ในเครื่อง"
             }
 
             // Extended list of Thai stop words to remove semantic noise
@@ -185,7 +187,7 @@ object DocumentParser {
             val distinctFeatures = features.distinct()
 
             if (distinctFeatures.isEmpty()) {
-                return "คำค้นหาไม่ถูกต้องหรือกว้างเกินไป"
+                return@withContext "คำค้นหาไม่ถูกต้องหรือกว้างเกินไป"
             }
 
             val fileMatches = mutableListOf<FileMatch>()
@@ -265,7 +267,7 @@ object DocumentParser {
             }
 
             if (fileMatches.isEmpty()) {
-                return "ไม่พบข้อมูลที่เกี่ยวข้องโดยตรงในเอกสารคู่มือหรือประกันภัยในเครื่อง"
+                return@withContext "ไม่พบข้อมูลที่เกี่ยวข้องโดยตรงในเอกสารคู่มือหรือประกันภัยในเครื่อง"
             }
 
             // Sort by score descending
@@ -290,10 +292,10 @@ object DocumentParser {
                 currentLength = sb.length
             }
 
-            return sb.toString().trim()
+            sb.toString().trim()
         } catch (e: Exception) {
             Log.e("DocumentParser", "Error querying documents", e)
-            return "เกิดข้อผิดพลาดในการรันระบบสืบค้นข้อมูล: ${e.message}"
+            "เกิดข้อผิดพลาดในการรันระบบสืบค้นข้อมูล: ${e.message}"
         }
     }
 

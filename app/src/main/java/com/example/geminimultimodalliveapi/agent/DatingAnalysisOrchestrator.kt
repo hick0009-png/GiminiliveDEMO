@@ -112,21 +112,26 @@ class DatingAnalysisOrchestrator(
     ): OrchestrationResult = kotlinx.coroutines.coroutineScope {
         val deferreds = candidates.map { (skill, agent) ->
             async(Dispatchers.Default) {
-                val docs = documentSelector?.selectRelevantDocuments(transcript, skill.id)
-                    ?: emptyList()
-                val docContents = docs.map { it.content }
-                Log.i(TAG, "DocumentSelector found ${docs.size} relevant docs for skill '${skill.id}' (multi-agent)")
+                try {
+                    val docs = documentSelector?.selectRelevantDocuments(transcript, skill.id)
+                        ?: emptyList()
+                    val docContents = docs.map { it.content }
+                    Log.i(TAG, "DocumentSelector found ${docs.size} relevant docs for skill '${skill.id}' (multi-agent)")
 
-                val deferredResult = CompletableDeferred<DateInsight>()
-                agent.analyze(skill, transcript, sensorContext, docContents) {
-                    deferredResult.complete(it)
+                    val deferredResult = CompletableDeferred<DateInsight>()
+                    agent.analyze(skill, transcript, sensorContext, docContents) {
+                        deferredResult.complete(it)
+                    }
+                    val result = withTimeout(30_000) { deferredResult.await() }
+                    Pair(result, agent.agentId)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error executing agent ${agent.agentId} for skill ${skill.id}", e)
+                    null
                 }
-                val result = deferredResult.await()
-                Pair(result, agent.agentId)
             }
         }
 
-        val pairs = deferreds.awaitAll()
+        val pairs = deferreds.awaitAll().filterNotNull()
         val results = pairs.map { it.first }
         val agentIds = pairs.map { it.second }
 

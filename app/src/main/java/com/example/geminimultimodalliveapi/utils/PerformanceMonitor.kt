@@ -43,6 +43,7 @@ class PerformanceMonitor(
                 processingTimeHistory.removeAt(0)
             }
         }
+        evaluatePerformance()
     }
 
     private fun evaluatePerformance() {

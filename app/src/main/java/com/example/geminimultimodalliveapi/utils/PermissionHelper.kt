@@ -69,20 +69,13 @@ object PermissionHelper {
             ContextCompat.checkSelfPermission(activity, it) != PackageManager.PERMISSION_GRANTED
         }
 
-        val missingOptional = OPTIONAL_PERMISSIONS.filter {
-            ContextCompat.checkSelfPermission(activity, it) != PackageManager.PERMISSION_GRANTED
-        }
-
-        if (missingRequired.isNotEmpty() || missingOptional.isNotEmpty()) {
-            val requestList = missingRequired + missingOptional
+        if (missingRequired.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 activity,
-                requestList.toTypedArray(),
+                missingRequired.toTypedArray(),
                 REQUIRED_PERMISSIONS_REQUEST_CODE
             )
-            if (missingRequired.isNotEmpty()) {
-                return false
-            }
+            return false
         }
 
         if (!hasOverlayPermission(activity)) {

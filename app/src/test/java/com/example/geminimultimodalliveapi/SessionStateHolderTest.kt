@@ -94,4 +94,25 @@ class SessionStateHolderTest {
         assertEquals(true, statesList[1])
         assertEquals(false, statesList[2])
     }
+
+    @Test
+    fun testAppErrorsDeDuplication() = runBlocking {
+        val errorsList = mutableListOf<com.example.geminimultimodalliveapi.error.AppError>()
+        val collectJob = launch(Dispatchers.Unconfined) {
+            SessionStateHolder.errorFlow.take(2).toList(errorsList)
+        }
+
+        val error1 = com.example.geminimultimodalliveapi.error.AppError.Network("Socket timeout")
+        val error2 = com.example.geminimultimodalliveapi.error.AppError.Network("Socket timeout")
+        val error3 = com.example.geminimultimodalliveapi.error.AppError.Permission("camera")
+
+        SessionStateHolder.postError(error1)
+        SessionStateHolder.postError(error2) // Should be de-duplicated (ignored)
+        SessionStateHolder.postError(error3) // Different error, should go through
+
+        collectJob.join()
+        assertEquals(2, errorsList.size)
+        assertEquals(error1, errorsList[0])
+        assertEquals(error3, errorsList[1])
+    }
 }

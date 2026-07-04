@@ -70,6 +70,7 @@ class DatingSkillManager(private val context: Context) {
         }
     }
 
+    @Synchronized
     fun getAllSkills(): List<DatingSkill> {
         val list = mutableListOf<DatingSkill>()
         try {
@@ -83,11 +84,13 @@ class DatingSkillManager(private val context: Context) {
         return list
     }
 
+    @Synchronized
     fun getSkill(id: String): DatingSkill? {
         val file = File(skillsDir, "$id.md")
         return parseSkillFile(file)
     }
 
+    @Synchronized
     fun saveSkill(skill: DatingSkill): Boolean {
         return try {
             val file = File(skillsDir, "${skill.id}.md")
@@ -107,6 +110,7 @@ class DatingSkillManager(private val context: Context) {
         }
     }
 
+    @Synchronized
     fun deleteSkill(id: String): Boolean {
         val file = File(skillsDir, "$id.md")
         return if (file.exists()) {

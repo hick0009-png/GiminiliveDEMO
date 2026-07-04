@@ -606,14 +606,16 @@ class GeminiToolDispatcher(
     }
 
     fun handleQueryPolicyDocument(callId: String, query: String, liveClient: GeminiLiveClient?) {
-        Log.i("GeminiToolDispatcher", "Tool call query_policy_document: $query")
-        val results = DocumentParser.queryDocuments(context, query)
-        
-        val output = JSONObject()
-        output.put("context", results)
-        
-        liveClient?.sendToolResponse(callId, output)
-        logger.log("SYSTEM: Queried policy docs for '$query'")
+        scope.launch {
+            Log.i("GeminiToolDispatcher", "Tool call query_policy_document: $query")
+            val results = DocumentParser.queryDocuments(context, query)
+            
+            val output = JSONObject()
+            output.put("context", results)
+            
+            liveClient?.sendToolResponse(callId, output)
+            logger.log("SYSTEM: Queried policy docs for '$query'")
+        }
     }
 
     fun handleMakePhoneCall(callId: String, phoneNumber: String, liveClient: GeminiLiveClient?) {

@@ -28,30 +28,47 @@ class MemoryViewModel(application: Application) : AndroidViewModel(application) 
     private val _memories = MutableStateFlow<List<MemoryEntry>>(emptyList())
     val memories: StateFlow<List<MemoryEntry>> = _memories.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
     init {
         loadData()
     }
 
     fun loadData() {
+        _isLoading.value = true
+        _error.value = null
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            // Load vehicle info
-            val plates = dbHelper.queryInfo("license_plate")
-            val platesVal = plates.firstOrNull()?.get("info_value") ?: ""
+            try {
+                // Load vehicle info
+                val plates = dbHelper.queryInfo("license_plate")
+                val platesVal = plates.firstOrNull()?.get("info_value") ?: ""
 
-            val tax = dbHelper.queryInfo("tax_circle")
-            val taxVal = tax.firstOrNull()?.get("info_value") ?: ""
+                val tax = dbHelper.queryInfo("tax_circle")
+                val taxVal = tax.firstOrNull()?.get("info_value") ?: ""
 
-            val maint = dbHelper.queryInfo("maintenance")
-            val maintVal = maint.firstOrNull()?.get("info_value") ?: ""
+                val maint = dbHelper.queryInfo("maintenance")
+                val maintVal = maint.firstOrNull()?.get("info_value") ?: ""
 
-            // Load memories
-            val mems = memoryManager.getAllMemories()
+                // Load memories
+                val mems = memoryManager.getAllMemories()
 
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                _licensePlate.value = platesVal
-                _taxCircle.value = taxVal
-                _maintenance.value = maintVal
-                _memories.value = mems
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    _licensePlate.value = platesVal
+                    _taxCircle.value = taxVal
+                    _maintenance.value = maintVal
+                    _memories.value = mems
+                    _isLoading.value = false
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MemoryViewModel", "Error loading data", e)
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    _error.value = e.message ?: "Unknown error"
+                    _isLoading.value = false
+                }
             }
         }
     }

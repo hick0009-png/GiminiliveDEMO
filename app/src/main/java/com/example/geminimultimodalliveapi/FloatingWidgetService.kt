@@ -482,7 +482,6 @@ class FloatingWidgetService : Service() {
             }
         })
 
-        // Initialize WakeWord detector with callbacks
         wakeWordDetector = WakeWordDetector(this, object : WakeWordDetector.Listener {
             override fun onWakeWordDetected(command: String) {
                 transitionToState(SessionState.Active(true), command)
@@ -500,6 +499,18 @@ class FloatingWidgetService : Service() {
                     }
                     serviceScope.launch {
                         delay(delay)
+                        if (SessionStateHolder.state.value is SessionState.Standby && isSessionConnected) {
+                            wakeWordDetector.startListening()
+                        }
+                    }
+                }
+            }
+
+            override fun onRecognitionComplete() {
+                val state = SessionStateHolder.state.value
+                if (state is SessionState.Standby && isSessionConnected) {
+                    serviceScope.launch {
+                        delay(50L)
                         if (SessionStateHolder.state.value is SessionState.Standby && isSessionConnected) {
                             wakeWordDetector.startListening()
                         }
@@ -1436,7 +1447,9 @@ class FloatingWidgetService : Service() {
                 // Force Attention Manager to ACTIVE_SESSION to enable audio streaming immediately
                 attentionManager.forceState(com.example.geminimultimodalliveapi.architecture.AttentionState.ACTIVE_SESSION)
                 
-                delay(100)
+                withContext(Dispatchers.Default) {
+                    delay(100L)
+                }
                 
                 // Reset Voice Gate and Diarization Gate variables for this active turn
                 voiceGateOpen = false

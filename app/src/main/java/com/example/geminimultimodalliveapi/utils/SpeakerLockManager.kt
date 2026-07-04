@@ -9,6 +9,7 @@ class SpeakerLockManager(
     private val isAudioPlaying: () -> Boolean = { false }
 ) {
 
+    @Volatile
     var activeSpeakerId: Int? = null
         private set
 

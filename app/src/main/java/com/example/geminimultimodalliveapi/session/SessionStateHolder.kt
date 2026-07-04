@@ -87,11 +87,21 @@ object SessionStateHolder {
     }
 
 
+    private var lastError: AppError? = null
+    private var lastErrorTime = 0L
+
     fun postError(errorMessage: String) {
         _appErrors.tryEmit(errorMessage)
     }
 
     fun postError(error: AppError) {
+        val now = System.currentTimeMillis()
+        if (error == lastError && now - lastErrorTime < 2000L) {
+            return
+        }
+        lastError = error
+        lastErrorTime = now
+
         _errorFlow.tryEmit(error)
         
         // Also post string message to _appErrors for backward compatibility/logging if needed

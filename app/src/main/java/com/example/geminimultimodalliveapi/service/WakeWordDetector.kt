@@ -21,6 +21,7 @@ class WakeWordDetector(
     interface Listener {
         fun onWakeWordDetected(command: String)
         fun onError(error: Int)
+        fun onRecognitionComplete()
     }
 
     private var speechRecognizer: SpeechRecognizer? = null
@@ -64,7 +65,7 @@ class WakeWordDetector(
                     override fun onResults(results: Bundle?) {
                         isListening = false
                         handleRecognitionResults(results, isFinal = true)
-                        listener.onError(0) // Signal completion to trigger reschedule
+                        listener.onRecognitionComplete()
                     }
 
                     override fun onPartialResults(partialResults: Bundle?) {
