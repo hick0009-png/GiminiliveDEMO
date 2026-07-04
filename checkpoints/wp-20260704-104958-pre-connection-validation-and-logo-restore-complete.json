@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+
+                   ],
+    "id":  "wp-20260704-104958-pre-connection-validation-and-logo-restore-complete",
+    "scope":  "",
+    "createdAt":  "2026-07-04T10:49:58+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  0,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "",
+    "title":  "Pre-connection validation and logo restore complete",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-04T10:49:58+07:00",
+    "status":  "in_progress",
+    "completed":  [
+
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
