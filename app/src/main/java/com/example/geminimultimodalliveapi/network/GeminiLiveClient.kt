@@ -333,12 +333,9 @@ class GeminiLiveClient(
         
         if (isTranslateMode) {
             val translationConfig = JSONObject()
-            val languageConfig = JSONObject()
-            languageConfig.put("sourceLanguage", translateSourceLanguage)
-            languageConfig.put("targetLanguage", translateTargetLanguage)
-            translationConfig.put("languageConfig", languageConfig)
+            translationConfig.put("targetLanguageCode", translateTargetLanguage)
             translationConfig.put("echoTargetLanguage", translateEchoTarget)
-            generationConfig.put("translationConfig", translationConfig)
+            setup.put("translationConfig", translationConfig)
         } else {
             setup.put("systemInstruction", systemInstruction)
             val tools = ToolDefinitions.getTools()
