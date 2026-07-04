@@ -154,8 +154,15 @@ class GeminiLiveClient(
                         t.message ?: "Connection failed"
                     }
 
+                    // Check if it is a permanent handshake rejection (e.g. HTTP status in exception message)
+                    val isHandshakeRejection = t is java.net.ProtocolException || 
+                        (t.message?.contains("Expected HTTP 101") == true) || 
+                        (t.message?.contains("429") == true) || 
+                        (t.message?.contains("403") == true) || 
+                        (t.message?.contains("400") == true)
+
                     // Suppress reconnect attempts for HTTP errors (auth, quota, bad request, etc.)
-                    val shouldRetry = response == null && !isExplicitDisconnect && reconnectAttempts < 3
+                    val shouldRetry = response == null && !isHandshakeRejection && !isExplicitDisconnect && reconnectAttempts < 3
 
                     if (shouldRetry) {
                         scheduleReconnect()

@@ -45,6 +45,12 @@ class WebSocketHandshakeFailureTest {
             "GeminiLiveClient should notify listener with exact error when aborting reconnects",
             content.contains("listener.onError")
         )
+
+        // 5. Verify that it checks for ProtocolException / handshake failure text inside onFailure
+        assertTrue(
+            "GeminiLiveClient should check for ProtocolException or handshake failure keywords to block retry loops",
+            content.contains("ProtocolException") || content.contains("Expected HTTP 101")
+        )
     }
 
     @Test
@@ -70,6 +76,29 @@ class WebSocketHandshakeFailureTest {
         assertTrue(
             "FloatingWidgetService connect should call ApiKeyValidator.verifyApiKey before establishing socket",
             content.contains("ApiKeyValidator.verifyApiKey") && content.substringAfter("fun connect(").substringBefore("fun proceedConnect(").contains("verifyApiKey")
+        )
+
+        // Verify that disconnect() method explicitly sets state to Disconnected
+        assertTrue(
+            "FloatingWidgetService disconnect should explicitly set state to Disconnected",
+            content.substringAfter("fun disconnect(").substringBefore("fun isAudioPlaying(").contains("SessionState.Disconnected")
+        )
+    }
+
+    @Test
+    fun testApiKeyValidatorGenerateContentQuotaCheck() {
+        val validatorFile = getSourceFile("src/main/java/com/example/geminimultimodalliveapi/network/ApiKeyValidator.kt")
+        assertTrue("ApiKeyValidator.kt should exist", validatorFile.exists())
+        val content = validatorFile.readText()
+
+        // Verify that verifyApiKey performs a generateContent POST request
+        assertTrue(
+            "ApiKeyValidator should target the generateContent endpoint to check actual quota",
+            content.contains("generateContent")
+        )
+        assertTrue(
+            "ApiKeyValidator should perform a POST request with payload",
+            content.contains(".post(") || content.contains("RequestBody")
         )
     }
 }

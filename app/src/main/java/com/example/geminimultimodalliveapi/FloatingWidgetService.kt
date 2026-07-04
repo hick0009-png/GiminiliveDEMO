@@ -796,6 +796,10 @@ class FloatingWidgetService : Service() {
 
         com.example.geminimultimodalliveapi.network.ApiKeyValidator.verifyApiKey(apiKey) { isValid, errorMsg ->
             android.os.Handler(android.os.Looper.getMainLooper()).post {
+                if (SessionStateHolder.state.value == SessionState.Disconnected) {
+                    Log.i("FloatingWidgetService", "Validation completed but session was already disconnected/cancelled.")
+                    return@post
+                }
                 if (!isValid) {
                     Toast.makeText(applicationContext, "ข้อผิดพลาด API Key: $errorMsg", Toast.LENGTH_LONG).show()
                     logAndNotify("SYSTEM: Connection failed ($errorMsg)")
@@ -913,6 +917,11 @@ class FloatingWidgetService : Service() {
         }
         synchronized(amplitudeHistory) {
             amplitudeHistory.clear()
+        }
+
+        // Explicitly update state to Disconnected
+        if (SessionStateHolder.state.value != SessionState.Disconnected) {
+            SessionStateHolder.updateState(SessionState.Disconnected)
         }
     }
 
