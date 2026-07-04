@@ -37,6 +37,9 @@ import android.telephony.TelephonyManager
 import com.example.geminimultimodalliveapi.service.PhoneStateReceiver
 import java.util.Locale
 import kotlinx.coroutines.*
+import android.view.MotionEvent
+import android.view.WindowManager
+import android.graphics.PixelFormat
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -59,6 +62,7 @@ class FloatingWidgetService : Service() {
     // Decoupled Helper Components
     private lateinit var notificationManager: SessionNotificationManager
     private lateinit var widgetController: OverlayWidgetController
+    private var radialPickerView: com.example.geminimultimodalliveapi.ui.RadialSkillPickerView? = null
     private lateinit var wakeWordDetector: WakeWordDetector
     private lateinit var toolDispatcher: GeminiToolDispatcher
     private var phoneStateReceiver: PhoneStateReceiver? = null
@@ -467,16 +471,11 @@ class FloatingWidgetService : Service() {
             }
 
             override fun onLongPress() {
-                val isConnected = SessionStateHolder.state.value != SessionState.Disconnected
-                if (!isConnected) {
-                    Toast.makeText(this@FloatingWidgetService, "โปรดเชื่อมต่อเซสชันก่อนเปิดกล้อง", Toast.LENGTH_SHORT).show()
-                } else {
-                    val cameraIntent = Intent(this@FloatingWidgetService, MainActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        putExtra("START_CAMERA", true)
-                    }
-                    startActivity(cameraIntent)
-                }
+                showRadialSkillPicker()
+            }
+
+            override fun onTouchGesture(event: MotionEvent) {
+                radialPickerView?.processTouchEvent(event)
             }
         })
 
@@ -1837,6 +1836,95 @@ class FloatingWidgetService : Service() {
             return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
         }
         return false
+    }
+
+    private fun showRadialSkillPicker() {
+        if (radialPickerView != null) return
+        
+        // 1. Transition/Forced toggle to Dating Mode
+        com.example.geminimultimodalliveapi.session.SessionStateHolder.isDateAssistantModeActive = true
+        // Turn off solo focus if enabled
+        val appPrefs = AppPreferences.getInstance(this)
+        appPrefs.isSoloFocusEnabled = false
+        
+        // If not connected, let's start connection automatically
+        val isConnected = SessionStateHolder.state.value != SessionState.Disconnected
+        if (!isConnected) {
+            val key = appPrefs.apiKey
+            if (key.isNotEmpty()) {
+                connect(key)
+            }
+        }
+
+        // Get list of skills
+        val skillMgr = com.example.geminimultimodalliveapi.data.DatingSkillManager(this)
+        val skills = skillMgr.getAllSkills()
+
+        val picker = com.example.geminimultimodalliveapi.ui.RadialSkillPickerView(this).apply {
+            setSkills(skills)
+            listener = object : com.example.geminimultimodalliveapi.ui.RadialSkillPickerView.OnSkillSelectedListener {
+                override fun onSkillSelected(skill: com.example.geminimultimodalliveapi.data.DatingSkill?) {
+                    if (skill != null) {
+                        // Apply the dating skill
+                        com.example.geminimultimodalliveapi.session.SessionStateHolder.activeSkillId = skill.id
+                        val prefs = AppPreferences.getInstance(this@FloatingWidgetService)
+                        prefs.lastDatingSkillId = skill.id
+                        
+                        Toast.makeText(
+                            this@FloatingWidgetService,
+                            "เปิดใช้งานโหมดผู้ช่วยเดต: ${skill.name}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        
+                        // Switch active state if session is connected
+                        if (SessionStateHolder.state.value is SessionState.Standby) {
+                            transitionToState(SessionState.Active(true))
+                        }
+                    }
+                    dismissRadialPicker()
+                }
+
+                override fun onDismiss() {
+                    dismissRadialPicker()
+                }
+            }
+        }
+
+        val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            layoutType,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        )
+
+        try {
+            val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            wm.addView(picker, params)
+            radialPickerView = picker
+            Log.i("FloatingWidgetService", "Radial skill picker overlay added to window")
+        } catch (e: Exception) {
+            Log.e("FloatingWidgetService", "Failed to add radial skill picker view", e)
+        }
+    }
+
+    private fun dismissRadialPicker() {
+        val picker = radialPickerView ?: return
+        try {
+            val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            wm.removeView(picker)
+            radialPickerView = null
+            Log.i("FloatingWidgetService", "Radial skill picker overlay removed from window")
+        } catch (e: Exception) {
+            Log.e("FloatingWidgetService", "Failed to remove radial skill picker view", e)
+        }
     }
 
     override fun onTrimMemory(level: Int) {

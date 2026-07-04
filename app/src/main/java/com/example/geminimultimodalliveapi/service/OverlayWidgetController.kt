@@ -27,6 +27,7 @@ class OverlayWidgetController(
         fun onSingleClick()
         fun onDoubleClick()
         fun onLongPress()
+        fun onTouchGesture(event: MotionEvent)
     }
 
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -105,19 +106,26 @@ class OverlayWidgetController(
                     }
                     MotionEvent.ACTION_UP -> {
                         mainHandler.removeCallbacks(longPressRunnable)
-                        if (!isMoving && !isLongPressed) {
+                        if (isLongPressed) {
+                            callbacks.onTouchGesture(event)
+                        } else if (!isMoving) {
                             handleWidgetClick()
                         }
+                        isLongPressed = false
                         return true
                     }
                     MotionEvent.ACTION_MOVE -> {
                         val dx = (event.rawX - initialTouchX).toInt()
                         val dy = (event.rawY - initialTouchY).toInt()
                         if (Math.abs(dx) > touchSlop || Math.abs(dy) > touchSlop) {
-                            isMoving = true
-                            mainHandler.removeCallbacks(longPressRunnable)
+                            if (!isLongPressed) {
+                                isMoving = true
+                                mainHandler.removeCallbacks(longPressRunnable)
+                            }
                         }
-                        if (isMoving) {
+                        if (isLongPressed) {
+                            callbacks.onTouchGesture(event)
+                        } else if (isMoving) {
                             params.x = initialX + dx
                             params.y = initialY + dy
                             try {
