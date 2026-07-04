@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+
+                   ],
+    "id":  "wp-20260704-085258-websocket-handshake-failure-error-handling-complete",
+    "scope":  "",
+    "createdAt":  "2026-07-04T08:52:58+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  0,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "",
+    "title":  "WebSocket handshake failure error handling complete",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-04T08:52:58+07:00",
+    "status":  "in_progress",
+    "completed":  [
+
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
