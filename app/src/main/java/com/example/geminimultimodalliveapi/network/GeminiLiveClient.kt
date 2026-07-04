@@ -135,11 +135,33 @@ class GeminiLiveClient(
                     if (this@GeminiLiveClient.webSocket === webSocket) {
                         this@GeminiLiveClient.webSocket = null
                     }
-                    if (!isExplicitDisconnect && reconnectAttempts < 3) {
+
+                    val httpCode = response?.code ?: -1
+                    val errorMsg = if (response != null) {
+                        val bodyString = try {
+                            response.body?.string() ?: ""
+                        } catch (e: Exception) {
+                            ""
+                        }
+                        val parsedMsg = try {
+                            val json = org.json.JSONObject(bodyString)
+                            json.getJSONObject("error").getString("message")
+                        } catch (e: Exception) {
+                            "HTTP $httpCode: ${response.message}"
+                        }
+                        parsedMsg
+                    } else {
+                        t.message ?: "Connection failed"
+                    }
+
+                    // Suppress reconnect attempts for HTTP errors (auth, quota, bad request, etc.)
+                    val shouldRetry = response == null && !isExplicitDisconnect && reconnectAttempts < 3
+
+                    if (shouldRetry) {
                         scheduleReconnect()
                     } else {
                         activeToolCalls.clear()
-                        listener.onDisconnected(t.message ?: "Connection failed")
+                        listener.onError("เชื่อมต่อล้มเหลว: $errorMsg")
                     }
                 }
             }

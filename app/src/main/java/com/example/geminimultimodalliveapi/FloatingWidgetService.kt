@@ -244,6 +244,9 @@ class FloatingWidgetService : Service() {
             Log.e("FloatingWidgetService", "Error: $errorMsg")
             logAndNotify("SYSTEM: Connection error ($errorMsg)")
             SessionStateHolder.updateState(SessionState.Error(errorMsg))
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                Toast.makeText(applicationContext, errorMsg, Toast.LENGTH_LONG).show()
+            }
             handleDisconnect(unexpected = true)
         }
 
