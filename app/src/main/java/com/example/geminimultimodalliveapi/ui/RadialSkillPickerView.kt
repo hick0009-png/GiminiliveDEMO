@@ -69,7 +69,7 @@ class RadialSkillPickerView @JvmOverloads constructor(
     }
 
     fun setSkills(skillsList: List<DatingSkill>) {
-        this.skills = skillsList.take(4) // Max 4 skills for clean radial quadrants
+        this.skills = skillsList.take(5) // Max 5 skills
         invalidate()
     }
 

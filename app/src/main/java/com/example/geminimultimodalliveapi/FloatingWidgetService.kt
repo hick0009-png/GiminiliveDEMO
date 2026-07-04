@@ -539,6 +539,12 @@ class FloatingWidgetService : Service() {
                         }
                         attentionManager.setIgnoreOtherSpeakers(hasIgnoreOther)
                         
+                        val appPrefs = AppPreferences.getInstance(this@FloatingWidgetService)
+                        if (appPrefs.isTranslateModeEnabled && (event.motion.name == "DRIVING" || event.motion.name == "RUNNING" || event.motion.name == "WALKING")) {
+                            sendBroadcast(Intent("ACTION_CLOSE_TRANSLATE_UI"))
+                            logAndNotify("ปิดหน้าจอแปลภาษาอัตโนมัติ (กำลังเคลื่อนที่)")
+                        }
+                        
                         refreshDynamicPrompt()
                     }
                     is com.example.geminimultimodalliveapi.architecture.PerceptionEvent.LocationChanged -> {
@@ -548,6 +554,13 @@ class FloatingWidgetService : Service() {
                     is com.example.geminimultimodalliveapi.architecture.PerceptionEvent.ScreenStateChanged -> {
                         contextManager.currentAttention = if (event.isScreenOn) "ACTIVE" else "BACKGROUND"
                         refreshDynamicPrompt()
+                    }
+                    is com.example.geminimultimodalliveapi.architecture.PerceptionEvent.BluetoothStateChanged -> {
+                        val appPrefs = AppPreferences.getInstance(this@FloatingWidgetService)
+                        if (appPrefs.isTranslateModeEnabled && event.isConnected) {
+                            sendBroadcast(Intent("ACTION_CLOSE_TRANSLATE_UI"))
+                            logAndNotify("ปิดหน้าจอแปลภาษาอัตโนมัติ (เชื่อมต่อหูฟัง: ${event.deviceName})")
+                        }
                     }
                     else -> {}
                 }
@@ -827,7 +840,18 @@ class FloatingWidgetService : Service() {
 
         val selectedVoice = appPrefs.selectedVoice
         val initialPrompt = getInitialCombinedPrompt()
-        liveClient = GeminiLiveClient(apiKey, selectedVoice, currentWakeWord, initialPrompt, clientListener)
+        val isTranslateMode = appPrefs.isTranslateModeEnabled
+        val translateTargetLang = appPrefs.translateTargetLanguage
+        
+        liveClient = GeminiLiveClient(
+            apiKey, 
+            selectedVoice, 
+            currentWakeWord, 
+            initialPrompt, 
+            isTranslateMode, 
+            translateTargetLang, 
+            clientListener
+        )
         liveClient?.connect()
 
         val deepgramKey = appPrefs.deepgramApiKey
@@ -884,6 +908,13 @@ class FloatingWidgetService : Service() {
                     startStaticFrameStreaming()
                     startDeepgramKeepAlive()
                     startSensorIntegration()
+
+                    if (appPrefs.isTranslateModeEnabled) {
+                        val intent = Intent(this@FloatingWidgetService, com.example.geminimultimodalliveapi.ui.translate.TranslateActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                    }
                 }
             }
         }
@@ -922,6 +953,51 @@ class FloatingWidgetService : Service() {
         // Explicitly update state to Disconnected
         if (SessionStateHolder.state.value != SessionState.Disconnected) {
             SessionStateHolder.updateState(SessionState.Disconnected)
+        }
+        
+        triggerPostSessionAnalysis()
+    }
+
+    private fun triggerPostSessionAnalysis() {
+        val pref = AppPreferences.getInstance(this)
+        // Check if translate mode OR passive summary is enabled
+        if (pref.isTranslateModeEnabled || pref.selectedContextProfile == "PASSIVE_SUMMARY") {
+            val transcriptList = SessionStateHolder.liveTranscripts.toList()
+            if (transcriptList.isEmpty()) return
+            
+            serviceScope.launch {
+                try {
+                    val sensorContext = com.example.geminimultimodalliveapi.agent.SensorContext(
+                        motion = contextManager.currentMotion,
+                        location = "unknown"
+                    )
+                    
+                    val result = datingOrchestrator?.analyze(
+                        transcriptHistory = transcriptList.map { Pair("Speaker", it) },
+                        sensorContext = sensorContext
+                    )
+                    
+                    if (result != null) {
+                        val dbHelper = com.example.geminimultimodalliveapi.data.MeetingDbHelper.getInstance(this@FloatingWidgetService)
+                        val summary = "Summary: ${result.insight.tip}\nConfidence: ${result.confidence}\nReasoning: ${result.reasoning}"
+                        
+                        dbHelper.insertMeeting(
+                            com.example.geminimultimodalliveapi.data.Meeting(
+                                id = java.util.UUID.randomUUID().toString(),
+                                title = if (pref.isTranslateModeEnabled) "Live Translation Session" else "Date Assistant Session",
+                                timestamp = System.currentTimeMillis(),
+                                duration = 0,
+                                filePath = "",
+                                summary = summary,
+                                transcriptJson = transcriptList.joinToString("\n")
+                            )
+                        )
+                        Log.i("FloatingWidgetService", "Post-session analysis saved to DB")
+                    }
+                } catch (e: Exception) {
+                    Log.e("FloatingWidgetService", "Error during post-session analysis", e)
+                }
+            }
         }
     }
 
@@ -1062,8 +1138,10 @@ class FloatingWidgetService : Service() {
                 delay(1000)
 
                 val isDateMode = com.example.geminimultimodalliveapi.session.SessionStateHolder.isDateAssistantModeActive
+                val isTranslateMode = appPrefs.isTranslateModeEnabled
+                val now = System.currentTimeMillis()
+                
                 if (isDateMode) {
-                    val now = System.currentTimeMillis()
                     if (now - lastDatingActivityTime > 5 * 60 * 1000) {
                         Log.i("FloatingWidgetService", "Auto-Sleep Dating Mode due to 5 min silence")
                         serviceScope.launch(Dispatchers.Main) {
@@ -1074,6 +1152,17 @@ class FloatingWidgetService : Service() {
                         Log.i("FloatingWidgetService", "Auto-Sleep Dating Mode due to 60 min session elapsed")
                         serviceScope.launch(Dispatchers.Main) {
                             triggerDatingAutoSleep("หมดเวลาเซสชันช่วยเดตสูงสุด 60 นาทีแล้ว")
+                        }
+                    }
+                }
+                
+                if (isTranslateMode) {
+                    if (now - lastActivityTime > 5 * 60 * 1000) {
+                        Log.i("FloatingWidgetService", "Auto-Sleep Translate Mode due to 5 min silence")
+                        serviceScope.launch(Dispatchers.Main) {
+                            sendBroadcast(Intent("ACTION_CLOSE_TRANSLATE_UI"))
+                            logAndNotify("ปิดโหมดแปลภาษาอัตโนมัติ (ไม่มีการสนทนาเกิน 5 นาที)")
+                            transitionToState(SessionState.Standby(currentWakeWord))
                         }
                     }
                 }
@@ -1887,27 +1976,52 @@ class FloatingWidgetService : Service() {
 
         // Get list of skills
         val skillMgr = com.example.geminimultimodalliveapi.data.DatingSkillManager(this)
-        val skills = skillMgr.getAllSkills()
+        val skills = skillMgr.getAllSkills().toMutableList()
+        
+        // Add Translate Mode as the 5th option
+        skills.add(
+            com.example.geminimultimodalliveapi.data.DatingSkill(
+                id = "live_translate_mode",
+                name = "Live Translate",
+                description = "เปิดโหมดแปลภาษาและ Co-pilot",
+                instructions = ""
+            )
+        )
 
         val picker = com.example.geminimultimodalliveapi.ui.RadialSkillPickerView(this).apply {
             setSkills(skills)
             listener = object : com.example.geminimultimodalliveapi.ui.RadialSkillPickerView.OnSkillSelectedListener {
                 override fun onSkillSelected(skill: com.example.geminimultimodalliveapi.data.DatingSkill?) {
                     if (skill != null) {
-                        // Apply the dating skill
-                        com.example.geminimultimodalliveapi.session.SessionStateHolder.activeSkillId = skill.id
-                        val prefs = AppPreferences.getInstance(this@FloatingWidgetService)
-                        prefs.lastDatingSkillId = skill.id
-                        
-                        Toast.makeText(
-                            this@FloatingWidgetService,
-                            "เปิดใช้งานโหมดผู้ช่วยเดต: ${skill.name}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        
-                        // Switch active state if session is connected
-                        if (SessionStateHolder.state.value is SessionState.Standby) {
-                            transitionToState(SessionState.Active(true))
+                        if (skill.id == "live_translate_mode") {
+                            val prefs = AppPreferences.getInstance(this@FloatingWidgetService)
+                            prefs.isTranslateModeEnabled = true
+                            Toast.makeText(
+                                this@FloatingWidgetService,
+                                "เปิดโหมดแปลภาษาเรียบร้อย",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            
+                            if (SessionStateHolder.state.value is SessionState.Standby) {
+                                transitionToState(SessionState.Active(true))
+                            }
+                        } else {
+                            // Apply the dating skill
+                            com.example.geminimultimodalliveapi.session.SessionStateHolder.activeSkillId = skill.id
+                            val prefs = AppPreferences.getInstance(this@FloatingWidgetService)
+                            prefs.isTranslateModeEnabled = false // Turn off translate mode if dating skill is chosen
+                            prefs.lastDatingSkillId = skill.id
+                            
+                            Toast.makeText(
+                                this@FloatingWidgetService,
+                                "เปิดใช้งานโหมดผู้ช่วยเดต: ${skill.name}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            
+                            // Switch active state if session is connected
+                            if (SessionStateHolder.state.value is SessionState.Standby) {
+                                transitionToState(SessionState.Active(true))
+                            }
                         }
                     }
                     dismissRadialPicker()

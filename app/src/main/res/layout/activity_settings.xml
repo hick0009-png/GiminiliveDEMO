@@ -657,6 +657,124 @@
                                 android:inputType="text"/>
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
+                    
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#33FFFFFF"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"/>
+                        
+                    <!-- Translate Mode Switch -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+                        
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="โหมดแปลภาษาและ Co-pilot"
+                                android:textColor="#FFFFFF"
+                                android:textSize="14sp"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="เปิดใช้งานเพื่อแปลเสียงพร้อมกระซิบคำแนะนำ"
+                                android:textColor="#9E9E9E"
+                                android:textSize="11sp"/>
+                        </LinearLayout>
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switchTranslateMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                    <!-- Translate Target Language Spinner -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ภาษาเป้าหมาย"
+                            android:textColor="#9E9E9E"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="12dp"/>
+
+                        <Spinner
+                            android:id="@+id/spinnerTargetLanguage"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:background="@android:drawable/btn_dropdown"
+                            android:backgroundTint="#FFFFFF"
+                            android:minHeight="36dp"/>
+                    </LinearLayout>
+
+                    <!-- Coaching Intensity Spinner -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ระดับการแนะนำ (Coaching)"
+                            android:textColor="#9E9E9E"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="12dp"/>
+
+                        <Spinner
+                            android:id="@+id/spinnerCoachingIntensity"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:background="@android:drawable/btn_dropdown"
+                            android:backgroundTint="#FFFFFF"
+                            android:minHeight="36dp"/>
+                    </LinearLayout>
+                    
+                    <!-- Context Profile Spinner -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="โพรไฟล์คู่สนทนา"
+                            android:textColor="#9E9E9E"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="12dp"/>
+
+                        <Spinner
+                            android:id="@+id/spinnerContextProfile"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:background="@android:drawable/btn_dropdown"
+                            android:backgroundTint="#FFFFFF"
+                            android:minHeight="36dp"/>
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

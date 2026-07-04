@@ -21,6 +21,9 @@ object SessionStateHolder {
     private val _state = MutableStateFlow<SessionState>(SessionState.Disconnected)
     val state: StateFlow<SessionState> = _state
 
+    val liveTranscripts: MutableList<String> = Collections.synchronizedList(mutableListOf<String>())
+    val liveAdviceLog: MutableList<String> = Collections.synchronizedList(mutableListOf<String>())
+
     private val _diagnostics = MutableStateFlow(SituationalDiagnostics())
     val diagnostics: StateFlow<SituationalDiagnostics> = _diagnostics
 

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Top Half (Flipped 180 degrees) for the other person -->
+    <FrameLayout
+        android:id="@+id/topHalf"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#1A1A1A"
+        android:rotation="180"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/middleDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+            <TextView
+                android:id="@+id/txtOtherPerson"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:gravity="center"
+                android:text="Waiting for speech..."/>
+        </ScrollView>
+    </FrameLayout>
+
+    <View
+        android:id="@+id/middleDivider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#4CAF50"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Bottom Half for the user -->
+    <FrameLayout
+        android:id="@+id/bottomHalf"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#000000"
+        app:layout_constraintTop_toBottomOf="@+id/middleDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+            <TextView
+                android:id="@+id/txtUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:gravity="center"
+                android:text="รอเสียงพูด..."/>
+        </ScrollView>
+            
+        <!-- Co-pilot Advice Overlay -->
+        <LinearLayout
+            android:id="@+id/layoutAdvice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="16dp"
+            android:background="#E61E1E1E"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💡 Co-pilot Advice"
+                android:textColor="#4CAF50"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:id="@+id/txtAdvice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFD700"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+        
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:tint="#FFFFFF"/>
+            
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

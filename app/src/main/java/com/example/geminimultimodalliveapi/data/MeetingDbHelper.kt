@@ -7,6 +7,7 @@ import net.sqlcipher.database.SQLiteOpenHelper
 import com.example.geminimultimodalliveapi.data.room.AppDatabase
 import com.example.geminimultimodalliveapi.data.room.MeetingEntity
 import java.io.File
+import kotlinx.coroutines.launch
 
 class MeetingDbHelper(private val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -41,42 +42,46 @@ class MeetingDbHelper(private val context: Context) : SQLiteOpenHelper(context, 
     private fun getDao() = AppDatabase.getInstance(context, dbPassword.toByteArray(Charsets.UTF_8)).meetingDao()
 
     fun insertMeeting(meeting: Meeting) {
-        try {
-            getDao().insert(
-                MeetingEntity(
-                    id = meeting.id,
-                    title = meeting.title,
-                    timestamp = meeting.timestamp,
-                    duration = meeting.duration,
-                    filePath = meeting.filePath,
-                    summary = meeting.summary,
-                    transcriptJson = meeting.transcriptJson
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                getDao().insert(
+                    MeetingEntity(
+                        id = meeting.id,
+                        title = meeting.title,
+                        timestamp = meeting.timestamp,
+                        duration = meeting.duration,
+                        filePath = meeting.filePath,
+                        summary = meeting.summary,
+                        transcriptJson = meeting.transcriptJson
+                    )
                 )
-            )
-            Log.i("MeetingDbHelper", "Inserted/Updated meeting: ${meeting.id}")
-        } catch (e: Exception) {
-            Log.e("MeetingDbHelper", "Error inserting meeting", e)
+                Log.i("MeetingDbHelper", "Inserted/Updated meeting: ${meeting.id}")
+            } catch (e: Exception) {
+                Log.e("MeetingDbHelper", "Error inserting meeting", e)
+            }
         }
     }
 
     fun deleteMeeting(id: String) {
-        try {
-            val dao = getDao()
-            val filePath = dao.getFilePath(id)
-            if (filePath != null) {
-                val file = File(filePath)
-                if (file.exists()) {
-                    if (file.delete()) {
-                        Log.i("MeetingDbHelper", "Deleted audio file: $filePath")
-                    } else {
-                        Log.w("MeetingDbHelper", "Failed to delete audio file: $filePath")
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                val dao = getDao()
+                val filePath = dao.getFilePath(id)
+                if (filePath != null) {
+                    val file = File(filePath)
+                    if (file.exists()) {
+                        if (file.delete()) {
+                            Log.i("MeetingDbHelper", "Deleted audio file: $filePath")
+                        } else {
+                            Log.w("MeetingDbHelper", "Failed to delete audio file: $filePath")
+                        }
                     }
                 }
+                dao.delete(id)
+                Log.i("MeetingDbHelper", "Deleted meeting record: $id")
+            } catch (e: Exception) {
+                Log.e("MeetingDbHelper", "Error deleting meeting", e)
             }
-            dao.delete(id)
-            Log.i("MeetingDbHelper", "Deleted meeting record: $id")
-        } catch (e: Exception) {
-            Log.e("MeetingDbHelper", "Error deleting meeting", e)
         }
     }
 

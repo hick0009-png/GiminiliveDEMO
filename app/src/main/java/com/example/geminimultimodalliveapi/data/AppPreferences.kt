@@ -257,6 +257,22 @@ class AppPreferences private constructor(context: Context) {
         return "AppSignatureBackupFingerprint"
     }
 
+    var isTranslateModeEnabled: Boolean
+        get() = sharedPrefs.getBoolean("TRANSLATE_MODE_ENABLED", false)
+        set(value) = sharedPrefs.edit().putBoolean("TRANSLATE_MODE_ENABLED", value).apply()
+
+    var translateTargetLanguage: String
+        get() = sharedPrefs.getString("TRANSLATE_TARGET_LANGUAGE", "en") ?: "en"
+        set(value) = sharedPrefs.edit().putString("TRANSLATE_TARGET_LANGUAGE", value).apply()
+
+    var coachingIntensity: String
+        get() = sharedPrefs.getString("COACHING_INTENSITY", "TEXT_ONLY") ?: "TEXT_ONLY"
+        set(value) = sharedPrefs.edit().putString("COACHING_INTENSITY", value).apply()
+
+    var selectedContextProfile: String
+        get() = sharedPrefs.getString("SELECTED_CONTEXT_PROFILE", "PASSIVE_SUMMARY") ?: "PASSIVE_SUMMARY"
+        set(value) = sharedPrefs.edit().putString("SELECTED_CONTEXT_PROFILE", value).apply()
+
     companion object {
         private const val PREFS_NAME = "GeminiPrefsEncrypted"
         private const val KEY_API_KEY = "API_KEY"

@@ -62,6 +62,10 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnManageMemory: Button
     private lateinit var spinnerActiveTimeout: Spinner
     private lateinit var spinnerDisconnectTimeout: Spinner
+    private lateinit var switchTranslateMode: SwitchCompat
+    private lateinit var spinnerTargetLanguage: Spinner
+    private lateinit var spinnerCoachingIntensity: Spinner
+    private lateinit var spinnerContextProfile: Spinner
     private lateinit var switchMicAgc: SwitchCompat
     private lateinit var spinnerMicGain: Spinner
     private lateinit var layoutMicGain: android.widget.LinearLayout
@@ -144,6 +148,10 @@ class SettingsActivity : AppCompatActivity() {
         btnTestDeepgram = findViewById(R.id.btnTestDeepgram)
         voiceSpinner = findViewById(R.id.voiceSpinner)
         wakeWordInput = findViewById(R.id.wakeWordInput)
+        switchTranslateMode = findViewById(R.id.switchTranslateMode)
+        spinnerTargetLanguage = findViewById(R.id.spinnerTargetLanguage)
+        spinnerCoachingIntensity = findViewById(R.id.spinnerCoachingIntensity)
+        spinnerContextProfile = findViewById(R.id.spinnerContextProfile)
         floatingWidgetSwitch = findViewById(R.id.floatingWidgetSwitch)
         chimeSwitch = findViewById(R.id.chimeSwitch)
         reminderSpinner = findViewById(R.id.reminderSpinner)
@@ -342,6 +350,63 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         wakeWordInput.addTextChangedListener(wakeWordWatcher)
+
+        // Translate Mode Settings
+        switchTranslateMode.isChecked = appPrefs.isTranslateModeEnabled
+        switchTranslateMode.setOnCheckedChangeListener { _, isChecked ->
+            appPrefs.isTranslateModeEnabled = isChecked
+        }
+
+        val targetLangs = arrayOf("th" to "Thai", "en" to "English", "ja" to "Japanese", "zh" to "Chinese", "ko" to "Korean")
+        val targetLangNames = targetLangs.map { it.second }.toTypedArray()
+        val langAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, targetLangNames)
+        langAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerTargetLanguage.adapter = langAdapter
+        
+        val savedTargetLang = appPrefs.translateTargetLanguage
+        val langIndex = targetLangs.indexOfFirst { it.first == savedTargetLang }
+        if (langIndex >= 0) spinnerTargetLanguage.setSelection(langIndex)
+        
+        spinnerTargetLanguage.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                appPrefs.translateTargetLanguage = targetLangs[position].first
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        val coachingIntensities = arrayOf("NONE" to "ปิดการแนะนำ", "ALERT_ONLY" to "แจ้งเตือนเฉพาะเมื่ออันตราย/โกหก", "ADVISORY" to "แนะนำเป็นระยะ", "FULL_COACHING" to "แนะนำแบบละเอียดต่อเนื่อง")
+        val coachingNames = coachingIntensities.map { it.second }.toTypedArray()
+        val coachingAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, coachingNames)
+        coachingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerCoachingIntensity.adapter = coachingAdapter
+
+        val savedCoaching = appPrefs.coachingIntensity
+        val coachingIndex = coachingIntensities.indexOfFirst { it.first == savedCoaching }
+        if (coachingIndex >= 0) spinnerCoachingIntensity.setSelection(coachingIndex)
+
+        spinnerCoachingIntensity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                appPrefs.coachingIntensity = coachingIntensities[position].first
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        val profiles = arrayOf("PASSIVE_SUMMARY" to "แค่บันทึกสรุปหลังจบ", "DATING" to "เดทติ้ง / จีบสาว", "BUSINESS_NEGOTIATION" to "เจรจาธุรกิจ", "INTERVIEW" to "สัมภาษณ์งาน", "CASUAL_CHAT" to "เพื่อนคุยเล่น")
+        val profileNames = profiles.map { it.second }.toTypedArray()
+        val profileAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, profileNames)
+        profileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerContextProfile.adapter = profileAdapter
+
+        val savedProfile = appPrefs.selectedContextProfile
+        val profileIndex = profiles.indexOfFirst { it.first == savedProfile }
+        if (profileIndex >= 0) spinnerContextProfile.setSelection(profileIndex)
+
+        spinnerContextProfile.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                appPrefs.selectedContextProfile = profiles[position].first
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
 
         // Floating widget preference
         val isFloatingWidgetEnabled = appPrefs.isFloatingWidgetEnabled

@@ -72,6 +72,12 @@
             android:label="Memory Management"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name="com.example.geminimultimodalliveapi.ui.translate.TranslateActivity"
+            android:exported="false"
+            android:label="Live Translate"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

@@ -17,6 +17,8 @@ class GeminiLiveClient(
     private val selectedVoice: String,
     private val wakeWord: String,
     memoryContext: String,
+    private val isTranslateMode: Boolean = false,
+    private val translateTargetLanguage: String = "th",
     private val listener: Listener
 ) {
     private var currentMemoryContext = memoryContext
@@ -66,7 +68,6 @@ class GeminiLiveClient(
         connect()
     }
 
-    private val MODEL = "models/gemini-3.1-flash-live-preview"
     private val HOST = "generativelanguage.googleapis.com"
 
     fun connect() {
@@ -324,12 +325,22 @@ class GeminiLiveClient(
         parts.put(partText)
         systemInstruction.put("parts", parts)
 
-        setup.put("model", MODEL)
+        val modelToUse = if (isTranslateMode) "models/gemini-3.5-live-translate-preview" else "models/gemini-3.1-flash-live-preview"
+        setup.put("model", modelToUse)
         setup.put("generationConfig", generationConfig)
-        setup.put("systemInstruction", systemInstruction)
         
-        val tools = ToolDefinitions.getTools()
-        setup.put("tools", tools)
+        if (isTranslateMode) {
+            val translationConfig = JSONObject()
+            val languageConfig = JSONObject()
+            languageConfig.put("sourceLanguage", "auto")
+            languageConfig.put("targetLanguage", translateTargetLanguage)
+            translationConfig.put("languageConfig", languageConfig)
+            setup.put("translationConfig", translationConfig)
+        } else {
+            setup.put("systemInstruction", systemInstruction)
+            val tools = ToolDefinitions.getTools()
+            setup.put("tools", tools)
+        }
 
         val realtimeInputConfig = JSONObject()
         val automaticActivityDetection = JSONObject()
