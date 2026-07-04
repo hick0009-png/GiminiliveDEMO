@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+
+                   ],
+    "id":  "wp-20260704-084847-api-quota-handshake-failure-mitigation-plan-created",
+    "scope":  "",
+    "createdAt":  "2026-07-04T08:48:47+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  0,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "",
+    "title":  "API Quota Handshake Failure Mitigation Plan Created",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-04T08:48:47+07:00",
+    "status":  "in_progress",
+    "completed":  [
+
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
