@@ -967,6 +967,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        stopWaveAnimation()
         if (cameraCaptureHelper?.isCameraActive == true) {
             wasCameraActiveBeforeStop = true
             cameraCaptureHelper?.stopPreview()

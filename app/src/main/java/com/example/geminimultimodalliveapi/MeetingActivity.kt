@@ -330,36 +330,21 @@ class MeetingActivity : AppCompatActivity() {
     }
 
     private fun updateLiveTranscriptUI(newList: List<TranscriptSegment>) {
-        if (newList.isEmpty()) {
-            liveTranscriptList.clear()
-            liveTranscriptAdapter.notifyDataSetChanged()
-            return
-        }
-
-        val oldSize = liveTranscriptList.size
-        val newSize = newList.size
-
-        if (oldSize == newSize) {
-            val lastIdx = oldSize - 1
-            if (liveTranscriptList[lastIdx] != newList[lastIdx]) {
-                liveTranscriptList[lastIdx] = newList[lastIdx]
-                liveTranscriptAdapter.notifyItemChanged(lastIdx)
+        val oldList = ArrayList(liveTranscriptList)
+        val diffResult = androidx.recyclerview.widget.DiffUtil.calculateDiff(object : androidx.recyclerview.widget.DiffUtil.Callback() {
+            override fun getOldListSize(): Int = oldList.size
+            override fun getNewListSize(): Int = newList.size
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldList[oldItemPosition].text == newList[newItemPosition].text &&
+                       oldList[oldItemPosition].speaker == newList[newItemPosition].speaker
             }
-        } else if (newSize > oldSize) {
-            val lastIdx = oldSize - 1
-            if (lastIdx >= 0 && liveTranscriptList[lastIdx] != newList[lastIdx]) {
-                liveTranscriptList[lastIdx] = newList[lastIdx]
-                liveTranscriptAdapter.notifyItemChanged(lastIdx)
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldList[oldItemPosition] == newList[newItemPosition]
             }
-            for (i in oldSize until newSize) {
-                liveTranscriptList.add(newList[i])
-                liveTranscriptAdapter.notifyItemInserted(i)
-            }
-        } else {
-            liveTranscriptList.clear()
-            liveTranscriptList.addAll(newList)
-            liveTranscriptAdapter.notifyDataSetChanged()
-        }
+        })
+        liveTranscriptList.clear()
+        liveTranscriptList.addAll(newList)
+        diffResult.dispatchUpdatesTo(liveTranscriptAdapter)
 
         if (liveTranscriptList.isNotEmpty()) {
             recyclerLiveTranscript.scrollToPosition(liveTranscriptList.size - 1)
