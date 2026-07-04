@@ -380,6 +380,8 @@ PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\<script>.p
 - Using OkHttp WebSocket with 10s ping interval
 - Dedicated high-priority threads for audio recording and playback
 - Jitter buffer: minimum 3 chunks (~120ms) before starting playback
+- **API Key Quota & Disconnect Safety**: Validates API keys and inference quota prior to WebSocket setup using a POST `generateContent` request. Detects `ProtocolException` handshake rejections (HTTP 4xx errors) to immediately disable connection retries. Updates session state to `Disconnected` instantly on explicit disconnect commands to support clean cancellation in the connecting phase.
+- **Theme & Manifest Consolidation**: Merged custom styles under a single application theme `Theme.GeminiMultimodalLiveAPI` and cleaned activity overrides in the manifest. Restored custom `app_logo` launcher icons.
 
 ---
 
