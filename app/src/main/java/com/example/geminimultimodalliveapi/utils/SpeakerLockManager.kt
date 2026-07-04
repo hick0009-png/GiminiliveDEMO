@@ -18,9 +18,9 @@ class SpeakerLockManager(
 
     private fun normalizeText(text: String): String {
         // Strip Thai tone marks (U+0E47 to U+0E4C) and common punctuation/spaces
-        return text.replace("[\u0E47-\u0E4C]".toRegex(), "")
+        return text.replace(TONE_MARKS_REGEX, "")
             .lowercase(Locale.getDefault())
-            .replace("[.,!?\\s]".toRegex(), "")
+            .replace(PUNCTUATION_REGEX, "")
             .trim()
     }
 
@@ -136,5 +136,10 @@ class SpeakerLockManager(
                 lockTimerJob = null
             }
         }
+    }
+
+    companion object {
+        private val TONE_MARKS_REGEX = "[\u0E47-\u0E4C]".toRegex()
+        private val PUNCTUATION_REGEX = "[.,!?\\s]".toRegex()
     }
 }

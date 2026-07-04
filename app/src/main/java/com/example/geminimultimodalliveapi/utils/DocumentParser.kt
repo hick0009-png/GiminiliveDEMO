@@ -14,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 
 object DocumentParser {
 
+    private val MULTIPLE_SPACES_REGEX = "\\s+".toRegex()
+
     suspend fun extractText(context: Context, uri: Uri, mimeType: String?): String = withContext(Dispatchers.IO) {
         try {
             val contentResolver = context.contentResolver
@@ -47,7 +49,7 @@ object DocumentParser {
         val pageNumRegex = Regex("^(page|หน้า)?\\s*\\d+\\s*(of|/|จาก)?\\s*\\d*\\s*$", RegexOption.IGNORE_CASE)
         
         for (line in lines) {
-            val trimmed = line.trim().replace("\\s+".toRegex(), " ")
+            val trimmed = line.trim().replace(MULTIPLE_SPACES_REGEX, " ")
             if (trimmed.isEmpty()) {
                 if (!lastWasEmpty) {
                     cleanedLines.add("")

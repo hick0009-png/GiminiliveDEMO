@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+
+                   ],
+    "id":  "wp-20260704-204029-completed-caching-and-regex-performance-optimizations",
+    "scope":  "",
+    "createdAt":  "2026-07-04T20:40:29+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  100,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "Optimize Document Selection and Text Parsing to reduce CPU and disk overhead",
+    "title":  "Completed Caching and Regex Performance Optimizations",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-04T20:40:29+07:00",
+    "status":  "completed",
+    "completed":  [
+                      "[Implemented in-memory Document Caching in DocumentSelector with directory modified-time invalidation,Pre-compiled Regex constants in SpeakerLockManager and DocumentParser to eliminate GC thrashing,Added testPerformanceOptimizations and testSpeakerLockNormalizationAndParserCleanText unit tests,Verified 100% test pass on full suite and reinstalled on connected device]"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}

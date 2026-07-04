@@ -1,5 +1,6 @@
 package com.example.geminimultimodalliveapi
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -143,5 +144,55 @@ class RemainingBugsTest {
             "AndroidManifest should use Theme.GeminiMultimodalLiveAPI style theme",
             manifestContent.contains("Theme.GeminiMultimodalLiveAPI")
         )
+    }
+
+    @Test
+    fun testPerformanceOptimizations() {
+        val lockManagerFile = getSourceFile("src/main/java/com/example/geminimultimodalliveapi/utils/SpeakerLockManager.kt")
+        assertTrue(lockManagerFile.exists())
+        val lockContent = lockManagerFile.readText()
+        assertTrue(
+            "SpeakerLockManager should pre-compile Regex constants in companion object",
+            lockContent.contains("TONE_MARKS_REGEX") && lockContent.contains("PUNCTUATION_REGEX")
+        )
+
+        val parserFile = getSourceFile("src/main/java/com/example/geminimultimodalliveapi/utils/DocumentParser.kt")
+        assertTrue(parserFile.exists())
+        val parserContent = parserFile.readText()
+        assertTrue(
+            "DocumentParser should pre-compile MULTIPLE_SPACES_REGEX constant",
+            parserContent.contains("MULTIPLE_SPACES_REGEX")
+        )
+
+        val selectorFile = getSourceFile("src/main/java/com/example/geminimultimodalliveapi/agent/DocumentSelector.kt")
+        assertTrue(selectorFile.exists())
+        val selectorContent = selectorFile.readText()
+        assertTrue(
+            "DocumentSelector should implement document cache properties",
+            selectorContent.contains("cachedDocs") && selectorContent.contains("lastDirModifiedTime")
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun testSpeakerLockNormalizationAndParserCleanText() {
+        val lockManager = com.example.geminimultimodalliveapi.utils.SpeakerLockManager(
+            coroutineScope = kotlinx.coroutines.GlobalScope
+        )
+        val wordList = listOf(
+            com.example.geminimultimodalliveapi.network.DeepgramLiveClient.WordDetail(
+                word = "กอหญ้า",
+                speaker = 1,
+                start = 0.0,
+                end = 0.5
+            )
+        )
+        val result = lockManager.processIncomingWords(wordList, "กอหญ้า")
+        assertEquals("กอหญ้า", result?.trim())
+        assertEquals(1, lockManager.activeSpeakerId)
+
+        val rawDocText = "Hello     world!   \n   This is    a   line."
+        val cleaned = com.example.geminimultimodalliveapi.utils.DocumentParser.cleanText(rawDocText)
+        assertEquals("Hello world!\nThis is a line.", cleaned)
     }
 }

@@ -10,7 +10,21 @@ class DocumentSelector(private val context: Context) {
     companion object {
         private const val TAG = "DocumentSelector"
         private const val MAX_MATCH = 2
+
+        @Volatile
+        private var cachedDocs: List<CachedDoc>? = null
+        @Volatile
+        private var lastDirModifiedTime = 0L
+        @Volatile
+        private var lastFileCount = 0
     }
+
+    data class CachedDoc(
+        val fileName: String,
+        val rawContent: String,
+        val searchableText: String,
+        val category: String
+    )
 
     data class ScoredDoc(
         val fileName: String,
@@ -29,39 +43,60 @@ class DocumentSelector(private val context: Context) {
         val docFiles = docsDir.listFiles { f -> f.isFile && (f.name.endsWith(".json") || f.name.endsWith(".txt")) }
             ?: return emptyList()
 
-        val docs = mutableListOf<ScoredDoc>()
-        for (file in docFiles) {
-            try {
-                val raw = file.readText()
-                val json = JSONObject(raw)
-                val category = json.optString("category", "")
-                val title = json.optString("title", "")
-                val description = json.optString("description", "")
+        val currentFileCount = docFiles.size
+        val currentDirModified = docsDir.lastModified()
 
-                val searchableText = buildString {
-                    append("$title $description $category ")
-                    val principles = json.optJSONArray("principles")
-                    if (principles != null) {
-                        for (i in 0 until principles.length()) {
-                            val p = principles.getJSONObject(i)
-                            append(p.optString("name", "") + " ")
-                            append(p.optString("description", "") + " ")
-                            val keywords = p.optJSONArray("keywords")
-                            if (keywords != null) {
-                                for (j in 0 until keywords.length()) {
-                                    append(keywords.getString(j) + " ")
+        // Verify cache freshness
+        var activeCache = cachedDocs
+        if (activeCache == null || lastFileCount != currentFileCount || lastDirModifiedTime != currentDirModified) {
+            synchronized(DocumentSelector::class.java) {
+                activeCache = cachedDocs
+                if (activeCache == null || lastFileCount != currentFileCount || lastDirModifiedTime != currentDirModified) {
+                    val newCache = mutableListOf<CachedDoc>()
+                    for (file in docFiles) {
+                        try {
+                            val raw = file.readText()
+                            val json = JSONObject(raw)
+                            val category = json.optString("category", "")
+                            val title = json.optString("title", "")
+                            val description = json.optString("description", "")
+
+                            val searchableText = buildString {
+                                append("$title $description $category ")
+                                val principles = json.optJSONArray("principles")
+                                if (principles != null) {
+                                    for (i in 0 until principles.length()) {
+                                        val p = principles.getJSONObject(i)
+                                        append(p.optString("name", "") + " ")
+                                        append(p.optString("description", "") + " ")
+                                        val keywords = p.optJSONArray("keywords")
+                                        if (keywords != null) {
+                                            for (j in 0 until keywords.length()) {
+                                                append(keywords.getString(j) + " ")
+                                            }
+                                        }
+                                    }
                                 }
                             }
+                            newCache.add(CachedDoc(file.name, raw, searchableText, category))
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Error reading ${file.name}", e)
                         }
                     }
+                    cachedDocs = newCache
+                    activeCache = newCache
+                    lastFileCount = currentFileCount
+                    lastDirModifiedTime = currentDirModified
+                    Log.i(TAG, "Rebuilt document cache with ${newCache.size} files")
                 }
+            }
+        }
 
-                val score = computeTfIdfScore(transcript, skillId, searchableText, category)
-                if (score > 0.1f) {
-                    docs.add(ScoredDoc(file.name, raw, score, category))
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Error reading ${file.name}", e)
+        val docs = mutableListOf<ScoredDoc>()
+        for (cached in activeCache!!) {
+            val score = computeTfIdfScore(transcript, skillId, cached.searchableText, cached.category)
+            if (score > 0.1f) {
+                docs.add(ScoredDoc(cached.fileName, cached.rawContent, score, cached.category))
             }
         }
 
