@@ -30,10 +30,10 @@ class SituationLogManager(
     private val maxBufferSize = 5
     private val gson = Gson()
 
-    // Common Thai phrases indicating frustration or correction of AI errors
-    private val correctionKeywords = listOf(
+    // Common Thai phrases indicating frustration or correction of AI errors (pre-normalized)
+    private val normalizedCorrectionKeywords = listOf(
         "ไม่ใช่", "ตอบผิด", "เข้าใจผิดแล้ว", "พูดอะไรนะ", "กอหญ้าหยุด", "เงียบก่อน", "พูดใหม่", "ไม่ใช่แล้ว", "หยุดพูด", "มั่วแล้ว"
-    )
+    ).map { it.replace(SPACES_REGEX, "") }
 
     @Synchronized
     fun logChatTurn(role: String, text: String) {
@@ -72,8 +72,8 @@ class SituationLogManager(
     }
 
     private fun containsCorrectionKeyword(text: String): Boolean {
-        val normalized = text.lowercase().replace("\\s".toRegex(), "")
-        return correctionKeywords.any { normalized.contains(it.replace("\\s".toRegex(), "")) }
+        val normalized = text.lowercase().replace(SPACES_REGEX, "")
+        return normalizedCorrectionKeywords.any { normalized.contains(it) }
     }
 
     @Synchronized
@@ -120,5 +120,9 @@ class SituationLogManager(
         } catch (e: Exception) {
             Log.e("SituationLogManager", "Failed to write incident log to disk", e)
         }
+    }
+
+    companion object {
+        private val SPACES_REGEX = "\\s".toRegex()
     }
 }

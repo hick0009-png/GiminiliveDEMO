@@ -13,18 +13,22 @@ data class Topic(
 class TopicManager(
     private val timeoutLimitMs: Long = 10 * 60 * 1000L // 10 minutes session close
 ) {
+    companion object {
+        private val SPACES_REGEX = "\\s".toRegex()
+    }
+
     var currentTopic: Topic? = null
         private set
 
-    // Initial keyword lists for classification mapping
+    // Initial keyword lists for classification mapping (pre-normalized)
     private val topicKeywords = mutableMapOf(
-        "used_car" to mutableListOf("รถมือสอง", "ค่างวด", "ผ่อนกี่ปี", "ดอกเบี้ย", "เงินดาวน์", "โตโยต้า", "ฮอนด้า", "ผ่อนรถ"),
-        "navigation" to mutableListOf("ทางไป", "นำทาง", "แผนที่", "รถติดไหม", "ร้านอาหารแถวนี้", "ปั๊มน้ำมันใกล้สุด"),
-        "weather" to mutableListOf("ฝนตกไหม", "อากาศ", "อุณหภูมิ", "พยากรณ์อากาศ")
+        "used_car" to mutableListOf("รถมือสอง", "ค่างวด", "ผ่อนกี่ปี", "ดอกเบี้ย", "เงินดาวน์", "โตโยต้า", "ฮอนด้า", "ผ่อนรถ").map { it.lowercase().replace(SPACES_REGEX, "") }.toMutableList(),
+        "navigation" to mutableListOf("ทางไป", "นำทาง", "แผนที่", "รถติดไหม", "ร้านอาหารแถวนี้", "ปั๊มน้ำมันใกล้สุด").map { it.lowercase().replace(SPACES_REGEX, "") }.toMutableList(),
+        "weather" to mutableListOf("ฝนตกไหม", "อากาศ", "อุณหภูมิ", "พยากรณ์อากาศ").map { it.lowercase().replace(SPACES_REGEX, "") }.toMutableList()
     )
 
     fun addDynamicKeyword(topicName: String, keyword: String) {
-        val normalizedKeyword = keyword.lowercase().trim()
+        val normalizedKeyword = keyword.lowercase().replace(SPACES_REGEX, "").trim()
         if (normalizedKeyword.isEmpty()) return
 
         val list = topicKeywords.getOrPut(topicName) { mutableListOf() }
@@ -118,9 +122,9 @@ class TopicManager(
     }
 
     private fun detectCategoryFromKeywords(query: String): String? {
-        val normalized = query.lowercase().replace("\\s".toRegex(), "")
+        val normalized = query.lowercase().replace(SPACES_REGEX, "")
         for ((category, keywords) in topicKeywords) {
-            if (keywords.any { normalized.contains(it.lowercase().replace("\\s".toRegex(), "")) }) {
+            if (keywords.any { normalized.contains(it) }) {
                 return category
             }
         }

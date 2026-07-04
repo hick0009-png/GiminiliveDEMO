@@ -195,4 +195,38 @@ class RemainingBugsTest {
         val cleaned = com.example.geminimultimodalliveapi.utils.DocumentParser.cleanText(rawDocText)
         assertEquals("Hello world!\nThis is a line.", cleaned)
     }
+
+    @Test
+    fun testTopicManagerAndSituationLogManagerOptimizations() {
+        val topicManagerFile = getSourceFile("src/main/java/com/example/geminimultimodalliveapi/architecture/TopicManager.kt")
+        assertTrue(topicManagerFile.exists())
+        val topicContent = topicManagerFile.readText()
+        assertTrue(
+            "TopicManager should pre-compile SPACES_REGEX",
+            topicContent.contains("SPACES_REGEX")
+        )
+        assertFalse(
+            "TopicManager detectCategoryFromKeywords should not compile regex inside loop",
+            topicContent.substringAfter("fun detectCategoryFromKeywords").substringBefore("fun ").contains("toRegex()")
+        )
+
+        val situationFile = getSourceFile("src/main/java/com/example/geminimultimodalliveapi/architecture/SituationLogManager.kt")
+        assertTrue(situationFile.exists())
+        val situationContent = situationFile.readText()
+        assertTrue(
+            "SituationLogManager should pre-compile SPACES_REGEX in companion object",
+            situationContent.contains("SPACES_REGEX")
+        )
+        assertFalse(
+            "SituationLogManager containsCorrectionKeyword should not compile regex inside loop",
+            situationContent.substringAfter("fun containsCorrectionKeyword").substringBefore("fun ").contains("toRegex()")
+        )
+    }
+
+    @Test
+    fun testTopicManagerAndSituationLogManagerFunctional() {
+        val topicManager = com.example.geminimultimodalliveapi.architecture.TopicManager()
+        val topic = topicManager.processQueryIntent("อยากซื้อ รถ มือ สอง ครับ")
+        assertEquals("used_car", topic.name)
+    }
 }
