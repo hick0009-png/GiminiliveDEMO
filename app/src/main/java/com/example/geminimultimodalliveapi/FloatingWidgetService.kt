@@ -2002,6 +2002,11 @@ class FloatingWidgetService : Service() {
                                 Toast.LENGTH_SHORT
                             ).show()
                             
+                            val intent = Intent(this@FloatingWidgetService, com.example.geminimultimodalliveapi.ui.translate.TranslateActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                            
                             if (SessionStateHolder.state.value is SessionState.Standby) {
                                 transitionToState(SessionState.Active(true))
                             }

@@ -355,6 +355,16 @@ class SettingsActivity : AppCompatActivity() {
         switchTranslateMode.isChecked = appPrefs.isTranslateModeEnabled
         switchTranslateMode.setOnCheckedChangeListener { _, isChecked ->
             appPrefs.isTranslateModeEnabled = isChecked
+            if (isChecked) {
+                if (FloatingWidgetService.instance != null && com.example.geminimultimodalliveapi.session.SessionStateHolder.state.value !is com.example.geminimultimodalliveapi.session.SessionState.Disconnected) {
+                    val intent = Intent(this, com.example.geminimultimodalliveapi.ui.translate.TranslateActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(intent)
+                }
+            } else {
+                sendBroadcast(Intent("ACTION_CLOSE_TRANSLATE_UI"))
+            }
         }
 
         val targetLangs = arrayOf("th" to "Thai", "en" to "English", "ja" to "Japanese", "zh" to "Chinese", "ko" to "Korean")
