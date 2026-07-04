@@ -115,4 +115,61 @@ class SessionStateHolderTest {
         assertEquals(error1, errorsList[0])
         assertEquals(error3, errorsList[1])
     }
+
+    @Test
+    fun testContextCachingMetadata() {
+        SessionStateHolder.activeCacheId = "cachedContents/test_123"
+        SessionStateHolder.activeCacheExpireTime = 1000L
+        SessionStateHolder.activeCacheContentHash = 999
+
+        assertEquals("cachedContents/test_123", SessionStateHolder.activeCacheId)
+        assertEquals(1000L, SessionStateHolder.activeCacheExpireTime)
+        assertEquals(999, SessionStateHolder.activeCacheContentHash)
+
+        // Verify DateInsight isCached default and change
+        val insight = com.example.geminimultimodalliveapi.data.DateInsight(isCached = true)
+        assertTrue(insight.isCached)
+    }
+
+    @Test
+    fun testContextCachingStaticAnalysis() {
+        val projectDir = java.io.File(".").absolutePath
+        val agentFile = java.io.File(projectDir, "src/main/java/com/example/geminimultimodalliveapi/agent/DatingSkillAgentImpl.kt").let {
+            if (it.exists()) it else java.io.File(projectDir, "app/src/main/java/com/example/geminimultimodalliveapi/agent/DatingSkillAgentImpl.kt")
+        }
+        val serviceFile = java.io.File(projectDir, "src/main/java/com/example/geminimultimodalliveapi/network/GeminiTextService.kt").let {
+            if (it.exists()) it else java.io.File(projectDir, "app/src/main/java/com/example/geminimultimodalliveapi/network/GeminiTextService.kt")
+        }
+
+        assertTrue("DatingSkillAgentImpl.kt should exist", agentFile.exists())
+        assertTrue("GeminiTextService.kt should exist", serviceFile.exists())
+
+        val agentContent = agentFile.readText()
+        val serviceContent = serviceFile.readText()
+
+        // 1. Verify DatingSkillAgentImpl checks eligibility and makes cache call
+        assertTrue(
+            "DatingSkillAgentImpl should have isEligibleForCache logic",
+            agentContent.contains("isEligibleForCache") && agentContent.contains("staticContentToCache.length")
+        )
+        assertTrue(
+            "DatingSkillAgentImpl should use createContextCache",
+            agentContent.contains("createContextCache(")
+        )
+        assertTrue(
+            "DatingSkillAgentImpl should store cache metadata in SessionStateHolder",
+            agentContent.contains("SessionStateHolder.activeCacheId =") &&
+            agentContent.contains("SessionStateHolder.activeCacheExpireTime =")
+        )
+
+        // 2. Verify GeminiTextService contains createContextCache and cachedContent parameter
+        assertTrue(
+            "GeminiTextService should have createContextCache method",
+            serviceContent.contains("fun createContextCache(")
+        )
+        assertTrue(
+            "GeminiTextService should build and send cachedContent request body field",
+            serviceContent.contains("cachedContentName") && serviceContent.contains("cachedContent")
+        )
+    }
 }

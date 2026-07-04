@@ -9,5 +9,6 @@ data class DateInsight(
     val hasRedFlag: Boolean = false,
     val activeAgentId: String = "",
     val activeAgentName: String = "",
-    val routerReasoning: String = ""
+    val routerReasoning: String = "",
+    val isCached: Boolean = false
 )

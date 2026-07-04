@@ -1236,7 +1236,27 @@ class MainActivity : AppCompatActivity() {
             // Set Agent Info
             val agentName = if (insight.activeAgentName.isNotEmpty()) insight.activeAgentName else ""
             val reasoning = if (insight.routerReasoning.isNotEmpty()) " • ${insight.routerReasoning}" else ""
-            txtAgentInfo.text = if (agentName.isNotEmpty()) "🤖 $agentName$reasoning" else ""
+            val text = "🤖 $agentName$reasoning"
+            val cacheText = if (insight.isCached) " ⚡ [Cached]" else ""
+            val fullText = "$text$cacheText"
+            val spannable = android.text.SpannableString(fullText)
+            if (insight.isCached) {
+                val start = text.length
+                val end = fullText.length
+                spannable.setSpan(
+                    android.text.style.ForegroundColorSpan(android.graphics.Color.parseColor("#4CAF50")), // Premium green
+                    start,
+                    end,
+                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                spannable.setSpan(
+                    android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                    start,
+                    end,
+                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            txtAgentInfo.text = spannable
 
             // Set suggestions
             txtDatingTip.text = if (insight.tip.isNotEmpty()) insight.tip else "รอประมวลผลคำแนะนำที่นี่..."

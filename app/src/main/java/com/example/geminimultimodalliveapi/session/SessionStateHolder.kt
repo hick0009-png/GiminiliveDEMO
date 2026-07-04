@@ -53,6 +53,15 @@ object SessionStateHolder {
     @Volatile
     var activeSkillId: String = ""
 
+    @Volatile
+    var activeCacheId: String? = null
+
+    @Volatile
+    var activeCacheExpireTime: Long = 0L
+
+    @Volatile
+    var activeCacheContentHash: Int = 0
+
     private val _chatLogs = MutableStateFlow<String>("")
     val chatLogs: StateFlow<String> = _chatLogs
 

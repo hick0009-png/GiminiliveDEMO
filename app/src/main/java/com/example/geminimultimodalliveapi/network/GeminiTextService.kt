@@ -40,6 +40,7 @@ object GeminiTextService {
         prompt: String,
         systemInstructionText: String,
         history: List<Pair<String, String>> = emptyList(),
+        cachedContentName: String? = null,
         callback: (String?) -> Unit
     ) {
         try {
@@ -70,14 +71,18 @@ object GeminiTextService {
 
             requestBody.put("contents", contents)
 
-            // Custom System Instruction
-            val systemInstruction = JSONObject()
-            val sysParts = JSONArray()
-            val sysPartText = JSONObject()
-            sysPartText.put("text", systemInstructionText)
-            sysParts.put(sysPartText)
-            systemInstruction.put("parts", sysParts)
-            requestBody.put("systemInstruction", systemInstruction)
+            // Custom System Instruction (only if not using cache)
+            if (cachedContentName == null) {
+                val systemInstruction = JSONObject()
+                val sysParts = JSONArray()
+                val sysPartText = JSONObject()
+                sysPartText.put("text", systemInstructionText)
+                sysParts.put(sysPartText)
+                systemInstruction.put("parts", sysParts)
+                requestBody.put("systemInstruction", systemInstruction)
+            } else {
+                requestBody.put("cachedContent", cachedContentName)
+            }
 
             val mediaType = "application/json; charset=utf-8".toMediaType()
             val body = requestBody.toString().toRequestBody(mediaType)
@@ -118,6 +123,98 @@ object GeminiTextService {
         } catch (e: Exception) {
             Log.e("GeminiTextService", "Error building request: ${e.message}", e)
             callback(null)
+        }
+    }
+
+    fun createContextCache(
+        apiKey: String,
+        modelName: String,
+        systemInstructionText: String,
+        docContents: List<String>,
+        ttlSeconds: Int = 300,
+        callback: (String?, Long?) -> Unit
+    ) {
+        try {
+            val requestBody = JSONObject()
+            requestBody.put("model", "models/$modelName")
+
+            val systemInstruction = JSONObject()
+            val sysParts = JSONArray()
+            sysParts.put(JSONObject().put("text", systemInstructionText))
+            systemInstruction.put("parts", sysParts)
+            requestBody.put("systemInstruction", systemInstruction)
+
+            if (docContents.isNotEmpty()) {
+                val contents = JSONArray()
+                val contentObj = JSONObject()
+                contentObj.put("role", "user")
+                val parts = JSONArray()
+                val docText = docContents.joinToString("\n---\n") { "เอกสารอ้างอิงที่เกี่ยวข้อง:\n$it" }
+                parts.put(JSONObject().put("text", docText))
+                contentObj.put("parts", parts)
+                contents.put(contentObj)
+                requestBody.put("contents", contents)
+            }
+
+            requestBody.put("ttl", "${ttlSeconds}s")
+
+            val mediaType = "application/json; charset=utf-8".toMediaType()
+            val body = requestBody.toString().toRequestBody(mediaType)
+
+            val request = Request.Builder()
+                .url("https://generativelanguage.googleapis.com/v1beta/cachedContents?key=$apiKey")
+                .post(body)
+                .build()
+
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e("GeminiTextService", "Cache creation request failed: ${e.message}", e)
+                    callback(null, null)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val respStr = response.body?.string() ?: ""
+                    if (response.isSuccessful) {
+                        try {
+                            val json = JSONObject(respStr)
+                            val name = json.getString("name")
+                            val expireTimeStr = json.getString("expireTime")
+                            val formatter = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                java.time.format.DateTimeFormatter.ISO_DATE_TIME
+                            } else null
+                            val epochMs = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && formatter != null) {
+                                java.time.Instant.from(formatter.parse(expireTimeStr)).toEpochMilli()
+                            } else {
+                                try {
+                                    val df = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US).apply {
+                                        timeZone = java.util.TimeZone.getTimeZone("UTC")
+                                    }
+                                    df.parse(expireTimeStr)?.time
+                                } catch (ex: Exception) {
+                                    try {
+                                        val df = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US).apply {
+                                            timeZone = java.util.TimeZone.getTimeZone("UTC")
+                                        }
+                                        df.parse(expireTimeStr)?.time
+                                    } catch (ex2: Exception) {
+                                        System.currentTimeMillis() + (ttlSeconds * 1000L)
+                                    }
+                                }
+                            }
+                            callback(name, epochMs)
+                        } catch (e: Exception) {
+                            Log.e("GeminiTextService", "Error parsing cache creation response: ${e.message}", e)
+                            callback(null, null)
+                        }
+                    } else {
+                        Log.e("GeminiTextService", "Cache creation API error: ${response.code} / $respStr")
+                        callback(null, null)
+                    }
+                }
+            })
+        } catch (e: Exception) {
+            Log.e("GeminiTextService", "Error building cache creation request: ${e.message}", e)
+            callback(null, null)
         }
     }
 }
