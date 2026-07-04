@@ -742,6 +742,13 @@ class MainActivity : AppCompatActivity() {
 
         flowCollectJob = activityScope.launch {
             launch {
+                SessionStateHolder.isDateAssistantModeActiveFlow.collect { isActive ->
+                    if (switchDateMode.isChecked != isActive) {
+                        switchDateMode.isChecked = isActive
+                    }
+                }
+            }
+            launch {
                 SessionStateHolder.state.collect { state ->
                     isConnected = state != SessionState.Disconnected
                     MainActivity.isSessionConnected = isConnected

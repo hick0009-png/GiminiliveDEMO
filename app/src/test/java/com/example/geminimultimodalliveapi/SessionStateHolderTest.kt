@@ -77,4 +77,21 @@ class SessionStateHolderTest {
         assertEquals("Network error", errorsList[0])
         assertEquals("Timeout error", errorsList[1])
     }
+
+    @Test
+    fun testDateAssistantModeFlow() = runBlocking {
+        val statesList = mutableListOf<Boolean>()
+        val collectJob = launch(Dispatchers.Unconfined) {
+            SessionStateHolder.isDateAssistantModeActiveFlow.take(3).toList(statesList)
+        }
+
+        SessionStateHolder.isDateAssistantModeActive = true
+        SessionStateHolder.isDateAssistantModeActive = false
+        
+        collectJob.join()
+        assertEquals(3, statesList.size)
+        assertEquals(false, statesList[0]) // Initial value
+        assertEquals(true, statesList[1])
+        assertEquals(false, statesList[2])
+    }
 }

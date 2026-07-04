@@ -35,8 +35,14 @@ object SessionStateHolder {
         _dateInsights.value = updater(_dateInsights.value)
     }
 
-    @Volatile
-    var isDateAssistantModeActive: Boolean = false
+    private val _isDateAssistantModeActive = MutableStateFlow(false)
+    val isDateAssistantModeActiveFlow: StateFlow<Boolean> = _isDateAssistantModeActive
+
+    var isDateAssistantModeActive: Boolean
+        get() = _isDateAssistantModeActive.value
+        set(value) {
+            _isDateAssistantModeActive.value = value
+        }
 
     @Volatile
     var activeProfileName: String = ""
