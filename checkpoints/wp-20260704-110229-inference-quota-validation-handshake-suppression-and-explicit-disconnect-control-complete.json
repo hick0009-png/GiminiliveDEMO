@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+
+                   ],
+    "id":  "wp-20260704-110229-inference-quota-validation-handshake-suppression-and-explicit-disconnect-control-complete",
+    "scope":  "",
+    "createdAt":  "2026-07-04T11:02:29+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  0,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "",
+    "title":  "Inference quota validation, handshake suppression and explicit disconnect control complete",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-04T11:02:29+07:00",
+    "status":  "in_progress",
+    "completed":  [
+
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
