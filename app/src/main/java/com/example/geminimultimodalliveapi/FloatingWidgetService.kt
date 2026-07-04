@@ -190,6 +190,10 @@ class FloatingWidgetService : Service() {
         }
 
         fun connectSession(context: Context, apiKey: String) {
+            if (!com.example.geminimultimodalliveapi.utils.NetworkUtils.isNetworkAvailable(context)) {
+                android.widget.Toast.makeText(context, "ไม่มีการเชื่อมต่ออินเทอร์เน็ต กรุณาเชื่อมต่ออินเทอร์เน็ตก่อนใช้งาน", android.widget.Toast.LENGTH_LONG).show()
+                return
+            }
             val intent = Intent(context, FloatingWidgetService::class.java).apply {
                 putExtra("IS_CONNECTED", true)
             }
@@ -767,6 +771,13 @@ class FloatingWidgetService : Service() {
     }
 
     fun connect(apiKey: String) {
+        if (!com.example.geminimultimodalliveapi.utils.NetworkUtils.isNetworkAvailable(this)) {
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                Toast.makeText(applicationContext, "ไม่มีการเชื่อมต่ออินเทอร์เน็ต กรุณาเชื่อมต่ออินเทอร์เน็ตก่อนใช้งาน", Toast.LENGTH_LONG).show()
+            }
+            disconnect()
+            return
+        }
         acquireWakeLock()
         val isConnected = SessionStateHolder.state.value != SessionState.Disconnected
         if (isConnected) return
