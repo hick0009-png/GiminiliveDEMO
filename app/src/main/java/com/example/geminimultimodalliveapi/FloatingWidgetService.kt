@@ -791,11 +791,28 @@ class FloatingWidgetService : Service() {
         isGeminiConnected = false
         isDeepgramConnected = false
 
+        SessionStateHolder.updateState(SessionState.Connecting)
+        logAndNotify("SYSTEM: Validating API Key...")
+
+        com.example.geminimultimodalliveapi.network.ApiKeyValidator.verifyApiKey(apiKey) { isValid, errorMsg ->
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                if (!isValid) {
+                    Toast.makeText(applicationContext, "ข้อผิดพลาด API Key: $errorMsg", Toast.LENGTH_LONG).show()
+                    logAndNotify("SYSTEM: Connection failed ($errorMsg)")
+                    SessionStateHolder.updateState(SessionState.Error(errorMsg))
+                    handleDisconnect(unexpected = true)
+                } else {
+                    proceedConnect(apiKey)
+                }
+            }
+        }
+    }
+
+    private fun proceedConnect(apiKey: String) {
         val appPrefs = AppPreferences.getInstance(this)
         currentWakeWord = appPrefs.wakeWord
         wakeWordDetector.updateWakeWord(currentWakeWord)
 
-        SessionStateHolder.updateState(SessionState.Connecting)
         if (appPrefs.isSoloFocusEnabled) {
             logAndNotify("SYSTEM: Connecting to Live API (Focus Mode)...")
             notificationManager.showOrUpdateNotification("Active background Focused voice conversation...")

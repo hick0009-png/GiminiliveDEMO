@@ -59,4 +59,17 @@ class WebSocketHandshakeFailureTest {
             content.contains("override fun onError") && content.substringAfter("override fun onError").substringBefore("}").contains("Toast.makeText")
         )
     }
+
+    @Test
+    fun testFloatingWidgetServiceApiKeyValidationBeforeConnection() {
+        val serviceFile = getSourceFile("src/main/java/com/example/geminimultimodalliveapi/FloatingWidgetService.kt")
+        assertTrue("FloatingWidgetService.kt should exist", serviceFile.exists())
+        val content = serviceFile.readText()
+
+        // Verify that connect() method calls ApiKeyValidator.verifyApiKey
+        assertTrue(
+            "FloatingWidgetService connect should call ApiKeyValidator.verifyApiKey before establishing socket",
+            content.contains("ApiKeyValidator.verifyApiKey") && content.substringAfter("fun connect(").substringBefore("fun proceedConnect(").contains("verifyApiKey")
+        )
+    }
 }

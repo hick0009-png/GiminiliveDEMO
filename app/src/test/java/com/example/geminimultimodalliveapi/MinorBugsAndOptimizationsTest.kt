@@ -34,14 +34,14 @@ class MinorBugsAndOptimizationsTest {
             manifestContent.contains("Theme.GeminiLiveDemo")
         )
 
-        // 3. Density-aware mipmap launcher icons should be used
+        // 3. Custom brand app_logo should be used as launcher icon
         assertTrue(
-            "Manifest should set ic_launcher as android:icon",
-            manifestContent.contains("android:icon=\"@mipmap/ic_launcher\"")
+            "Manifest should set app_logo as android:icon",
+            manifestContent.contains("android:icon=\"@drawable/app_logo\"")
         )
         assertTrue(
-            "Manifest should set ic_launcher_round as android:roundIcon",
-            manifestContent.contains("android:roundIcon=\"@mipmap/ic_launcher_round\"")
+            "Manifest should set app_logo as android:roundIcon",
+            manifestContent.contains("android:roundIcon=\"@drawable/app_logo\"")
         )
 
         // 4. Themes.xml consolidation
