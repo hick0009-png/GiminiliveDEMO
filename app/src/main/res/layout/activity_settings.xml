@@ -776,6 +776,68 @@
                             android:minHeight="36dp"/>
                     </LinearLayout>
 
+                    <!-- Translate Source Language Spinner -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ภาษาต้นทาง"
+                            android:textColor="#9E9E9E"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="12dp"/>
+
+                        <Spinner
+                            android:id="@+id/spinnerSourceLanguage"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:background="@android:drawable/btn_dropdown"
+                            android:backgroundTint="#FFFFFF"
+                            android:minHeight="36dp"/>
+                    </LinearLayout>
+
+                    <!-- Echo Target Language Switch -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ออกเสียงพูดคำแปล (Voice Output)"
+                                android:textColor="#FFFFFF"
+                                android:textSize="14sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ปิดเพื่อแสดงคำแปลเฉพาะข้อความบนหน้าต่าง"
+                                android:textColor="#9E9E9E"
+                                android:textSize="11sp"/>
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switchEchoTarget"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

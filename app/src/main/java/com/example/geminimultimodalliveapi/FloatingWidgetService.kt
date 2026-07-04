@@ -844,13 +844,15 @@ class FloatingWidgetService : Service() {
         val translateTargetLang = appPrefs.translateTargetLanguage
         
         liveClient = GeminiLiveClient(
-            apiKey, 
-            selectedVoice, 
-            currentWakeWord, 
-            initialPrompt, 
-            isTranslateMode, 
-            translateTargetLang, 
-            clientListener
+            apiKey = apiKey,
+            selectedVoice = selectedVoice,
+            wakeWord = currentWakeWord,
+            memoryContext = initialPrompt,
+            isTranslateMode = isTranslateMode,
+            translateTargetLanguage = translateTargetLang,
+            translateSourceLanguage = appPrefs.translateSourceLanguage,
+            translateEchoTarget = appPrefs.translateEchoTarget,
+            listener = clientListener
         )
         liveClient?.connect()
 

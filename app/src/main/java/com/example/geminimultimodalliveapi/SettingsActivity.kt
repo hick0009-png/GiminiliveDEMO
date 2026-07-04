@@ -66,6 +66,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var spinnerTargetLanguage: Spinner
     private lateinit var spinnerCoachingIntensity: Spinner
     private lateinit var spinnerContextProfile: Spinner
+    private lateinit var spinnerSourceLanguage: Spinner
+    private lateinit var switchEchoTarget: SwitchCompat
     private lateinit var switchMicAgc: SwitchCompat
     private lateinit var spinnerMicGain: Spinner
     private lateinit var layoutMicGain: android.widget.LinearLayout
@@ -152,6 +154,8 @@ class SettingsActivity : AppCompatActivity() {
         spinnerTargetLanguage = findViewById(R.id.spinnerTargetLanguage)
         spinnerCoachingIntensity = findViewById(R.id.spinnerCoachingIntensity)
         spinnerContextProfile = findViewById(R.id.spinnerContextProfile)
+        spinnerSourceLanguage = findViewById(R.id.spinnerSourceLanguage)
+        switchEchoTarget = findViewById(R.id.switchEchoTarget)
         floatingWidgetSwitch = findViewById(R.id.floatingWidgetSwitch)
         chimeSwitch = findViewById(R.id.chimeSwitch)
         reminderSpinner = findViewById(R.id.reminderSpinner)
@@ -416,6 +420,30 @@ class SettingsActivity : AppCompatActivity() {
                 appPrefs.selectedContextProfile = profiles[position].first
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Source Language Spinner binding
+        val sourceLangs = arrayOf("auto" to "ตรวจจับอัตโนมัติ (Auto-detect)", "th" to "Thai (ไทย)", "en" to "English (อังกฤษ)", "ja" to "Japanese (ญี่ปุ่น)", "zh" to "Chinese (จีน)", "ko" to "Korean (เกาหลี)")
+        val sourceLangNames = sourceLangs.map { it.second }.toTypedArray()
+        val sourceLangAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, sourceLangNames)
+        sourceLangAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerSourceLanguage.adapter = sourceLangAdapter
+
+        val savedSourceLang = appPrefs.translateSourceLanguage
+        val sourceLangIndex = sourceLangs.indexOfFirst { it.first == savedSourceLang }
+        if (sourceLangIndex >= 0) spinnerSourceLanguage.setSelection(sourceLangIndex)
+
+        spinnerSourceLanguage.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                appPrefs.translateSourceLanguage = sourceLangs[position].first
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Echo Target Language Switch binding
+        switchEchoTarget.isChecked = appPrefs.translateEchoTarget
+        switchEchoTarget.setOnCheckedChangeListener { _, isChecked ->
+            appPrefs.translateEchoTarget = isChecked
         }
 
         // Floating widget preference

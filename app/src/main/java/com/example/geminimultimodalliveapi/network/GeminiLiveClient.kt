@@ -19,6 +19,8 @@ class GeminiLiveClient(
     memoryContext: String,
     private val isTranslateMode: Boolean = false,
     private val translateTargetLanguage: String = "th",
+    private val translateSourceLanguage: String = "auto",
+    private val translateEchoTarget: Boolean = true,
     private val listener: Listener
 ) {
     private var currentMemoryContext = memoryContext
@@ -332,10 +334,11 @@ class GeminiLiveClient(
         if (isTranslateMode) {
             val translationConfig = JSONObject()
             val languageConfig = JSONObject()
-            languageConfig.put("sourceLanguage", "auto")
+            languageConfig.put("sourceLanguage", translateSourceLanguage)
             languageConfig.put("targetLanguage", translateTargetLanguage)
             translationConfig.put("languageConfig", languageConfig)
-            setup.put("translationConfig", translationConfig)
+            translationConfig.put("echoTargetLanguage", translateEchoTarget)
+            generationConfig.put("translationConfig", translationConfig)
         } else {
             setup.put("systemInstruction", systemInstruction)
             val tools = ToolDefinitions.getTools()

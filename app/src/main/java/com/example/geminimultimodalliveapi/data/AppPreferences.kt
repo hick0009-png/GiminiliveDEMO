@@ -272,6 +272,14 @@ class AppPreferences private constructor(context: Context) {
     var selectedContextProfile: String
         get() = sharedPrefs.getString("SELECTED_CONTEXT_PROFILE", "PASSIVE_SUMMARY") ?: "PASSIVE_SUMMARY"
         set(value) = sharedPrefs.edit().putString("SELECTED_CONTEXT_PROFILE", value).apply()
+        
+    var translateSourceLanguage: String
+        get() = sharedPrefs.getString("TRANSLATE_SOURCE_LANGUAGE", "auto") ?: "auto"
+        set(value) = sharedPrefs.edit().putString("TRANSLATE_SOURCE_LANGUAGE", value).apply()
+
+    var translateEchoTarget: Boolean
+        get() = sharedPrefs.getBoolean("TRANSLATE_ECHO_TARGET", true)
+        set(value) = sharedPrefs.edit().putBoolean("TRANSLATE_ECHO_TARGET", value).apply()
 
     companion object {
         private const val PREFS_NAME = "GeminiPrefsEncrypted"
