@@ -6,3 +6,8 @@ fun Context.dpToPx(dp: Int): Int {
     val density = resources.displayMetrics.density
     return (dp * density).toInt()
 }
+
+fun Context.dpToPx(dp: Float): Float {
+    val density = resources.displayMetrics.density
+    return dp * density
+}

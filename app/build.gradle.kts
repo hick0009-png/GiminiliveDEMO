@@ -80,15 +80,15 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.security.crypto)
-    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
-    implementation("androidx.sqlite:sqlite-ktx:2.4.0")
+    implementation(libs.sqlcipher)
+    implementation(libs.sqlite.ktx)
 
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("org.java-websocket:Java-WebSocket:1.5.3")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.constraintlayout)
+    implementation(libs.java.websocket)
+    implementation(libs.okhttp)
+    implementation(libs.pdfbox.android)
 
     // Hilt Dependency Injection
     implementation(libs.hilt.android)
@@ -100,23 +100,23 @@ dependencies {
     ksp(libs.room.compiler)
 
     // Google Authentication & Google Drive API
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("com.google.android.gms:play-services-location:21.2.0")
-    implementation("com.google.api-client:google-api-client-android:2.2.0") {
+    implementation(libs.play.services.auth)
+    implementation(libs.play.services.location)
+    implementation(libs.google.api.client.android) {
         exclude(group = "org.apache.httpcomponents")
     }
-    implementation("com.google.apis:google-api-services-drive:v3-rev20230822-2.0.0") {
+    implementation(libs.google.api.services.drive) {
         exclude(group = "org.apache.httpcomponents")
     }
-    implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0") {
+    implementation(libs.google.api.services.calendar) {
         exclude(group = "org.apache.httpcomponents")
     }
 
-    implementation("org.json:json:20231013") // JSON parsing
-    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation(libs.org.json) // JSON parsing
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -256,7 +256,7 @@ class SettingsActivity : AppCompatActivity() {
             if (activeSkill != null) {
                 showEditSkillDialog(activeSkill)
             } else {
-                Toast.makeText(this, "โปรดเลือกทักษะที่ต้องการแก้ไข", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_select_skill_to_edit), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -314,7 +314,7 @@ class SettingsActivity : AppCompatActivity() {
         btnTestDeepgram.setOnClickListener {
             val key = deepgramApiKeyInput.text.toString().trim()
             if (key.isEmpty()) {
-                Toast.makeText(this, "โปรดกรอก Deepgram API Key", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_enter_deepgram_api_key), Toast.LENGTH_SHORT).show()
             } else {
                 testDeepgramConnection(key)
             }
@@ -515,11 +515,11 @@ class SettingsActivity : AppCompatActivity() {
             if (isChecked) {
                 if (!isNotificationServiceEnabled()) {
                     switchNotificationPercept.isChecked = false
-                    Toast.makeText(this, "โปรดอนุญาตสิทธิ์เข้าถึงแจ้งเตือนสำหรับแอปพลิเคชัน", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.toast_grant_notification_access), Toast.LENGTH_LONG).show()
                     try {
                         startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
                     } catch (e: Exception) {
-                        Toast.makeText(this, "ไม่สามารถเปิดหน้าตั้งค่าได้: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.toast_open_settings_failed, e.message ?: ""), Toast.LENGTH_LONG).show()
                     }
                 } else {
                     appPrefs.isNotificationPerceptEnabled = true
@@ -713,7 +713,7 @@ class SettingsActivity : AppCompatActivity() {
                 runOnUiThread {
                     btnTestDeepgram.isEnabled = true
                     btnTestDeepgram.text = "Test"
-                    Toast.makeText(this@SettingsActivity, "เชื่อมต่อล้มเหลว: ไม่มีอินเทอร์เน็ต", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@SettingsActivity, getString(R.string.toast_network_error_no_internet), Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -723,14 +723,14 @@ class SettingsActivity : AppCompatActivity() {
                     btnTestDeepgram.isEnabled = true
                     btnTestDeepgram.text = "Test"
                     if (response.isSuccessful) {
-                        Toast.makeText(this@SettingsActivity, "เชื่อมต่อสำเร็จ! คีย์ใช้งานได้ปกติ", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SettingsActivity, getString(R.string.toast_api_key_valid), Toast.LENGTH_SHORT).show()
                     } else {
                         if (code == 401) {
-                            Toast.makeText(this@SettingsActivity, "คีย์ไม่ถูกต้อง (401 Unauthorized)", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@SettingsActivity, getString(R.string.toast_api_key_unauthorized), Toast.LENGTH_LONG).show()
                         } else if (code == 402) {
-                            Toast.makeText(this@SettingsActivity, "เครดิตการใช้งานหมดแล้ว (402 Payment Required)", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@SettingsActivity, getString(R.string.toast_api_key_quota_exceeded), Toast.LENGTH_LONG).show()
                         } else {
-                            Toast.makeText(this@SettingsActivity, "ข้อผิดพลาดรหัส $code", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@SettingsActivity, getString(R.string.toast_api_error_code, code), Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -787,11 +787,11 @@ class SettingsActivity : AppCompatActivity() {
             if (hasLocation && hasActivity) {
                 appPrefs.isSensorIntegrationEnabled = true
                 switchSensorIntegration.isChecked = true
-                Toast.makeText(this, "เปิดใช้งานเซ็นเซอร์ตรวจจับสถานการณ์เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_sensor_enabled_success), Toast.LENGTH_SHORT).show()
             } else {
                 appPrefs.isSensorIntegrationEnabled = false
                 switchSensorIntegration.isChecked = false
-                Toast.makeText(this, "จำเป็นต้องได้รับสิทธิ์ตำแหน่งและกิจกรรมเคลื่อนไหวเพื่อเปิดใช้งาน", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_sensor_permissions_required), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -899,17 +899,17 @@ class SettingsActivity : AppCompatActivity() {
                 if (account != null) {
                     documentManager.onSignedIn(account)
                     calendarManager.onSignedIn(account)
-                    Toast.makeText(this, "เชื่อมต่อ Google สำเร็จ!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_google_connect_success), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 Log.e("GDrive", "Sign-in failed", e)
-                Toast.makeText(this, "การเชื่อมต่อล้มเหลว: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_google_connect_failed, e.message ?: ""), Toast.LENGTH_LONG).show()
                 documentManager.onSignedOut()
                 calendarManager.onSignedOut()
             }
         } else {
             Log.e("GDrive", "Sign-in cancelled or failed with code: ${result.resultCode}")
-            Toast.makeText(this, "ยกเลิกการเชื่อมต่อ", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_disconnect), Toast.LENGTH_SHORT).show()
             documentManager.onSignedOut()
             calendarManager.onSignedOut()
         }
@@ -1103,13 +1103,13 @@ class SettingsActivity : AppCompatActivity() {
             val inst = editInst.text.toString().trim()
 
             if (name.isEmpty() || desc.isEmpty() || inst.isEmpty()) {
-                Toast.makeText(this, "กรุณากรอกข้อมูลให้ครบถ้วน", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_enter_required_fields), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val id = skill?.id ?: name.lowercase().replace("\\s+".toRegex(), "_").replace("[^a-z0-9_]".toRegex(), "")
             if (id.isEmpty()) {
-                Toast.makeText(this, "ชื่อทักษะไม่ถูกต้อง", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_invalid_skill_name), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -1121,12 +1121,12 @@ class SettingsActivity : AppCompatActivity() {
             )
 
             if (datingSkillManager.saveSkill(newSkill)) {
-                Toast.makeText(this, "บันทึกทักษะเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_save_skill_success), Toast.LENGTH_SHORT).show()
                 appPrefs.lastDatingSkillId = id
                 setupSkillSpinner()
                 dialog.dismiss()
             } else {
-                Toast.makeText(this, "เกิดข้อผิดพลาดในการบันทึกทักษะ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_save_skill_failed), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -1136,11 +1136,11 @@ class SettingsActivity : AppCompatActivity() {
     private fun handleSelectedPsychologyPdf(uri: android.net.Uri) {
         val apiKey = appPrefs.apiKey
         if (apiKey.isEmpty()) {
-            Toast.makeText(this, "กรุณากรอกและเชื่อมต่อ Gemini API Key ก่อนอัปโหลดตำรา", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_enter_gemini_key_before_upload), Toast.LENGTH_LONG).show()
             return
         }
 
-        showProgressDialog("การนำเข้าเอกสาร", "กำลังอ่านและสกัดข้อความจากไฟล์ PDF...")
+        showProgressDialog(getString(R.string.dialog_pdf_import_title), getString(R.string.dialog_pdf_import_message))
 
         activityScope.launch(Dispatchers.IO) {
             try {
@@ -1149,7 +1149,7 @@ class SettingsActivity : AppCompatActivity() {
                 if (inputStream == null) {
                     dismissProgressDialog()
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@SettingsActivity, "ไม่สามารถเปิดไฟล์ PDF ได้", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SettingsActivity, getString(R.string.toast_pdf_open_failed), Toast.LENGTH_SHORT).show()
                     }
                     return@launch
                 }
@@ -1228,7 +1228,7 @@ class SettingsActivity : AppCompatActivity() {
                         dismissProgressDialog()
                         if (resultText == null) {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(this@SettingsActivity, "การวิเคราะห์โครงสร้างด้วย Gemini ล้มเหลว", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@SettingsActivity, getString(R.string.toast_gemini_analysis_failed), Toast.LENGTH_SHORT).show()
                             }
                             return@launch
                         }
@@ -1257,12 +1257,12 @@ class SettingsActivity : AppCompatActivity() {
                             file.writeText(cleanedJson)
 
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(this@SettingsActivity, "นำเข้าและจัดหมวดหมู่ตำราเอกสารสำเร็จเรียบร้อย!", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@SettingsActivity, getString(R.string.toast_pdf_import_success), Toast.LENGTH_LONG).show()
                             }
                         } catch (e: Exception) {
                             Log.e("PsychologyPDF", "Invalid JSON from Gemini: $cleanedJson", e)
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(this@SettingsActivity, "การวิเคราะห์ล้มเหลว: โครงสร้างข้อมูลไม่ถูกต้อง", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@SettingsActivity, getString(R.string.toast_analysis_failed_invalid_data), Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -1272,7 +1272,7 @@ class SettingsActivity : AppCompatActivity() {
                 dismissProgressDialog()
                 Log.e("PsychologyPDF", "Error handling selected PDF", e)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@SettingsActivity, "เกิดข้อผิดพลาดในการอ่านไฟล์ PDF: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@SettingsActivity, getString(R.string.toast_pdf_read_error, e.message ?: ""), Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -1392,14 +1392,14 @@ class SettingsActivity : AppCompatActivity() {
                     )
                     setOnClickListener {
                         AlertDialog.Builder(this@SettingsActivity)
-                            .setTitle("ยืนยันการลบ")
-                            .setMessage("คุณต้องการลบเอกสาร '$title' ใช่หรือไม่?")
-                            .setPositiveButton("ลบ") { _, _ ->
+                            .setTitle(getString(R.string.dialog_delete_doc_title))
+                            .setMessage(getString(R.string.dialog_delete_doc_message, title))
+                            .setPositiveButton(getString(R.string.btn_delete)) { _, _ ->
                                 file.delete()
                                 rebuildList()
-                                Toast.makeText(this@SettingsActivity, "ลบเอกสารสำเร็จ", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@SettingsActivity, getString(R.string.toast_document_deleted_success), Toast.LENGTH_SHORT).show()
                             }
-                            .setNegativeButton("ยกเลิก", null)
+                            .setNegativeButton(getString(R.string.btn_cancel), null)
                             .show()
                     }
                 }

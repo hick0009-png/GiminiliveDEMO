@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.example.geminimultimodalliveapi.data.DatingSkill
+import com.example.geminimultimodalliveapi.utils.dpToPx
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -27,9 +28,9 @@ class RadialSkillPickerView @JvmOverloads constructor(
     private var selectedIndex = -1
 
     // Dimensions
-    private val outerRadius = dpToPx(130f)
-    private val innerRadius = dpToPx(45f)
-    private val centerCircleRadius = dpToPx(40f)
+    private val outerRadius = context.dpToPx(130f)
+    private val innerRadius = context.dpToPx(45f)
+    private val centerCircleRadius = context.dpToPx(40f)
 
     // Paints
     private val segmentPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -38,14 +39,14 @@ class RadialSkillPickerView @JvmOverloads constructor(
     
     private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = dpToPx(1.5f)
+        strokeWidth = context.dpToPx(1.5f)
         color = Color.argb(120, 255, 255, 255) // Luxury subtle white border
     }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textAlign = Paint.Align.CENTER
-        textSize = dpToPx(14f)
+        textSize = context.dpToPx(14f)
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
 
@@ -131,7 +132,7 @@ class RadialSkillPickerView @JvmOverloads constructor(
             val middleAngle = Math.toRadians((startAngle + sweepAngle / 2f).toDouble())
             val textRadius = (outerRadius + innerRadius) / 2f
             val textX = centerX + textRadius * cos(middleAngle).toFloat()
-            val textY = centerY + textRadius * sin(middleAngle).toFloat() + dpToPx(5f) // Vertical offset adjustment
+            val textY = centerY + textRadius * sin(middleAngle).toFloat() + context.dpToPx(5f) // Vertical offset adjustment
 
             val displayName = skills[i].name.substringBefore(" (") // Shorten name if it contains description parentheses
             canvas.drawText(displayName, textX, textY, textPaint)
@@ -139,15 +140,15 @@ class RadialSkillPickerView @JvmOverloads constructor(
 
         // 4. Draw Center Cancel Button
         canvas.drawCircle(centerX, centerY, centerCircleRadius, shadowPaint)
-        canvas.drawCircle(centerX, centerY, centerCircleRadius - dpToPx(2f), centerPaint)
-        canvas.drawCircle(centerX, centerY, centerCircleRadius - dpToPx(2f), borderPaint)
+        canvas.drawCircle(centerX, centerY, centerCircleRadius - context.dpToPx(2f), centerPaint)
+        canvas.drawCircle(centerX, centerY, centerCircleRadius - context.dpToPx(2f), borderPaint)
         
         // Draw Cancel/Exit text
         val cancelTextPaint = Paint(textPaint).apply {
-            textSize = dpToPx(11f)
+            textSize = context.dpToPx(11f)
             color = Color.argb(200, 255, 255, 255)
         }
-        canvas.drawText("ยกเลิก", centerX, centerY + dpToPx(4f), cancelTextPaint)
+        canvas.drawText("ยกเลิก", centerX, centerY + context.dpToPx(4f), cancelTextPaint)
     }
 
     /**
@@ -209,7 +210,4 @@ class RadialSkillPickerView @JvmOverloads constructor(
         return super.onTouchEvent(event)
     }
 
-    private fun dpToPx(dp: Float): Float {
-        return dp * context.resources.displayMetrics.density
-    }
 }

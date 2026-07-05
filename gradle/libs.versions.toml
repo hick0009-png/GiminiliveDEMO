@@ -13,6 +13,24 @@ ksp = "2.0.0-1.0.21"
 hilt = "2.51.1"
 room = "2.6.1"
 
+# Centralized versions for previously hardcoded dependencies
+playServicesAuth = "20.7.0"
+playServicesLocation = "21.2.0"
+googleApiClient = "2.2.0"
+googleApiServicesDrive = "v3-rev20230822-2.0.0"
+googleApiServicesCalendar = "v3-rev20220715-2.0.0"
+sqlcipher = "4.5.4"
+sqliteKtx = "2.4.0"
+appcompat = "1.6.1"
+material = "1.10.0"
+constraintlayout = "2.1.4"
+javaWebSocket = "1.5.3"
+okhttp = "4.12.0"
+pdfbox = "2.0.27.0"
+orgJson = "20231013"
+kotlinxSerialization = "1.6.3"
+kotlinxCoroutinesTest = "1.7.3"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -34,6 +52,24 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.r
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+
+# Declared libraries for Version Catalog migration
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+google-api-client-android = { group = "com.google.api-client", name = "google-api-client-android", version.ref = "googleApiClient" }
+google-api-services-drive = { group = "com.google.apis", name = "google-api-services-drive", version.ref = "googleApiServicesDrive" }
+google-api-services-calendar = { group = "com.google.apis", name = "google-api-services-calendar", version.ref = "googleApiServicesCalendar" }
+sqlcipher = { group = "net.zetetic", name = "android-database-sqlcipher", version.ref = "sqlcipher" }
+sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version.ref = "sqliteKtx" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+java-websocket = { group = "org.java-websocket", name = "Java-WebSocket", version.ref = "javaWebSocket" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+pdfbox-android = { group = "com.tom-roush", name = "pdfbox-android", version.ref = "pdfbox" }
+org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

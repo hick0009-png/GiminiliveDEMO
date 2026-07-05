@@ -66,14 +66,14 @@ class MainActivity : AppCompatActivity() {
             try {
                 val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
                 if (account != null) {
-                    Toast.makeText(this, "เชื่อมต่อบัญชี Google สำเร็จ!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_google_connect_success), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 Log.e("MainActivity", "Sign-in failed", e)
-                Toast.makeText(this, "การเชื่อมต่อล้มเหลว: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_google_connect_failed, e.message ?: ""), Toast.LENGTH_LONG).show()
             }
         } else {
-            Toast.makeText(this, "ยกเลิกการเชื่อมต่อ", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_disconnect), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -220,10 +220,10 @@ class MainActivity : AppCompatActivity() {
             if (isChecked && switchDateMode.isChecked) {
                 switchDateMode.isChecked = false
                 com.example.geminimultimodalliveapi.session.SessionStateHolder.isDateAssistantModeActive = false
-                Toast.makeText(this, "ปิดโหมดผู้ช่วยเดตเนื่องจากเปิดโหมดโฟกัสเดี่ยว", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_dating_mode_disabled_by_focus), Toast.LENGTH_SHORT).show()
             }
             if (FloatingWidgetService.isSessionConnected) {
-                Toast.makeText(this, "กรุณาเชื่อมต่อใหม่เพื่อสลับโหมด", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_reconnect_to_switch_mode), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity() {
             if (!isConnected) {
                 val key = appPrefs.apiKey
                 if (key.isEmpty()) {
-                    Toast.makeText(this, "กรุณากรอก API Key ในหน้าการตั้งค่าก่อน", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_input_api_key_first), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, SettingsActivity::class.java))
                 } else {
                     if (PermissionHelper.checkAndRequestPermissions(this)) {
@@ -278,7 +278,7 @@ class MainActivity : AppCompatActivity() {
         // Single Camera / Shutter Button Click
         btnShutterSingle.setOnClickListener {
             if (!isConnected) {
-                Toast.makeText(this, "โปรดเชื่อมต่อเซสชันก่อนใช้งานกล้อง", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_connect_session_first_for_camera), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             val isCameraActive = cameraCaptureHelper?.isCameraActive ?: false
@@ -361,7 +361,7 @@ class MainActivity : AppCompatActivity() {
                 if (switchSoloFocus.isChecked) {
                     switchSoloFocus.isChecked = false
                     appPrefs.isSoloFocusEnabled = false
-                    Toast.makeText(this, "ปิดโหมดโฟกัสเดี่ยวเพื่อรับเสียงทั้งสองคน", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_disable_focus_mode_to_receive_both), Toast.LENGTH_SHORT).show()
                 }
                 consoleCard.visibility = View.GONE
                 dateInsightCard.visibility = View.VISIBLE
@@ -553,7 +553,7 @@ class MainActivity : AppCompatActivity() {
             }
             STORAGE_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "สิทธิ์จัดเก็บข้อมูลได้รับการอนุญาตแล้ว กรุณากดถ่ายภาพอีกครั้งเพื่อบันทึกรูปภาพ", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.toast_storage_permission_granted_click_photo_again), Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this, "Storage permission denied. Cannot save photo.", Toast.LENGTH_SHORT).show()
                 }
@@ -888,19 +888,19 @@ class MainActivity : AppCompatActivity() {
                 EXTRA_PERMISSIONS_REQUEST_CODE
             )
         } else if (requestCall || requestAnswer || requestLocation) {
-            Toast.makeText(this, "ได้รับสิทธิ์ที่จำเป็นเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_required_permissions_granted), Toast.LENGTH_SHORT).show()
         }
 
         if (requestNotification) {
             if (!isNotificationServiceEnabled()) {
-                Toast.makeText(this, "โปรดเปิดสิทธิ์เข้าถึงการแจ้งเตือนให้แอปพลิเคชัน", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_enable_notification_access), Toast.LENGTH_LONG).show()
                 try {
                     startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
                 } catch (e: Exception) {
-                    Toast.makeText(this, "ไม่สามารถเปิดหน้าตั้งค่าได้: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.toast_open_settings_failed, e.message ?: ""), Toast.LENGTH_LONG).show()
                 }
             } else {
-                Toast.makeText(this, "ได้รับสิทธิ์เข้าถึงการแจ้งเตือนเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_notification_permission_granted), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -917,7 +917,7 @@ class MainActivity : AppCompatActivity() {
 
         if (startCamera) {
             if (!isConnected) {
-                Toast.makeText(this, "โปรดเชื่อมต่อเซสชันก่อนเปิดกล้อง", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_connect_session_first_for_camera_open), Toast.LENGTH_SHORT).show()
                 updateCaptureButtonState(false)
                 cameraCallId?.let { cid ->
                     FloatingWidgetService.sendToolResponse(cid, false)
@@ -1094,13 +1094,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 Log.i("SaveImage", "Image saved to gallery: $uri")
                 runOnUiThread {
-                    Toast.makeText(this, "ถ่ายภาพสำเร็จและบันทึกลงเครื่องแล้ว!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_photo_saved_success), Toast.LENGTH_SHORT).show()
                 }
             }
         } catch (e: Exception) {
             Log.e("SaveImage", "Failed to save image to gallery", e)
             runOnUiThread {
-                Toast.makeText(this, "บันทึกภาพล้มเหลว", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_photo_save_failed), Toast.LENGTH_SHORT).show()
             }
             if (uri != null) {
                 try {
@@ -1292,16 +1292,16 @@ class MainActivity : AppCompatActivity() {
     private fun checkNotificationAccessPermission() {
         if (!isNotificationServiceEnabled()) {
             androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("เปิดระบบอ่านแจ้งเตือนเสียง")
-                .setMessage("แอปต้องการสิทธิ์เข้าถึงการแจ้งเตือน เพื่อให้ AI สามารถอ่านข้อความจาก LINE/SMS ให้คุณฟังขณะขับขี่ได้ ต้องการเปิดการตั้งค่าตอนนี้เลยหรือไม่?")
-                .setPositiveButton("เปิดตั้งค่า") { _, _ ->
+                .setTitle(getString(R.string.dialog_notification_access_title))
+                .setMessage(getString(R.string.dialog_notification_access_message))
+                .setPositiveButton(getString(R.string.dialog_notification_access_positive)) { _, _ ->
                     try {
                         startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
                     } catch (e: Exception) {
-                        Toast.makeText(this, "ไม่สามารถเปิดการตั้งค่าได้", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.toast_open_settings_failed_general), Toast.LENGTH_SHORT).show()
                     }
                 }
-                .setNegativeButton("ไว้ทีหลัง", null)
+                .setNegativeButton(getString(R.string.dialog_notification_access_negative), null)
                 .show()
         }
     }

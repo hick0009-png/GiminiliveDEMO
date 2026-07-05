@@ -39,6 +39,7 @@ import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import com.example.geminimultimodalliveapi.utils.dpToPx
+import com.example.geminimultimodalliveapi.utils.formatTime
 
 // removed unused serialization imports
 import java.io.File
@@ -116,7 +117,7 @@ class MeetingActivity : AppCompatActivity() {
             act.mediaPlayer?.let { mp ->
                 if (mp.isPlaying) {
                     act.seekBarAudio.progress = mp.currentPosition
-                    act.txtCurrentPlayTime.text = act.formatTime(mp.currentPosition.toLong() / 1000)
+                    act.txtCurrentPlayTime.text = formatTime(mp.currentPosition.toLong() / 1000)
                     act.playHandler.postDelayed(this, 200)
                 }
             }
@@ -364,7 +365,7 @@ class MeetingActivity : AppCompatActivity() {
     private fun startRecording() {
         val title = editMeetingTitle.text.toString().trim()
         if (title.isEmpty()) {
-            Toast.makeText(this, "กรุณากรอกชื่อการประชุม", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_enter_meeting_name), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -430,7 +431,7 @@ class MeetingActivity : AppCompatActivity() {
 
         txtRecordTimer.visibility = View.VISIBLE
         txtRecordTimer.text = "00:00:00"
-        txtRecordStatus.text = "กำลังบันทึกเสียงการประชุม..."
+        txtRecordStatus.text = getString(R.string.status_meeting_recording)
         imgRecordIcon.setImageResource(R.drawable.baseline_mic_off_24)
         startPulsingAnimation()
     }
@@ -473,7 +474,7 @@ class MeetingActivity : AppCompatActivity() {
         }
 
         txtRecordTimer.visibility = View.GONE
-        txtRecordStatus.text = "หยุดการบันทึกแล้ว"
+        txtRecordStatus.text = getString(R.string.status_meeting_stopped)
         imgRecordIcon.setImageResource(R.drawable.baseline_mic_24)
         stopPulsingAnimation()
         cardDeepgramStatus.visibility = View.GONE
@@ -623,7 +624,7 @@ class MeetingActivity : AppCompatActivity() {
         val meeting = selectedMeeting ?: return
         val audioFile = File(meeting.filePath)
         if (!audioFile.exists()) {
-            Toast.makeText(this, "ไม่พบไฟล์เสียงในเครื่อง", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_audio_file_not_found), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -657,7 +658,7 @@ class MeetingActivity : AppCompatActivity() {
                     prepareAsync()
                 } catch (e: Exception) {
                     Log.e("MeetingActivity", "Error preparing MediaPlayer", e)
-                    Toast.makeText(this@MeetingActivity, "ไม่สามารถเล่นไฟล์เสียงนี้ได้", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MeetingActivity, getString(R.string.toast_cannot_play_audio), Toast.LENGTH_SHORT).show()
                     return
                 }
             }
@@ -694,13 +695,13 @@ class MeetingActivity : AppCompatActivity() {
         val meeting = selectedMeeting ?: return
         val apiKey = appPrefs.apiKey
         if (apiKey.isEmpty()) {
-            Toast.makeText(this, "กรุณากรอก API Key ในเมนูตั้งค่าก่อน", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_input_api_key_first_settings), Toast.LENGTH_SHORT).show()
             return
         }
 
         val audioFile = File(meeting.filePath)
         if (!audioFile.exists()) {
-            Toast.makeText(this, "ไม่พบไฟล์เสียงการประชุมสำหรับการวิเคราะห์", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_meeting_audio_not_found_for_analysis), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -721,7 +722,7 @@ class MeetingActivity : AppCompatActivity() {
                         layoutAnalysisResults.visibility = View.VISIBLE
                         txtMeetingSummary.text = summary
                         displayTranscript(transcriptJson)
-                        Toast.makeText(this@MeetingActivity, "วิเคราะห์การประชุมสำเร็จ!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MeetingActivity, getString(R.string.toast_meeting_analysis_success), Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -778,7 +779,7 @@ class MeetingActivity : AppCompatActivity() {
     private fun showRenameSpeakerDialog() {
         val meeting = selectedMeeting ?: return
         if (meeting.transcriptJson.isNullOrEmpty()) {
-            Toast.makeText(this, "ต้องทำการวิเคราะห์การประชุมก่อนจึงจะสามารถแก้ไขชื่อผู้พูดได้", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_analyze_meeting_first_to_edit_speaker), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -787,7 +788,7 @@ class MeetingActivity : AppCompatActivity() {
         if (distinctSpeakers.isEmpty()) return
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("แก้ไขชื่อผู้พูด")
+        builder.setTitle(getString(R.string.dialog_edit_speaker_title))
 
         // Actually, let's build a simple view programmatically to avoid xml dependency conflicts! It is extremely clean and stable.
         val layout = LinearLayout(this).apply {
@@ -797,7 +798,7 @@ class MeetingActivity : AppCompatActivity() {
         }
 
         val labelSpinner = TextView(this).apply {
-            text = "เลือกชื่อผู้พูดที่ต้องการเปลี่ยน:"
+            text = getString(R.string.dialog_edit_speaker_select)
             setTextColor(ContextCompat.getColor(context, android.R.color.white))
             textSize = 14f
             setPadding(0, 0, 0, dpToPx(8))
@@ -811,7 +812,7 @@ class MeetingActivity : AppCompatActivity() {
         layout.addView(spinner)
 
         val labelInput = TextView(this).apply {
-            text = "พิมพ์ชื่อใหม่:"
+            text = getString(R.string.dialog_edit_speaker_input_label)
             setTextColor(ContextCompat.getColor(context, android.R.color.white))
             textSize = 14f
             setPadding(0, dpToPx(16), 0, dpToPx(8))
@@ -820,18 +821,18 @@ class MeetingActivity : AppCompatActivity() {
 
         val input = EditText(this).apply {
             setTextColor(ContextCompat.getColor(context, android.R.color.white))
-            hint = "เช่น สมพงษ์, ประธาน"
+            hint = getString(R.string.dialog_edit_speaker_hint)
             setHintTextColor(0x80FFFFFF.toInt())
         }
         layout.addView(input)
 
         builder.setView(layout)
 
-        builder.setPositiveButton("บันทึก") { _, _ ->
+        builder.setPositiveButton(getString(R.string.btn_save)) { _, _ ->
             val oldName = spinner.selectedItem as? String ?: return@setPositiveButton
             val newName = input.text.toString().trim()
             if (newName.isEmpty()) {
-                Toast.makeText(this, "กรุณากรอกชื่อใหม่", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_enter_new_speaker_name), Toast.LENGTH_SHORT).show()
                 return@setPositiveButton
             }
 
@@ -842,12 +843,12 @@ class MeetingActivity : AppCompatActivity() {
                 selectedMeeting?.let {
                     displayTranscript(it.transcriptJson)
                 }
-                Toast.makeText(this, "แก้ไขชื่อผู้พูดสำเร็จ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_edit_speaker_success), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "ไม่สามารถแก้ไขชื่อได้", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_edit_speaker_failed), Toast.LENGTH_SHORT).show()
             }
         }
-        builder.setNegativeButton("ยกเลิก", null)
+        builder.setNegativeButton(getString(R.string.btn_cancel), null)
         
         val dialog = builder.create()
         if (!isFinishing && !isDestroyed) {
@@ -880,19 +881,13 @@ class MeetingActivity : AppCompatActivity() {
 
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, "สรุปการประชุม - ${meeting.title}")
+            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_meeting_subject, meeting.title))
             putExtra(Intent.EXTRA_TEXT, shareBody)
         }
-        startActivity(Intent.createChooser(intent, "แชร์ข้อมูลการประชุม"))
+        startActivity(Intent.createChooser(intent, getString(R.string.share_meeting_chooser)))
     }
 
     // Helper Utils
-    private fun formatTime(seconds: Long): String {
-        val h = seconds / 3600
-        val m = (seconds % 3600) / 60
-        val s = seconds % 60
-        return String.format("%02d:%02d:%02d", h, m, s)
-    }
 
 
 
@@ -914,7 +909,7 @@ class MeetingActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startRecording()
             } else {
-                Toast.makeText(this, "ต้องการสิทธิ์เข้าถึงไมโครโฟนเพื่ออัดเสียง", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_microphone_permission_required), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -989,7 +984,7 @@ class MeetingActivity : AppCompatActivity() {
             val sec = meeting.duration
             val m = sec / 60
             val s = sec % 60
-            holder.duration.text = String.format("%02d:%02d นาที", m, s)
+            holder.duration.text = String.format(Locale.getDefault(), getString(R.string.duration_minutes_format), m, s)
 
             // Status chip
             if (meeting.summary.isNullOrEmpty()) {
@@ -997,7 +992,7 @@ class MeetingActivity : AppCompatActivity() {
                 holder.status.setTextColor(0xFFD32F2F.toInt()) // Red
                 holder.status.setBackgroundResource(R.drawable.floating_widget_bg) // simple bg
             } else {
-                holder.status.text = "วิเคราะห์เสร็จสิ้น"
+                holder.status.text = getString(R.string.status_analysis_complete)
                 holder.status.setTextColor(0xFF388E3C.toInt()) // Green
                 holder.status.setBackgroundResource(R.drawable.floating_widget_bg)
             }
@@ -1009,14 +1004,14 @@ class MeetingActivity : AppCompatActivity() {
             holder.deleteBtn.setOnClickListener {
                 if (isFinishing || isDestroyed) return@setOnClickListener
                 AlertDialog.Builder(this@MeetingActivity)
-                    .setTitle("ลบการประชุม")
-                    .setMessage("คุณต้องการลบการประชุมนี้และไฟล์เสียงที่บันทึกไว้ใช่หรือไม่?")
-                    .setPositiveButton("ลบ") { _, _ ->
+                    .setTitle(getString(R.string.dialog_delete_meeting_title))
+                    .setMessage(getString(R.string.dialog_delete_meeting_message))
+                    .setPositiveButton(getString(R.string.btn_delete)) { _, _ ->
                         meetingDbHelper.deleteMeeting(meeting.id)
                         loadMeetings()
-                        Toast.makeText(this@MeetingActivity, "ลบสำเร็จ", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MeetingActivity, getString(R.string.toast_delete_success), Toast.LENGTH_SHORT).show()
                     }
-                    .setNegativeButton("ยกเลิก", null)
+                    .setNegativeButton(getString(R.string.btn_cancel), null)
                     .show()
             }
         }
