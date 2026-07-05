@@ -253,6 +253,21 @@ class FloatingWidgetService : Service() {
         override fun onTextMessageReceived(text: String) {
             logAndNotify("GEMINI: $text")
             situationLogManager.logChatTurn("model", text)
+            val appPrefs = AppPreferences.getInstance(this@FloatingWidgetService)
+            if (appPrefs.isTranslateModeEnabled) {
+                SessionStateHolder.updateTranslateTranscript(text)
+            }
+        }
+
+        override fun onInputAudioTranscriptionReceived(text: String, completed: Boolean) {
+            val appPrefs = AppPreferences.getInstance(this@FloatingWidgetService)
+            if (appPrefs.isTranslateModeEnabled) {
+                SessionStateHolder.updateUserTranscript(text)
+                if (completed) {
+                    logAndNotify("USER: $text")
+                    situationLogManager.logChatTurn("user", text)
+                }
+            }
         }
 
         override fun onAudioChunkReceived(base64Audio: String, sampleRate: Int) {
@@ -840,6 +855,10 @@ class FloatingWidgetService : Service() {
         val appPrefs = AppPreferences.getInstance(this)
         currentWakeWord = appPrefs.wakeWord
         wakeWordDetector.updateWakeWord(currentWakeWord)
+        
+        if (appPrefs.isTranslateModeEnabled) {
+            SessionStateHolder.clearTranslateSessionData()
+        }
 
         if (appPrefs.isSoloFocusEnabled) {
             logAndNotify("SYSTEM: Connecting to Live API (Focus Mode)...")

@@ -32,6 +32,7 @@ class GeminiLiveClient(
         fun onReconnecting(attempt: Int)
         fun onError(errorMsg: String)
         fun onTextMessageReceived(text: String)
+        fun onInputAudioTranscriptionReceived(text: String, completed: Boolean) {}
         fun onAudioChunkReceived(base64Audio: String, sampleRate: Int)
         fun onInterrupted()
         fun onCameraOpenRequested(callId: String)
@@ -335,7 +336,11 @@ class GeminiLiveClient(
             val translationConfig = JSONObject()
             translationConfig.put("targetLanguageCode", translateTargetLanguage)
             translationConfig.put("echoTargetLanguage", translateEchoTarget)
-            setup.put("translationConfig", translationConfig)
+            generationConfig.put("translationConfig", translationConfig)
+
+            val inputAudioTranscriptionConfig = JSONObject()
+            inputAudioTranscriptionConfig.put("model", "models/speech-to-text")
+            setup.put("inputAudioTranscriptionConfig", inputAudioTranscriptionConfig)
         } else {
             setup.put("systemInstruction", systemInstruction)
             val tools = ToolDefinitions.getTools()
@@ -378,6 +383,15 @@ class GeminiLiveClient(
                 if (serverContent.has("interrupted") && serverContent.getBoolean("interrupted")) {
                     mainHandler.post {
                         listener.onInterrupted()
+                    }
+                }
+
+                if (serverContent.has("inputAudioTranscription")) {
+                    val inputAudioTranscription = serverContent.getJSONObject("inputAudioTranscription")
+                    val text = inputAudioTranscription.optString("text", "")
+                    val completed = inputAudioTranscription.optBoolean("completed", false)
+                    mainHandler.post {
+                        listener.onInputAudioTranscriptionReceived(text, completed)
                     }
                 }
 

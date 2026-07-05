@@ -49,18 +49,32 @@ class TranslateActivity : AppCompatActivity() {
             registerReceiver(closeReceiver, android.content.IntentFilter("ACTION_CLOSE_TRANSLATE_UI"))
         }
 
+        SessionStateHolder.clearTranslateSessionData()
+
+        lifecycleScope.launch {
+            SessionStateHolder.liveUserTranscript.collectLatest { text ->
+                if (text.isNotEmpty()) {
+                    txtUser.text = text
+                } else {
+                    txtUser.text = "รอเสียงพูด..."
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            SessionStateHolder.liveTranslateTranscript.collectLatest { text ->
+                if (text.isNotEmpty()) {
+                    txtOtherPerson.text = text
+                } else {
+                    txtOtherPerson.text = "Waiting for speech..."
+                }
+            }
+        }
+
         lifecycleScope.launch {
             SessionStateHolder.state.collectLatest { state ->
                 when (state) {
                     is SessionState.Active -> {
-                        // Assuming the translated text comes through chat history or live transcripts
-                        // For this mockup, we just show the latest message
-                        val latestMsg = SessionStateHolder.liveTranscripts.lastOrNull() ?: ""
-                        if (latestMsg.isNotEmpty()) {
-                            txtUser.text = latestMsg
-                            txtOtherPerson.text = latestMsg
-                        }
-                        
                         // Check if there is advice in liveAdviceLog
                         val advice = SessionStateHolder.liveAdviceLog.lastOrNull()
                         if (advice != null) {
@@ -75,8 +89,7 @@ class TranslateActivity : AppCompatActivity() {
                         txtOtherPerson.text = "Session ended"
                     }
                     else -> {
-                        txtUser.text = "Waiting for speech..."
-                        txtOtherPerson.text = "Waiting for speech..."
+                        // Handled by liveUserTranscript and liveTranslateTranscript flows
                     }
                 }
             }

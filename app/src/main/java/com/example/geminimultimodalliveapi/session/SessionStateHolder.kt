@@ -65,6 +65,25 @@ object SessionStateHolder {
     private val _chatLogs = MutableStateFlow<String>("")
     val chatLogs: StateFlow<String> = _chatLogs
 
+    private val _liveUserTranscript = MutableStateFlow<String>("")
+    val liveUserTranscript: StateFlow<String> = _liveUserTranscript
+
+    private val _liveTranslateTranscript = MutableStateFlow<String>("")
+    val liveTranslateTranscript: StateFlow<String> = _liveTranslateTranscript
+
+    fun updateUserTranscript(text: String) {
+        _liveUserTranscript.value = text
+    }
+
+    fun updateTranslateTranscript(text: String) {
+        _liveTranslateTranscript.value = text
+    }
+
+    fun clearTranslateSessionData() {
+        _liveUserTranscript.value = ""
+        _liveTranslateTranscript.value = ""
+    }
+
     private val _appErrors = MutableSharedFlow<String>(extraBufferCapacity = 64)
     val appErrors: SharedFlow<String> = _appErrors
 

@@ -1,0 +1,57 @@
+﻿{
+    "next_steps":  [
+
+                   ],
+    "id":  "wp-20260705-210510-complete-live-translate-integration",
+    "scope":  "",
+    "createdAt":  "2026-07-05T21:05:10+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  100,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "",
+    "title":  "Complete Live Translate Integration",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-05T21:05:10+07:00",
+    "status":  "in_progress",
+    "completed":  [
+                      "Fixed WebSocket setup JSON nesting",
+                      "Configured inputAudioTranscriptionConfig in setup",
+                      "Added user/translate StateFlows to SessionStateHolder",
+                      "Updated FloatingWidgetService listener to route transcripts",
+                      "Connected TranslateActivity to real-time flows",
+                      "Wrote and passed unit/static tests"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
