@@ -1,7 +1,7 @@
 ﻿{
     "status":  "in_progress",
-    "timestamp":  "2026-07-05T21:05:10+07:00",
+    "timestamp":  "2026-07-05T22:01:51+07:00",
     "schema":  "hermes-work-package-v1",
-    "latest_checkpoint_id":  "wp-20260705-210510-complete-live-translate-integration",
-    "latest_checkpoint_path":  "checkpoints/wp-20260705-210510-complete-live-translate-integration.json"
+    "latest_checkpoint_id":  "wp-20260705-220151-finalized-live-translate-and-self-learning-blueprint",
+    "latest_checkpoint_path":  "checkpoints/wp-20260705-220151-finalized-live-translate-and-self-learning-blueprint.json"
 }
