@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+                       "[\\"
+                   ],
+    "id":  "wp-20260705-113740-onbackpressed-and-pulse-animation-optimization",
+    "scope":  "",
+    "createdAt":  "2026-07-05T11:37:40+07:00",
+    "decisions":  [
+                      "\\Simplified onBackPressed callback inside MainActivity and SettingsActivity to use finish() / handleBackPress()\\\\, \\\\Configured FloatingWidgetService to only pulse overlay in Active state, preserving standby battery\\\\, \\\\Verified all unit tests passed successfully\\\\]"
+                  ],
+    "progress":  100,
+    "knowledge":  [
+                      "\\Awaiting user requests\\\\]"
+                  ],
+    "pending":  [
+
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "Simplify Activity back pressed handling and disable continuous overlay pulse animation when idle",
+    "title":  "onBackPressed and pulse animation optimization",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-05T11:37:40+07:00",
+    "status":  "completed",
+    "completed":  [
+                      "[\\"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}

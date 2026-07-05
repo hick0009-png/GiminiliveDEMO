@@ -409,8 +409,8 @@ class FloatingWidgetService : Service() {
 
         if (isWidgetEnabled && isGranted) {
             widgetController.show()
-            val isConnected = SessionStateHolder.state.value != SessionState.Disconnected
-            widgetController.updateWidgetColor(isConnected)
+            val isActive = SessionStateHolder.state.value is SessionState.Active
+            widgetController.updateWidgetColor(isActive)
         } else {
             widgetController.hide()
         }

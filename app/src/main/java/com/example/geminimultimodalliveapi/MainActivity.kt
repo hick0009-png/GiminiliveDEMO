@@ -142,9 +142,7 @@ class MainActivity : AppCompatActivity() {
                     cameraCaptureHelper?.stopPreview()
                     updateCaptureButtonState(false)
                 } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                    isEnabled = true
+                    finish()
                 }
             }
         })

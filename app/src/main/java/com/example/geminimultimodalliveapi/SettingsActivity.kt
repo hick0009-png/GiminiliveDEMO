@@ -131,13 +131,7 @@ class SettingsActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (layoutCategoryMenu.visibility == View.GONE) {
-                    handleBackPress()
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                    isEnabled = true
-                }
+                handleBackPress()
             }
         })
 
