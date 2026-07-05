@@ -1,0 +1,75 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260705-102200-serena-installation-complete",
+  "sequence": 1,
+  "createdAt": "2026-07-05T10:22:00+07:00",
+  "updatedAt": "2026-07-05T10:22:00+07:00",
+  "title": "Serena Installation and Tools Overview Complete",
+  "status": "completed",
+  "progress": 100,
+  "objective": "Verify active rules, list available tools, and guide the user in setting up Serena MCP server.",
+  "scope": "Verify workspace rules (AGENTS.md), audit active tools, verify Serena MCP config, check local PATH, and outline setup guides.",
+  "completed": [
+    "Reviewed and summarized all 8 rules in .agents/AGENTS.md",
+    "Audited and categorized all built-in tools, skills/plugins, and subagents",
+    "Found Serena MCP configuration in C:\\Users\\ASUS\\.cursor\\mcp.json",
+    "Verified local PATH and noted that PowerShell script restriction is active",
+    "Provided the user with two options to install/run Serena via uv",
+    "User completed the installation of Serena globally using uv tool install"
+  ],
+  "pending": [],
+  "artifacts": [
+    {
+      "path": ".agents/AGENTS.md",
+      "type": "doc",
+      "description": "Workspace rules"
+    },
+    {
+      "path": "C:\\Users\\ASUS\\.cursor\\mcp.json",
+      "type": "data",
+      "description": "Cursor MCP configuration file"
+    }
+  ],
+  "agents": [
+    {
+      "role": "current",
+      "name": "Antigravity (Gemini 3.5 Flash)",
+      "responsibility": "Guide the user and answer configuration questions"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "timestamp": "2026-07-05T10:20:00+07:00",
+      "decision": "Recommended two options (global install vs inline uvx run) for setting up Serena",
+      "rationale": "Gives user flexibility depending on whether they want a global tool or local configuration run",
+      "alternatives": ["Ask user to bypass powershell policies", "Manual pip install"],
+      "decidedBy": "AI"
+    }
+  ],
+  "knowledge": [
+    "uv tool manager is installed at version 0.11.25",
+    "PowerShell scripts execution is disabled on the current Windows environment",
+    "Serena command is now installed globally by the user"
+  ],
+  "assumptions": [
+    {
+      "assumption": "Serena is successfully configured and run in Cursor editor context by the user",
+      "confidence": "high",
+      "needsValidation": false
+    }
+  ],
+  "risks": [],
+  "next_steps": [
+    "Awaiting user's next coding or bug fixing task in the workspace"
+  ],
+  "dependencies": [],
+  "open_questions": [],
+  "memory_snapshot": [
+    "User prefers Thai communication with internal English compression",
+    "Ponytail Ruleset active: minimal code",
+    "Serena is installed globally"
+  ],
+  "context_summary": "Session started with reviewing rules and tools. Guide was provided for Serena MCP server setup, which the user completed successfully.",
+  "tags": ["setup", "serena", "tools-audit"]
+}

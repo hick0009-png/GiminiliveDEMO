@@ -341,6 +341,7 @@ PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\<script>.p
 | 7 | Full Code Review — Bug Report + Project Review | in_progress |
 | 8 | Fix 10 easy bugs + write tests (batch 1) | completed |
 | 9 | Fix 10 easy bugs + write tests (batch 2) | completed |
+| 10 | Serena and Memory MCP Verification | completed |
 
 ---
 
@@ -383,6 +384,7 @@ PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\<script>.p
 - **API Key Quota & Disconnect Safety**: Validates API keys and inference quota prior to WebSocket setup using a POST `generateContent` request. Detects `ProtocolException` handshake rejections (HTTP 4xx errors) to immediately disable connection retries. Updates session state to `Disconnected` instantly on explicit disconnect commands to support clean cancellation in the connecting phase.
 - **Theme & Manifest Consolidation**: Merged custom styles under a single application theme `Theme.GeminiMultimodalLiveAPI` and cleaned activity overrides in the manifest. Restored custom `app_logo` launcher icons.
 - **Live Translate Feature Design**: Planned integration of `gemini-3.5-live-translate-preview` via a dedicated `TranslateActivity` (split-screen layout). Uses a hybrid trigger workflow (manual UI toggle + hot-swap voice trigger). Integrates Deepgram for speaker filtering (Focus Mode) and dual-transcription diarization. Configures a quick-access shortcut as a 5th segment inside the floating widget's radial picker wheel.
+- **Serena & Memory MCP Configuration**: Updated Cursor `mcp.json` to absolute path (`C:\Users\ASUS\.local\bin\serena.exe`) to bypass environment PATH limits and verified correct execution of both Serena and Memory MCP servers.
 
 ---
 

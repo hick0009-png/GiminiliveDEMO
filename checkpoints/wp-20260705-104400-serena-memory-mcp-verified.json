@@ -1,0 +1,72 @@
+{
+  "schema": "hermes-work-package-v1",
+  "id": "wp-20260705-104400-serena-memory-mcp-verified",
+  "sequence": 10,
+  "createdAt": "2026-07-05T10:44:00+07:00",
+  "updatedAt": "2026-07-05T10:44:00+07:00",
+  "title": "Serena and Memory MCP Verification Complete",
+  "status": "completed",
+  "progress": 100,
+  "objective": "Verify the functionality of Serena and Memory MCP servers and document the setup.",
+  "scope": "Verify global Serena CLI installation, update Cursor mcp.json with absolute path for Serena, create and execute a python test script for Memory MCP over JSON-RPC, update project docs, and commit changes.",
+  "completed": [
+    "Conducted session handoff and reviewed active workspace rules",
+    "Verified global Serena CLI installation and resolved PATH issue using absolute path",
+    "Updated Cursor mcp.json configuration for serena to use C:\\Users\\ASUS\\.local\\bin\\serena.exe",
+    "Successfully tested memory MCP server over stdio JSON-RPC (create_entities and search_nodes)",
+    "Documented decisions in docs/context.md and updated checkpoints timeline"
+  ],
+  "pending": [],
+  "artifacts": [
+    {
+      "path": "C:\\Users\\ASUS\\.cursor\\mcp.json",
+      "type": "data",
+      "description": "Cursor MCP configuration file"
+    },
+    {
+      "path": "docs/context.md",
+      "type": "doc",
+      "description": "Project context document"
+    }
+  ],
+  "agents": [
+    {
+      "role": "current",
+      "name": "Antigravity (Gemini 3.5 Flash)",
+      "responsibility": "Run MCP server verification and documentation update"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-002",
+      "timestamp": "2026-07-05T10:26:00+07:00",
+      "decision": "Use absolute path C:\\Users\\ASUS\\.local\\bin\\serena.exe in Cursor's mcp.json",
+      "rationale": "Resolves CommandNotFoundException caused by system PATH environment not having updated local bin directories",
+      "decidedBy": "AI"
+    }
+  ],
+  "knowledge": [
+    "Serena CLI v1.5.3 is installed at C:\\Users\\ASUS\\.local\\bin\\serena.exe",
+    "Memory MCP server (@modelcontextprotocol/server-memory) is functional over stdio transport and exposes create_entities and search_nodes tools"
+  ],
+  "assumptions": [
+    {
+      "assumption": "Cursor IDE will load the updated absolute path for serena and memory MCP servers without errors",
+      "confidence": "high",
+      "needsValidation": false
+    }
+  ],
+  "risks": [],
+  "next_steps": [
+    "Awaiting user's coding or bug-fixing requests in the workspace"
+  ],
+  "dependencies": [],
+  "open_questions": [],
+  "memory_snapshot": [
+    "Cursor mcp.json holds absolute paths",
+    "Tested memory MCP successfully",
+    "Updated context.md"
+  ],
+  "context_summary": "Session focused on verifying MCP servers. Updated Cursor config to use absolute paths, verified memory MCP over json-rpc, updated project docs, and committed changes.",
+  "tags": ["setup", "mcp", "memory", "serena"]
+}
