@@ -2096,6 +2096,11 @@ class FloatingWidgetService : Service() {
         if (::dynamicRulesManager.isInitialized) {
             dynamicRulesManager.clearCache()
         }
+        if (level >= TRIM_MEMORY_RUNNING_CRITICAL || level >= TRIM_MEMORY_COMPLETE) {
+            if (!isGeminiConnected && !isDeepgramConnected) {
+                System.gc()
+            }
+        }
     }
 
     override fun onLowMemory() {
@@ -2103,6 +2108,9 @@ class FloatingWidgetService : Service() {
         Log.w("FloatingWidgetService", "onLowMemory called")
         if (::dynamicRulesManager.isInitialized) {
             dynamicRulesManager.clearCache()
+        }
+        if (!isGeminiConnected && !isDeepgramConnected) {
+            System.gc()
         }
     }
 }

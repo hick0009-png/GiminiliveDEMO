@@ -34,9 +34,10 @@ class AudioRecorder(
 
     // Thread isolation - dedicated high-priority single thread
     private val recordExecutor = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "gemini-record-thread").apply {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO)
-        }
+        Thread({
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO)
+            runnable.run()
+        }, "gemini-record-thread")
     }
     private val recordDispatcher = recordExecutor.asCoroutineDispatcher()
 

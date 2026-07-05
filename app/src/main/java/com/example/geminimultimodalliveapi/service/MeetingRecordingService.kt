@@ -65,9 +65,10 @@ class MeetingRecordingService : Service() {
 
     // High-priority dedicated audio thread resources
     private val audioExecutor = java.util.concurrent.Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "meeting-record-thread").apply {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO)
-        }
+        Thread({
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO)
+            runnable.run()
+        }, "meeting-record-thread")
     }
     private val audioDispatcher = audioExecutor.asCoroutineDispatcher()
     private var audioChannel: kotlinx.coroutines.channels.Channel<ByteArray>? = null
