@@ -342,6 +342,7 @@ PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\<script>.p
 | 8 | Fix 10 easy bugs + write tests (batch 1) | completed |
 | 9 | Fix 10 easy bugs + write tests (batch 2) | completed |
 | 10 | Serena and Memory MCP Verification | completed |
+| 11 | Hermes BOOS Planning & PDF to JSON Design | completed |
 
 ---
 
@@ -385,6 +386,9 @@ PowerShell -ExecutionPolicy Bypass -File ".agents\skills\work-package\<script>.p
 - **Theme & Manifest Consolidation**: Merged custom styles under a single application theme `Theme.GeminiMultimodalLiveAPI` and cleaned activity overrides in the manifest. Restored custom `app_logo` launcher icons.
 - **Live Translate Feature Design**: Planned integration of `gemini-3.5-live-translate-preview` via a dedicated `TranslateActivity` (split-screen layout). Uses a hybrid trigger workflow (manual UI toggle + hot-swap voice trigger). Integrates Deepgram for speaker filtering (Focus Mode) and dual-transcription diarization. Configures a quick-access shortcut as a 5th segment inside the floating widget's radial picker wheel.
 - **Serena & Memory MCP Configuration**: Updated Cursor `mcp.json` to absolute path (`C:\Users\ASUS\.local\bin\serena.exe`) to bypass environment PATH limits and verified correct execution of both Serena and Memory MCP servers.
+- **PDF to JSON via Gemini Files API**: เลือกใช้ระบบ Google Gemini Files API ร่วมกับ Multipart/Resumable upload เพื่อส่งไฟล์ PDF หรือภาพถ่ายขึ้นไปแปลงโครงสร้างข้อมูลเป็น JSON (พร้อมตารางและคำอธิบายภาพ) แทนการเรนเดอร์บิตแมปในเครื่อง โดยบันทึกรักษาเอกสารและรูปภาพต้นฉบับไว้ถาวรในโทรศัพท์ (`filesDir/media/`) เพื่อใช้อ้างอิง และใช้ข้อมูล JSON เป็นแคชขนาดเล็กในการทำคิวรี RAG ความหน่วงต่ำ
+- **ReSpeaker XVF3800 & Hybrid Search**: ออกแบบระบบข้ามขั้นตอนการฟิลเตอร์ตัดเสียงสะท้อนและเสียงรบกวนระดับซอฟต์แวร์ของ Android เพื่อประหยัด CPU 15%-25% และเลือกใช้ระบบสืบค้นข้อมูลผสมผสาน Sparse (TF-IDF/FTS5) และ Dense (Semantic Vector) โดยจัดอันดับด้วยสูตร RRF (Reciprocal Rank Fusion)
+
 
 ---
 
