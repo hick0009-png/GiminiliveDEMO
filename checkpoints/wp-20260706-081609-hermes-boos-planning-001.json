@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+                       "XVF3800, ร่างแผนพัฒนาเบื้องต้น"
+                   ],
+    "id":  "wp-20260706-081609-hermes-boos-planning-1",
+    "scope":  "",
+    "createdAt":  "2026-07-06T08:16:09+07:00",
+    "decisions":  [
+                      "Hermes"
+                  ],
+    "progress":  30,
+    "knowledge":  [
+                      "BOOS, ดึงข้อมูลสเปกไมโครโฟนพิเศษ"
+                  ],
+    "pending":  [
+                    "[วิเคราะห์และปรับปรุงสถาปัตยกรรมระบบสืบค้นแบบไฮบริด"
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "บันทึกและวิเคราะห์แผนพัฒนาระบบสถาปัตยกรรมร่วม Hermes BOOS",
+    "title":  "Hermes BOOS Planning",
+    "risks":  [
+                  "XMOS"
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  1,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-06T08:16:09+07:00",
+    "status":  "เฟสและปรับปรุงตามการทำเฟส",
+    "completed":  [
+                      "[รวบรวมข้อมูลเอกสารปรัชญา"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  "5"
+}

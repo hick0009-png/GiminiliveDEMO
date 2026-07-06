@@ -1,0 +1,52 @@
+﻿{
+    "next_steps":  [
+                       "[รอผู้ใช้อนุมัติแผนงานเพื่อสร้างเอกสารสถาปัตยกรรมและการสร้างโค้ดส่วนต่อขยาย]"
+                   ],
+    "id":  "wp-20260706-210116-hermes-boos-planning",
+    "scope":  "",
+    "createdAt":  "2026-07-06T21:01:16+07:00",
+    "decisions":  [
+
+                  ],
+    "progress":  45,
+    "knowledge":  [
+
+                  ],
+    "pending":  [
+                    "[สร้างเอกสาร pdf_to_json_design.md,สร้างเอกสาร xvf3800_integration_plan.md,สร้างเอกสาร hybrid_retrieval_architecture.md]"
+                ],
+    "assumptions":  [
+
+                    ],
+    "objective":  "บันทึกและวิเคราะห์แผนพัฒนาระบบสถาปัตยกรรมร่วม Hermes BOOS และการพาร์ส PDF",
+    "title":  "Hermes BOOS Planning",
+    "risks":  [
+
+              ],
+    "schema":  "hermes-work-package-v1",
+    "sequence":  2,
+    "tags":  [
+
+             ],
+    "artifacts":  [
+
+                  ],
+    "open_questions":  [
+
+                       ],
+    "memory_snapshot":  [
+
+                        ],
+    "updatedAt":  "2026-07-06T21:01:16+07:00",
+    "status":  "in_progress",
+    "completed":  [
+                      "[ทบทวนสถานะโค้ดและรันยูนิตเทสผ่าน 100%,เปรียบเทียบสถาปัตยกรรม PDF to JSON และเลือกใช้ Gemini Files API,อัปเดตแผนงานใน Artifact ในรูปภาษาไทย]"
+                  ],
+    "agents":  [
+
+               ],
+    "dependencies":  [
+
+                     ],
+    "context_summary":  ""
+}
